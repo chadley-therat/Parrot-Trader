@@ -269,6 +269,30 @@
 .price-tile-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
 .price-tile-val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
 .price-tile-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── Sort / Select ── */
+.sort-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 50px; padding: 0.3rem 0.75rem; font-size: 12px; color: var(--muted); cursor: pointer; outline: none; }
+.sort-select:focus { border-color: var(--accent); }
+.select-btn { font-size: 13px; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; font-weight: 500; white-space: nowrap; }
+.inv-card.selected { border-color: var(--accent); background: rgba(232,200,74,0.07); }
+.bulk-bar { position: fixed; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); left: 0; right: 0; background: var(--surface3); border-top: 1px solid var(--border2); padding: 0.7rem 1.1rem; display: none; align-items: center; justify-content: space-between; z-index: 95; gap: 10px; }
+.bulk-bar.active { display: flex; }
+
+/* ── Deck tabs ── */
+.tab-row { display: flex; gap: 4px; padding: 0 1.1rem 0.8rem; }
+.tab-btn { flex: 1; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.tab-btn.active { background: var(--accent); border-color: var(--accent); color: #0d0d0f; font-weight: 600; }
+
+/* ── Deck builder ── */
+.deck-builder-card { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.deck-builder-card-info { flex: 1; min-width: 0; }
+.deck-builder-card-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-qty-control { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.db-qty-control button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.db-qty-control span { font-size: 13px; font-weight: 600; min-width: 16px; text-align: center; }
+
+/* ── Price cache note ── */
+.price-cached-note { font-size: 11px; color: var(--muted); text-align: right; margin-top: -6px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -278,8 +302,20 @@
   <!-- ═══════════ INVENTORY SCREEN ═══════════ -->
   <div id="screen-inventory" class="screen active">
     <div class="page-header">
-      <div class="page-title">My Vault</div>
-      <div style="font-size:13px;color:var(--muted)" id="inv-count">0 cards</div>
+      <div>
+        <div class="page-title">My Vault</div>
+        <div style="font-size:12px;color:var(--muted)" id="inv-count">0 cards</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <select class="sort-select" id="vault-sort" onchange="setSortMode(this.value)">
+          <option value="date-desc">Recent</option>
+          <option value="price-desc">Price ↓</option>
+          <option value="price-asc">Price ↑</option>
+          <option value="name-asc">A → Z</option>
+          <option value="qty-desc">Most Copies</option>
+        </select>
+        <button class="select-btn" id="select-btn" onclick="toggleSelectMode()">Select</button>
+      </div>
     </div>
     <div class="search-wrap">
       <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -333,14 +369,23 @@
   <div id="screen-decks" class="screen">
     <div class="page-header">
       <div class="page-title">Deck Lab</div>
-      <button class="btn btn-outline btn-sm" onclick="generateDecks()">Suggest</button>
+      <button class="btn btn-outline btn-sm" id="decks-action-btn" onclick="handleDecksAction()">Suggest</button>
     </div>
-    <div class="deck-list" id="deck-list">
-      <div class="empty" id="deck-empty">
-        <div class="empty-icon">⚗️</div>
-        <h3>No deck suggestions yet</h3>
-        <p>Add cards to your vault, then tap "Suggest" to build decks from your collection</p>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-meta" onclick="switchDeckTab('meta')">Meta</button>
+      <button class="tab-btn" id="tab-mydecks" onclick="switchDeckTab('mydecks')">My Decks</button>
+    </div>
+    <div id="meta-deck-panel">
+      <div class="deck-list" id="deck-list">
+        <div class="empty" id="deck-empty">
+          <div class="empty-icon">⚗️</div>
+          <h3>No deck suggestions yet</h3>
+          <p>Add cards to your vault, then tap "Suggest" to build decks from your collection</p>
+        </div>
       </div>
+    </div>
+    <div id="mydecks-panel" style="display:none">
+      <div class="deck-list" id="mydecks-list"></div>
     </div>
   </div>
 
@@ -395,6 +440,9 @@
     <div class="section-label">Cards by Set</div>
     <div style="padding: 0 1.1rem 1rem" id="stat-sets"></div>
 
+    <div style="padding: 0 1.1rem 0.5rem; display: flex; gap: 10px;">
+      <button class="btn btn-outline btn-block" id="refresh-prices-btn" onclick="refreshAllPrices()">↻ Refresh Prices</button>
+    </div>
     <div style="padding: 0 1.1rem 1.5rem; display: flex; gap: 10px;">
       <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Vault</button>
       <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Vault</button>
@@ -404,6 +452,15 @@
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
 
 </div><!-- /app -->
+
+<!-- Bulk Action Bar -->
+<div class="bulk-bar" id="bulk-bar">
+  <span style="font-size:13px;color:var(--text);font-weight:500" id="bulk-count">0 selected</span>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-danger btn-sm" id="bulk-delete-btn" onclick="bulkDelete()" disabled>Delete Selected</button>
+    <button class="btn btn-outline btn-sm" onclick="toggleSelectMode()">Done</button>
+  </div>
+</div>
 
 <!-- Bottom Nav -->
 <nav id="bottom-nav">
@@ -469,6 +526,28 @@
   </div>
 </div>
 
+<!-- SHEET: Deck Builder -->
+<div class="sheet-overlay" id="deck-builder-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="deck-builder-title">New Deck</div>
+    <div class="form-group">
+      <label class="form-label">Deck Name</label>
+      <input type="text" class="form-input" id="deck-name-input" placeholder="My Awesome Deck">
+    </div>
+    <div class="search-wrap" style="padding:0;margin-bottom:0.6rem">
+      <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="deck-card-search" placeholder="Add a card…" oninput="debounceDeckCardSearch()" style="padding-left:2.4rem">
+    </div>
+    <div id="deck-card-results" style="max-height:200px;overflow-y:auto;margin-bottom:0.8rem"></div>
+    <div id="deck-cards-list" style="max-height:280px;overflow-y:auto;margin-bottom:1rem"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="closeAllSheets()" style="flex-shrink:0">Cancel</button>
+      <button class="btn btn-primary btn-block" onclick="saveDeck()">Save Deck</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -477,10 +556,18 @@ const POKEMON_API = 'https://api.pokemontcg.io/v2';
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
+let customDecks = JSON.parse(localStorage.getItem('tcg_custom_decks') || '[]');
+let priceCache = JSON.parse(localStorage.getItem('tcg_price_cache') || '{}');
 let searchTimeout = null;
 let activeCard = null;
 let typeFilter = 'All';
 let formatFilter = 'All';
+let sortMode = 'date-desc';
+let selectMode = false;
+let selectedUids = new Set();
+let activeDeckTab = 'meta';
+let newDeckCards = [];
+let editingDeckId = null;
 
 // ═══ VOICE SEARCH ═══
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -592,6 +679,7 @@ function save() {
   localStorage.setItem('tcg_inventory', JSON.stringify(inventory));
   localStorage.setItem('tcg_listings', JSON.stringify(listings));
   localStorage.setItem('tcg_wishlist', JSON.stringify(wishlist));
+  localStorage.setItem('tcg_custom_decks', JSON.stringify(customDecks));
 }
 
 // ═══ SHEETS ═══
@@ -630,7 +718,9 @@ async function fetchApiCards(nameQuery) {
   const encoded = encodeURIComponent('*' + q + '*');
   const res = await fetch(`${POKEMON_API}/cards?q=name:${encoded}&pageSize=80&orderBy=-set.releaseDate&select=id,name,images,set,types,rarity,cardmarket,hp,attacks,abilities,weaknesses,resistances,retreatCost,legalities,regulationMark,number,artist,flavorText,evolvesFrom,supertype,subtypes,nationalPokedexNumbers,tcgplayer`);
   const data = await res.json();
-  return (data.data || []).filter(isLegitCard).slice(0, 25);
+  const cards = (data.data || []).filter(isLegitCard).slice(0, 25);
+  cards.forEach(cacheCardPrices);
+  return cards;
 }
 
 function buildResultItem(c) {
@@ -748,7 +838,7 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
-    ${renderPriceBlock(price, card.cardmarket?.prices?.trendPrice, card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0)}
+    ${renderPriceBlock(price, card.cardmarket?.prices?.trendPrice, card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0, card.id)}
     ${renderCardText(card)}
     ${existingAll.length ? `
       <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
@@ -878,6 +968,7 @@ function filterInventory() {
   if (formatFilter === 'Standard') cards = cards.filter(c => c.legalities?.standard === 'Legal');
   if (formatFilter === 'Expanded') cards = cards.filter(c => c.legalities?.expanded === 'Legal');
   if (q) cards = cards.filter(c => c.name.toLowerCase().includes(q) || c.set.toLowerCase().includes(q));
+  cards = sortCards(cards);
   renderInventoryGrid(cards);
 }
 
@@ -900,14 +991,17 @@ function renderInventoryGrid(cards) {
   grid.innerHTML = cards.map(c => {
     const fl = finishLabel(c.finish);
     const uid = c.uid || (c.id + '__normal');
+    const isSel = selectedUids.has(uid);
     return `
-    <div class="inv-card" onclick="openVaultCard('${uid}')">
+    <div class="inv-card${isSel ? ' selected' : ''}" onclick="handleCardClick('${uid}',event)">
       <div style="position:relative">
         <img src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2212%22>No img</text></svg>'">
         <div style="position:absolute;top:4px;left:4px;display:flex;flex-direction:column;gap:2px">
           ${c.legalities ? legalityBadges(c.legalities) : ''}
         </div>
-        ${c.finish && c.finish !== 'normal' ? `<div style="position:absolute;top:4px;right:4px;font-size:13px;line-height:1;background:rgba(0,0,0,0.65);border-radius:4px;padding:2px 3px">${fl.icon}</div>` : ''}
+        ${selectMode
+          ? `<div style="position:absolute;top:4px;right:4px;width:20px;height:20px;background:${isSel ? 'var(--accent)' : 'rgba(0,0,0,0.55)'};border:2px solid ${isSel ? 'var(--accent)' : 'rgba(255,255,255,0.4)'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0d0d0f">${isSel ? '✓' : ''}</div>`
+          : (c.finish && c.finish !== 'normal' ? `<div style="position:absolute;top:4px;right:4px;font-size:13px;line-height:1;background:rgba(0,0,0,0.65);border-radius:4px;padding:2px 3px">${fl.icon}</div>` : '')}
       </div>
       <div class="inv-card-info">
         <div class="inv-card-name">${c.name}</div>
@@ -940,7 +1034,7 @@ function openVaultCard(uid) {
         <div class="meta-row"><span>Market Price</span><span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span></div>
       </div>
     </div>
-    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice)}
+    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice, card.id)}
     ${renderCardText(card)}
     <div class="form-group">
       <label class="form-label">Quantity</label>
@@ -1347,11 +1441,19 @@ function renderCardText(card) {
   return html;
 }
 
-function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice) {
-  const avg = marketPrice || 0;
-  const trend = trendPrice || 0;
-  const tcg = tcgPlayerPrice || 0;
+function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId) {
+  const cached = cardId ? getCachedPrice(cardId) : null;
+  const avg = (cached ? cached.market : marketPrice) || 0;
+  const trend = (cached ? cached.trend : trendPrice) || 0;
+  const tcg = (cached ? cached.tcg : tcgPlayerPrice) || 0;
   const arrow = trendArrow(avg, trend);
+  let freshNote = '';
+  if (cardId && priceCache[cardId]) {
+    const ageMs = Date.now() - priceCache[cardId].cachedAt;
+    const ageHrs = Math.floor(ageMs / 3600000);
+    const ageMins = Math.floor(ageMs / 60000);
+    freshNote = ageHrs > 0 ? `Prices cached ${ageHrs}h ago` : ageMins > 0 ? `Prices cached ${ageMins}m ago` : 'Prices just updated';
+  }
   return `<div class="price-block">
     <div class="price-tile">
       <div class="price-tile-label">Cardmarket</div>
@@ -1363,7 +1465,8 @@ function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice) {
       <div class="price-tile-val">${tcg ? '$'+tcg.toFixed(2) : '—'}</div>
       <div class="price-tile-sub">Market price</div>
     </div>
-  </div>`;
+  </div>
+  ${freshNote ? `<div class="price-cached-note">${freshNote}</div>` : ''}`;
 }
 
 function renderDeckList(deck, inv) {
@@ -1818,6 +1921,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
 }
 
 function renderDecks() {
+  if (activeDeckTab === 'mydecks') { renderMyDecks(); return; }
   if (document.getElementById('deck-list').querySelector('.deck-card')) return;
   if (inventory.length >= 1) generateDecks();
 }
@@ -1913,6 +2017,338 @@ function handleImport(e) {
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ═══ SORT ═══
+function sortCards(cards) {
+  switch (sortMode) {
+    case 'name-asc':   return [...cards].sort((a,b) => a.name.localeCompare(b.name));
+    case 'name-desc':  return [...cards].sort((a,b) => b.name.localeCompare(a.name));
+    case 'price-desc': return [...cards].sort((a,b) => (b.marketPrice||0) - (a.marketPrice||0));
+    case 'price-asc':  return [...cards].sort((a,b) => (a.marketPrice||0) - (b.marketPrice||0));
+    case 'qty-desc':   return [...cards].sort((a,b) => b.qty - a.qty);
+    default:           return [...cards].sort((a,b) => (b.addedAt||0) - (a.addedAt||0));
+  }
+}
+function setSortMode(mode) { sortMode = mode; filterInventory(); }
+
+// ═══ BULK SELECT ═══
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  selectedUids.clear();
+  const btn = document.getElementById('select-btn');
+  const bar = document.getElementById('bulk-bar');
+  if (btn) { btn.textContent = selectMode ? 'Cancel' : 'Select'; btn.style.color = selectMode ? 'var(--red)' : 'var(--accent)'; }
+  if (bar) bar.classList.toggle('active', selectMode);
+  filterInventory();
+}
+function handleCardClick(uid, e) {
+  if (selectMode) { e.stopPropagation(); toggleCardSelect(uid); }
+  else openVaultCard(uid);
+}
+function toggleCardSelect(uid) {
+  if (selectedUids.has(uid)) selectedUids.delete(uid);
+  else selectedUids.add(uid);
+  updateBulkBar();
+  filterInventory();
+}
+function updateBulkBar() {
+  const n = selectedUids.size;
+  const el = document.getElementById('bulk-count');
+  if (el) el.textContent = n + ' selected';
+  const btn = document.getElementById('bulk-delete-btn');
+  if (btn) btn.disabled = n === 0;
+}
+function bulkDelete() {
+  const n = selectedUids.size;
+  if (!n) return;
+  if (!confirm(`Remove ${n} card${n>1?'s':''} from vault?`)) return;
+  inventory = inventory.filter(c => !selectedUids.has(c.uid || c.id+'__normal'));
+  listings = listings.filter(l => !selectedUids.has(l.uid));
+  selectedUids.clear();
+  save();
+  toggleSelectMode();
+  toast(`✓ Removed ${n} card${n>1?'s':''}`);
+}
+
+// ═══ PRICE CACHE ═══
+const PRICE_CACHE_TTL = 24 * 60 * 60 * 1000;
+function getCachedPrice(cardId) {
+  const c = priceCache[cardId];
+  if (!c || Date.now() - c.cachedAt > PRICE_CACHE_TTL) return null;
+  return c;
+}
+function savePriceCache() { localStorage.setItem('tcg_price_cache', JSON.stringify(priceCache)); }
+function setCachedPrice(cardId, prices) {
+  priceCache[cardId] = { ...prices, cachedAt: Date.now() };
+  savePriceCache();
+}
+function cacheCardPrices(card) {
+  if (!card.id) return;
+  setCachedPrice(card.id, {
+    market: card.cardmarket?.prices?.averageSellPrice || 0,
+    trend: card.cardmarket?.prices?.trendPrice || 0,
+    tcg: card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0
+  });
+}
+async function refreshAllPrices() {
+  if (!inventory.length) { toast('No cards to refresh'); return; }
+  const btn = document.getElementById('refresh-prices-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Refreshing...'; }
+  const uniqueIds = [...new Set(inventory.map(c => c.id))];
+  const batchSize = 20;
+  let updated = 0;
+  for (let i = 0; i < uniqueIds.length; i += batchSize) {
+    const batch = uniqueIds.slice(i, i + batchSize);
+    try {
+      const q = batch.map(id => `id:${id}`).join(' OR ');
+      const res = await fetch(`${POKEMON_API}/cards?q=${encodeURIComponent(q)}&select=id,cardmarket,tcgplayer&pageSize=${batchSize}`);
+      const data = await res.json();
+      (data.data || []).forEach(card => {
+        const prices = {
+          market: card.cardmarket?.prices?.averageSellPrice || 0,
+          trend: card.cardmarket?.prices?.trendPrice || 0,
+          tcg: card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0
+        };
+        setCachedPrice(card.id, prices);
+        inventory.filter(c => c.id === card.id).forEach(c => {
+          c.marketPrice = prices.market;
+          c.trendPrice = prices.trend;
+          c.tcgPlayerPrice = prices.tcg;
+        });
+        updated++;
+      });
+    } catch(e) {}
+  }
+  save();
+  renderStats();
+  if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh Prices'; }
+  toast(`✓ Refreshed ${updated} card${updated!==1?'s':''}`);
+}
+
+// ═══ DECK TABS ═══
+function switchDeckTab(tab) {
+  activeDeckTab = tab;
+  document.getElementById('meta-deck-panel').style.display = tab === 'meta' ? '' : 'none';
+  document.getElementById('mydecks-panel').style.display = tab === 'mydecks' ? '' : 'none';
+  document.getElementById('tab-meta').classList.toggle('active', tab === 'meta');
+  document.getElementById('tab-mydecks').classList.toggle('active', tab === 'mydecks');
+  const btn = document.getElementById('decks-action-btn');
+  if (btn) btn.textContent = tab === 'meta' ? 'Suggest' : '+ New';
+  if (tab === 'mydecks') renderMyDecks();
+}
+function handleDecksAction() {
+  if (activeDeckTab === 'meta') generateDecks();
+  else openNewDeckBuilder();
+}
+
+// ═══ CUSTOM DECKS ═══
+const deckCardCache = [];
+let deckSearchTimeout2 = null;
+
+function renderMyDecks() {
+  const list = document.getElementById('mydecks-list');
+  if (!list) return;
+  if (!customDecks.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🃏</div><h3>No custom decks yet</h3><p>Tap "+ New" to build your first deck</p></div>`;
+    return;
+  }
+  list.innerHTML = customDecks.map(deck => {
+    const { pct, totalOwned, totalNeeded } = scoreDeck(deck, inventory);
+    const pctInt = Math.round(pct * 100);
+    const barColor = pctInt >= 80 ? 'var(--green)' : pctInt >= 60 ? 'var(--accent)' : pctInt >= 30 ? 'var(--blue)' : 'var(--muted)';
+    const dl = deck.decklist || { pokemon:[], trainer:[], energy:[] };
+    const totalCards = [...dl.pokemon, ...dl.trainer, ...dl.energy].reduce((s,c)=>s+c.qty, 0);
+    return `<div class="deck-card">
+      <div class="deck-header">
+        <div>
+          <div class="deck-name">${deck.name}</div>
+          <div class="deck-type">${totalCards} cards · Custom</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-outline btn-sm" onclick="openNewDeckBuilder('${deck.id}')">Edit</button>
+          <button style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:50px;padding:0.4rem 0.75rem;font-size:12px;cursor:pointer" onclick="deleteCustomDeck('${deck.id}')">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
+        <span>Vault coverage</span>
+        <span style="color:${barColor};font-weight:600">${pctInt}% (${totalOwned}/${totalNeeded})</span>
+      </div>
+      <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:0.8rem">
+        <div style="height:100%;width:${pctInt}%;background:${barColor};border-radius:3px"></div>
+      </div>
+      ${renderDeckList(deck, inventory)}
+    </div>`;
+  }).join('');
+}
+
+function deleteCustomDeck(id) {
+  if (!confirm('Delete this deck?')) return;
+  customDecks = customDecks.filter(d => d.id !== id);
+  save();
+  renderMyDecks();
+  toast('Deck deleted');
+}
+
+function openNewDeckBuilder(deckId) {
+  editingDeckId = deckId || null;
+  newDeckCards = [];
+  if (deckId) {
+    const deck = customDecks.find(d => d.id === deckId);
+    if (deck && deck.decklist) {
+      const toFlat = (arr, type) => arr.map(c => ({ name:c.name, qty:c.qty, supertype:type, img:c.img||'' }));
+      newDeckCards = [
+        ...toFlat(deck.decklist.pokemon, 'Pokémon'),
+        ...toFlat(deck.decklist.trainer, 'Trainer'),
+        ...toFlat(deck.decklist.energy, 'Energy')
+      ];
+      document.getElementById('deck-builder-title').textContent = 'Edit Deck';
+      document.getElementById('deck-name-input').value = deck.name;
+    }
+  } else {
+    document.getElementById('deck-builder-title').textContent = 'New Deck';
+    document.getElementById('deck-name-input').value = '';
+  }
+  deckCardCache.length = 0;
+  document.getElementById('deck-card-search').value = '';
+  document.getElementById('deck-card-results').innerHTML = '';
+  renderDeckBuilderCards();
+  document.getElementById('deck-builder-sheet').classList.add('open');
+}
+
+function inferSupertype(card) {
+  if (card.supertype) return card.supertype;
+  if (card.attacks && card.attacks.length) return 'Pokémon';
+  if ((card.name||'').toLowerCase().includes('energy')) return 'Energy';
+  return 'Trainer';
+}
+
+function debounceDeckCardSearch() {
+  clearTimeout(deckSearchTimeout2);
+  deckSearchTimeout2 = setTimeout(searchDeckCards, 250);
+}
+
+async function searchDeckCards() {
+  const q = document.getElementById('deck-card-search').value.trim();
+  const el = document.getElementById('deck-card-results');
+  if (q.length < 2) { el.innerHTML = ''; deckCardCache.length = 0; return; }
+  deckCardCache.length = 0;
+  const ql = q.toLowerCase();
+  const seen = new Set();
+  const vaultMatches = inventory.filter(c => {
+    if (!c.name.toLowerCase().includes(ql) && !c.set.toLowerCase().includes(ql)) return false;
+    if (seen.has(c.name)) return false;
+    seen.add(c.name); return true;
+  }).slice(0, 4);
+  vaultMatches.forEach(c => deckCardCache.push({ name:c.name, supertype:inferSupertype(c), img:c.img }));
+  let html = vaultMatches.map((c,i) => `
+    <div class="result-item" onclick="addCardToDeckByIdx(${i})">
+      <img src="${c.img}" loading="lazy" onerror="this.style.display='none'">
+      <div class="result-info">
+        <div class="result-name">${c.name}</div>
+        <div class="result-set">${c.set} · ${inferSupertype(c)}</div>
+      </div>
+      <div style="color:var(--green);font-weight:700;font-size:18px;line-height:1">+</div>
+    </div>`).join('');
+  el.innerHTML = html || '<div style="font-size:13px;color:var(--muted);padding:6px 0">Searching...</div>';
+  try {
+    const cards = await fetchApiCards(q);
+    const offset = deckCardCache.length;
+    cards.slice(0,8).forEach(c => deckCardCache.push({ name:c.name, supertype:c.supertype||inferSupertype(c), img:c.images?.small||'' }));
+    const apiHtml = cards.slice(0,8).map((c,i) => `
+      <div class="result-item" onclick="addCardToDeckByIdx(${offset+i})">
+        <img src="${c.images?.small||''}" loading="lazy" onerror="this.style.display='none'">
+        <div class="result-info">
+          <div class="result-name">${c.name}</div>
+          <div class="result-set">${c.set?.name||''} · ${c.supertype||'Unknown'}</div>
+        </div>
+        <div style="color:var(--accent);font-weight:700;font-size:18px;line-height:1">+</div>
+      </div>`).join('');
+    if (cards.length) {
+      el.innerHTML = (vaultMatches.length ? html + '<div style="font-size:10px;color:var(--muted);padding:5px 0 3px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700">All Cards</div>' : '') + apiHtml;
+    } else if (!vaultMatches.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:6px 0">No cards found</div>';
+    }
+  } catch(e) {
+    if (!vaultMatches.length) el.innerHTML = '<div style="font-size:13px;color:var(--red);padding:6px 0">Search failed</div>';
+  }
+}
+
+function addCardToDeckByIdx(idx) {
+  const card = deckCardCache[idx];
+  if (!card) return;
+  const existing = newDeckCards.find(c => c.name === card.name);
+  if (existing) { existing.qty++; toast(`+1 ${card.name} (${existing.qty}×)`); }
+  else { newDeckCards.push({ ...card, qty:1 }); toast(`Added ${card.name}`); }
+  document.getElementById('deck-card-search').value = '';
+  document.getElementById('deck-card-results').innerHTML = '';
+  deckCardCache.length = 0;
+  renderDeckBuilderCards();
+}
+
+function adjustDeckQty(idx, delta) {
+  if (idx < 0 || idx >= newDeckCards.length) return;
+  newDeckCards[idx].qty = Math.max(0, newDeckCards[idx].qty + delta);
+  if (newDeckCards[idx].qty === 0) newDeckCards.splice(idx, 1);
+  renderDeckBuilderCards();
+}
+
+function renderDeckBuilderCards() {
+  const el = document.getElementById('deck-cards-list');
+  if (!el) return;
+  const total = newDeckCards.reduce((s,c)=>s+c.qty, 0);
+  const pokemon  = newDeckCards.filter(c => c.supertype === 'Pokémon');
+  const trainers = newDeckCards.filter(c => c.supertype === 'Trainer');
+  const energy   = newDeckCards.filter(c => c.supertype === 'Energy');
+  const sec = (title, arr) => {
+    if (!arr.length) return '';
+    const tot = arr.reduce((s,c)=>s+c.qty,0);
+    return `<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;margin-bottom:4px">
+        <span>${title}</span><span>${tot}</span>
+      </div>
+      ${arr.map(c => {
+        const idx = newDeckCards.indexOf(c);
+        return `<div class="deck-builder-card">
+          <img src="${c.img||''}" loading="lazy" onerror="this.style.display='none'" style="width:36px;border-radius:4px;flex-shrink:0">
+          <div class="deck-builder-card-info"><div class="deck-builder-card-name">${c.name}</div></div>
+          <div class="db-qty-control">
+            <button onclick="adjustDeckQty(${idx},-1)">−</button>
+            <span>${c.qty}</span>
+            <button onclick="adjustDeckQty(${idx},1)">+</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  };
+  const totalColor = total === 60 ? 'var(--green)' : total > 60 ? 'var(--red)' : 'var(--accent)';
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;padding:0 0 8px;border-bottom:1px solid var(--border2);margin-bottom:8px">
+    <span>Cards in deck</span><span style="color:${totalColor}">${total}/60</span>
+  </div>
+  ${sec('Pokémon', pokemon)}${sec('Trainer', trainers)}${sec('Energy', energy)}
+  ${!newDeckCards.length ? '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem 0">Search above to add cards</div>' : ''}`;
+}
+
+function saveDeck() {
+  const name = document.getElementById('deck-name-input').value.trim();
+  if (!name) { toast('Enter a deck name'); return; }
+  if (!newDeckCards.length) { toast('Add at least one card'); return; }
+  const decklist = {
+    pokemon: newDeckCards.filter(c=>c.supertype==='Pokémon').map(c=>({name:c.name,qty:c.qty,img:c.img||''})),
+    trainer: newDeckCards.filter(c=>c.supertype==='Trainer').map(c=>({name:c.name,qty:c.qty,img:c.img||''})),
+    energy:  newDeckCards.filter(c=>c.supertype==='Energy').map(c=>({name:c.name,qty:c.qty,img:c.img||''}))
+  };
+  if (editingDeckId) {
+    const idx = customDecks.findIndex(d => d.id === editingDeckId);
+    if (idx >= 0) customDecks[idx] = { ...customDecks[idx], name, decklist };
+    else customDecks.push({ id: editingDeckId, name, createdAt: Date.now(), decklist });
+  } else {
+    customDecks.push({ id:'deck_'+Date.now()+'_'+Math.random().toString(36).substr(2,4), name, createdAt:Date.now(), decklist });
+  }
+  save();
+  closeAllSheets();
+  renderMyDecks();
+  toast(`✓ "${name}" saved`);
 }
 
 // ═══ INIT ═══
