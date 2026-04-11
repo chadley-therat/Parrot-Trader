@@ -206,6 +206,69 @@
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
   .search-wrap input { padding-right: 2.6rem; }
   .mic-btn-sheet { right: 0.8rem; }
+
+/* ── Legality badges ── */
+.legal-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; }
+.legal-std { background: rgba(82,201,125,0.18); color: #52c97d; }
+.legal-exp { background: rgba(82,148,224,0.18); color: #5294e0; }
+.legal-unlim { background: rgba(136,136,136,0.18); color: #888; }
+
+/* ── Trend ── */
+.trend-up { color: #52c97d; }
+.trend-down { color: #e05252; }
+
+/* ── Card text ── */
+.card-section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+.attack-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.attack-cost { display: flex; gap: 2px; flex-shrink: 0; margin-top: 3px; flex-wrap: wrap; max-width: 54px; }
+.energy-dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.attack-info { flex: 1; min-width: 0; }
+.attack-name { font-weight: 600; font-size: 13px; }
+.attack-damage { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.attack-text { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+.ability-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.ability-name { font-weight: 700; font-size: 13px; color: var(--accent); display: inline; }
+.ability-type { font-size: 10px; background: rgba(232,200,74,0.12); color: var(--accent); padding: 1px 6px; border-radius: 3px; margin-left: 6px; display: inline-block; vertical-align: middle; }
+.ability-text { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+.wr-row { display: flex; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+.wr-item { font-size: 12px; color: var(--muted); }
+.wr-item strong { color: var(--text); }
+
+/* ── Stats screen ── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 1.1rem 1rem; }
+.stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.stat-tile-val { font-family: 'Bebas Neue', cursive; font-size: 2rem; color: var(--accent); letter-spacing: 0.04em; line-height: 1; }
+.stat-tile-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.top-card-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.top-card-row img { width: 36px; border-radius: 4px; flex-shrink: 0; }
+.top-card-info { flex: 1; min-width: 0; }
+.top-card-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-card-sub { font-size: 11px; color: var(--muted); }
+.top-card-val { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.type-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.type-bar-label { font-size: 12px; color: var(--muted); min-width: 70px; }
+.type-bar-track { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.type-bar-fill { height: 100%; border-radius: 3px; }
+.type-bar-val { font-size: 12px; color: var(--accent); font-weight: 600; min-width: 48px; text-align: right; }
+
+/* ── Wishlist ── */
+.wishlist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1.1rem; }
+@media (min-width: 600px) { .wishlist-grid { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 900px) { .wishlist-grid { grid-template-columns: repeat(7, 1fr); } }
+.wish-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; padding: 4px 4px 0; }
+.wish-card:active { transform: scale(0.97); border-color: var(--accent); }
+.wish-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; border-radius: 8px; }
+.wish-card-info { padding: 5px 4px 4px; }
+.wish-card-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wish-card-price { font-size: 10px; color: var(--accent); font-weight: 600; margin-top: 1px; }
+.nav-badge { position: absolute; top: 6px; right: 8px; background: var(--red); color: #fff; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 10px; line-height: 1.4; }
+
+/* ── Dual price block ── */
+.price-block { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.price-tile { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+.price-tile-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
+.price-tile-val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.price-tile-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -225,8 +288,13 @@
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
       </button>
     </div>
+    <div class="chip-row" id="format-chips">
+      <div class="chip active" onclick="setFormatFilter('All',this)">All Formats</div>
+      <div class="chip" onclick="setFormatFilter('Standard',this)">Standard</div>
+      <div class="chip" onclick="setFormatFilter('Expanded',this)">Expanded</div>
+    </div>
     <div class="chip-row" id="type-chips">
-      <div class="chip active" onclick="setTypeFilter('All',this)">All</div>
+      <div class="chip active" onclick="setTypeFilter('All',this)">All Types</div>
       <div class="chip" onclick="setTypeFilter('Fire',this)">🔥 Fire</div>
       <div class="chip" onclick="setTypeFilter('Water',this)">💧 Water</div>
       <div class="chip" onclick="setTypeFilter('Grass',this)">🌿 Grass</div>
@@ -234,6 +302,9 @@
       <div class="chip" onclick="setTypeFilter('Psychic',this)">🔮 Psychic</div>
       <div class="chip" onclick="setTypeFilter('Fighting',this)">🥊 Fighting</div>
       <div class="chip" onclick="setTypeFilter('Colorless',this)">⚪ Colorless</div>
+      <div class="chip" onclick="setTypeFilter('Darkness',this)">🌑 Dark</div>
+      <div class="chip" onclick="setTypeFilter('Metal',this)">⚙️ Metal</div>
+      <div class="chip" onclick="setTypeFilter('Dragon',this)">🐉 Dragon</div>
     </div>
     <div class="inv-grid" id="inv-grid"></div>
     <div class="empty" id="inv-empty" style="display:none">
@@ -273,6 +344,65 @@
     </div>
   </div>
 
+  <!-- ═══════════ WISHLIST SCREEN ═══════════ -->
+  <div id="screen-wishlist" class="screen">
+    <div class="page-header">
+      <div class="page-title">Wishlist</div>
+      <div style="font-size:13px;color:var(--muted)" id="wishlist-count"></div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="wishlist-search" placeholder="Search wishlist…" oninput="renderWishlist()">
+    </div>
+    <div class="wishlist-grid" id="wishlist-grid"></div>
+    <div class="empty" id="wishlist-empty">
+      <div class="empty-icon">♡</div>
+      <h3>Wishlist is empty</h3>
+      <p>Search for a card and tap "♡ Wish" to add it</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ STATS SCREEN ═══════════ -->
+  <div id="screen-stats" class="screen">
+    <div class="page-header">
+      <div class="page-title">Stats</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-tile">
+        <div class="stat-tile-val" id="stat-total-cards">0</div>
+        <div class="stat-tile-label">Total Cards</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-val" id="stat-total-value">$0</div>
+        <div class="stat-tile-label">Vault Value</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-val" id="stat-total-entries">0</div>
+        <div class="stat-tile-label">Unique Entries</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-val" id="stat-avg-value">$0</div>
+        <div class="stat-tile-label">Avg Card Value</div>
+      </div>
+    </div>
+
+    <div class="section-label">Top 5 Most Valuable</div>
+    <div style="padding: 0 1.1rem 1rem" id="stat-top-cards"></div>
+
+    <div class="section-label">Value by Type</div>
+    <div style="padding: 0 1.1rem 1rem" id="stat-type-bars"></div>
+
+    <div class="section-label">Cards by Set</div>
+    <div style="padding: 0 1.1rem 1rem" id="stat-sets"></div>
+
+    <div style="padding: 0 1.1rem 1.5rem; display: flex; gap: 10px;">
+      <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Vault</button>
+      <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Vault</button>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+
 </div><!-- /app -->
 
 <!-- Bottom Nav -->
@@ -281,13 +411,22 @@
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <span class="nav-label">Vault</span>
   </button>
-  <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18M8 5l-1 4M16 5l1 4"/></svg>
-    <span class="nav-label">Store</span>
-  </button>
   <button class="nav-btn" id="nav-decks" onclick="showScreen('decks')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="13" height="17" rx="2"/><rect x="7" y="2" width="13" height="17" rx="2" fill="none"/><path d="M8 10h6M8 14h4"/></svg>
     <span class="nav-label">Decks</span>
+  </button>
+  <button class="nav-btn" id="nav-wishlist" onclick="showScreen('wishlist')" style="position:relative">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span id="wishlist-badge" class="nav-badge"></span>
+    <span class="nav-label">Wishlist</span>
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="nav-label">Stats</span>
+  </button>
+  <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
+    <span class="nav-label">Store</span>
   </button>
 </nav>
 
@@ -337,9 +476,11 @@
 const POKEMON_API = 'https://api.pokemontcg.io/v2';
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
 let searchTimeout = null;
 let activeCard = null;
 let typeFilter = 'All';
+let formatFilter = 'All';
 
 // ═══ VOICE SEARCH ═══
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -434,6 +575,8 @@ function showScreen(name) {
   fab.style.display = name === 'inventory' ? 'flex' : 'none';
   if (name === 'store') renderStore();
   if (name === 'decks') renderDecks();
+  if (name === 'stats') renderStats();
+  if (name === 'wishlist') renderWishlist();
 }
 
 // ═══ TOAST ═══
@@ -448,6 +591,7 @@ function toast(msg, dur=2200) {
 function save() {
   localStorage.setItem('tcg_inventory', JSON.stringify(inventory));
   localStorage.setItem('tcg_listings', JSON.stringify(listings));
+  localStorage.setItem('tcg_wishlist', JSON.stringify(wishlist));
 }
 
 // ═══ SHEETS ═══
@@ -484,7 +628,7 @@ function isLegitCard(c) {
 async function fetchApiCards(nameQuery) {
   const q = nameQuery.replace(/['"]/g, '').trim();
   const encoded = encodeURIComponent('*' + q + '*');
-  const res = await fetch(`${POKEMON_API}/cards?q=name:${encoded}&pageSize=80&orderBy=-set.releaseDate&select=id,name,images,set,types,rarity,cardmarket`);
+  const res = await fetch(`${POKEMON_API}/cards?q=name:${encoded}&pageSize=80&orderBy=-set.releaseDate&select=id,name,images,set,types,rarity,cardmarket,hp,attacks,abilities,weaknesses,resistances,retreatCost,legalities,regulationMark,number,artist,flavorText,evolvesFrom,supertype,subtypes,nationalPokedexNumbers,tcgplayer`);
   const data = await res.json();
   return (data.data || []).filter(isLegitCard).slice(0, 25);
 }
@@ -499,6 +643,7 @@ function buildResultItem(c) {
     <div class="result-info">
       <div class="result-name">${c.name}</div>
       <div class="result-set">${c.set?.name || ''} · ${types}</div>
+      <div style="margin-top:3px;display:flex;gap:4px">${legalityBadges(c.legalities)}</div>
     </div>
     <div class="result-price">${priceStr}</div>
   </div>`;
@@ -603,6 +748,8 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
+    ${renderPriceBlock(price, card.cardmarket?.prices?.trendPrice, card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0)}
+    ${renderCardText(card)}
     ${existingAll.length ? `
       <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
         ✓ In vault: ${existingAll.map(e => `${finishLabel(e.finish).icon} ${finishLabel(e.finish).label} ×${e.qty}`).join(' · ')}
@@ -634,6 +781,7 @@ function openCardDetail(card) {
       </div>
     </div>
     <div class="flex gap-8">
+      <button class="btn btn-outline" onclick="addToWishlist()" style="flex-shrink:0">♡ Wish</button>
       <button class="btn btn-primary btn-block" onclick="addToVault()">Add to Vault</button>
     </div>
   `;
@@ -685,7 +833,20 @@ function addToVault() {
       finish,
       qty,
       condition,
-      addedAt: Date.now()
+      addedAt: Date.now(),
+      hp: activeCard.hp || '',
+      attacks: activeCard.attacks || [],
+      abilities: activeCard.abilities || [],
+      weaknesses: activeCard.weaknesses || [],
+      resistances: activeCard.resistances || [],
+      retreatCost: activeCard.retreatCost || [],
+      legalities: activeCard.legalities || {},
+      regulationMark: activeCard.regulationMark || '',
+      number: activeCard.number || '',
+      artist: activeCard.artist || '',
+      flavorText: activeCard.flavorText || '',
+      tcgPlayerPrice: activeCard.tcgplayer?.prices?.holofoil?.market || activeCard.tcgplayer?.prices?.normal?.market || activeCard.tcgplayer?.prices?.['1stEditionNormal']?.market || 0,
+      trendPrice: activeCard.cardmarket?.prices?.trendPrice || 0
     });
   }
   save();
@@ -698,7 +859,14 @@ function addToVault() {
 // ═══ INVENTORY RENDER ═══
 function setTypeFilter(type, el) {
   typeFilter = type;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#type-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterInventory();
+}
+
+function setFormatFilter(fmt, el) {
+  formatFilter = fmt;
+  document.querySelectorAll('#format-chips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   filterInventory();
 }
@@ -706,7 +874,9 @@ function setTypeFilter(type, el) {
 function filterInventory() {
   const q = document.getElementById('inv-search').value.toLowerCase();
   let cards = inventory;
-  if (typeFilter !== 'All') cards = cards.filter(c => c.types.includes(typeFilter));
+  if (typeFilter !== 'All') cards = cards.filter(c => c.types && c.types.includes(typeFilter));
+  if (formatFilter === 'Standard') cards = cards.filter(c => c.legalities?.standard === 'Legal');
+  if (formatFilter === 'Expanded') cards = cards.filter(c => c.legalities?.expanded === 'Legal');
   if (q) cards = cards.filter(c => c.name.toLowerCase().includes(q) || c.set.toLowerCase().includes(q));
   renderInventoryGrid(cards);
 }
@@ -734,6 +904,9 @@ function renderInventoryGrid(cards) {
     <div class="inv-card" onclick="openVaultCard('${uid}')">
       <div style="position:relative">
         <img src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2212%22>No img</text></svg>'">
+        <div style="position:absolute;top:4px;left:4px;display:flex;flex-direction:column;gap:2px">
+          ${c.legalities ? legalityBadges(c.legalities) : ''}
+        </div>
         ${c.finish && c.finish !== 'normal' ? `<div style="position:absolute;top:4px;right:4px;font-size:13px;line-height:1;background:rgba(0,0,0,0.65);border-radius:4px;padding:2px 3px">${fl.icon}</div>` : ''}
       </div>
       <div class="inv-card-info">
@@ -767,6 +940,8 @@ function openVaultCard(uid) {
         <div class="meta-row"><span>Market Price</span><span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span></div>
       </div>
     </div>
+    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice)}
+    ${renderCardText(card)}
     <div class="form-group">
       <label class="form-label">Quantity</label>
       <div class="qty-control">
@@ -943,6 +1118,92 @@ function renderStore() {
   total.textContent = '$' + sum.toFixed(2);
 }
 
+// ═══ WISHLIST ═══
+function addToWishlist() {
+  if (!activeCard) return;
+  const exists = wishlist.find(w => w.id === activeCard.id);
+  if (exists) { toast('Already in wishlist'); return; }
+  wishlist.push({
+    id: activeCard.id,
+    name: activeCard.name,
+    img: activeCard.images?.small || '',
+    imgLg: activeCard.images?.large || activeCard.images?.small || '',
+    set: activeCard.set?.name || '',
+    types: activeCard.types || [],
+    rarity: activeCard.rarity || '',
+    marketPrice: activeCard.cardmarket?.prices?.averageSellPrice || 0,
+    legalities: activeCard.legalities || {},
+    addedAt: Date.now()
+  });
+  save();
+  renderWishlist();
+  closeAllSheets();
+  toast(`♡ ${activeCard.name} added to wishlist`);
+}
+
+function renderWishlist() {
+  const grid = document.getElementById('wishlist-grid');
+  const empty = document.getElementById('wishlist-empty');
+  const badge = document.getElementById('wishlist-badge');
+  if (badge) badge.textContent = wishlist.length || '';
+  if (!wishlist.length) {
+    if (grid) grid.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (!grid) return;
+  const q = document.getElementById('wishlist-search')?.value.toLowerCase() || '';
+  const filtered = q ? wishlist.filter(w => w.name.toLowerCase().includes(q) || w.set.toLowerCase().includes(q)) : wishlist;
+  grid.innerHTML = filtered.map(w => `
+    <div class="wish-card" onclick="openWishCard('${w.id}')">
+      <img src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/></svg>'">
+      <div class="wish-card-info">
+        <div class="wish-card-name">${w.name}</div>
+        <div class="wish-card-price">${w.marketPrice ? '$'+w.marketPrice.toFixed(2) : '—'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openWishCard(id) {
+  const w = wishlist.find(x => x.id === id);
+  if (!w) return;
+  document.getElementById('detail-content').innerHTML = `
+    <div class="sheet-title">${w.name}</div>
+    <div class="card-detail">
+      <img src="${w.imgLg || w.img}" alt="${w.name}" style="width:110px;border-radius:8px">
+      <div class="card-meta">
+        <div class="meta-row"><span>Set</span><span>${w.set}</span></div>
+        <div class="meta-row"><span>Rarity</span><span>${w.rarity || '—'}</span></div>
+        <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${w.marketPrice ? '$'+w.marketPrice.toFixed(2) : '—'}</span></div>
+        <div class="meta-row" style="border:none"><span>Format</span><span>${legalityBadges(w.legalities)}</span></div>
+      </div>
+    </div>
+    <div class="flex gap-8" style="margin-bottom:10px">
+      <button class="btn btn-primary btn-block" onclick="moveWishToVault('${w.id}')">Move to Vault</button>
+    </div>
+    <button class="btn btn-danger btn-block btn-sm" onclick="removeFromWishlist('${w.id}')">Remove from Wishlist</button>
+  `;
+  document.getElementById('detail-sheet').classList.add('open');
+}
+
+function moveWishToVault(id) {
+  const w = wishlist.find(x => x.id === id);
+  if (!w) return;
+  // Set activeCard so addToVault can use it - simulate the card object
+  activeCard = { id: w.id, name: w.name, images: { small: w.img, large: w.imgLg }, set: { name: w.set }, types: w.types, rarity: w.rarity, cardmarket: { prices: { averageSellPrice: w.marketPrice } }, legalities: w.legalities };
+  closeAllSheets();
+  openCardDetail(activeCard);
+}
+
+function removeFromWishlist(id) {
+  wishlist = wishlist.filter(w => w.id !== id);
+  save();
+  renderWishlist();
+  closeAllSheets();
+  toast('Removed from wishlist');
+}
+
 // ═══ DECK BUILDER — Limitless TCG meta + AI theorycrafting ═══
 
 // ═══ DECK SCORING ═══
@@ -1004,6 +1265,105 @@ function personalizedLine(deck, cardDetails) {
     return `One Pokémon away from a full line: still need ${pokemonMissing[0].name}.`;
   }
   return '';
+}
+
+const ENERGY_COLORS = {
+  Fire:'#e05252', Water:'#5294e0', Grass:'#52c97d', Lightning:'#e8c84a',
+  Psychic:'#b05ce0', Fighting:'#c47a3a', Darkness:'#555', Metal:'#aaa',
+  Colorless:'#ccc', Dragon:'#7a6eaa', Fairy:'#e08cba'
+};
+
+function legalityBadges(legalities) {
+  if (!legalities) return '';
+  const std = legalities.standard === 'Legal';
+  const exp = legalities.expanded === 'Legal';
+  if (std) return `<span class="legal-badge legal-std">STD</span>`;
+  if (exp) return `<span class="legal-badge legal-exp">EXP</span>`;
+  return `<span class="legal-badge legal-unlim">UNLIM</span>`;
+}
+
+function trendArrow(avg, trend) {
+  if (!avg || !trend) return '';
+  const diff = ((trend - avg) / avg) * 100;
+  if (Math.abs(diff) < 1) return '';
+  if (diff > 0) return `<span class="trend-up">↑${Math.abs(diff).toFixed(0)}%</span>`;
+  return `<span class="trend-down">↓${Math.abs(diff).toFixed(0)}%</span>`;
+}
+
+function energyCostDots(cost) {
+  if (!cost || !cost.length) return '';
+  return cost.map(t => {
+    const col = ENERGY_COLORS[t] || '#888';
+    return `<span class="energy-dot" style="background:${col}" title="${t}"></span>`;
+  }).join('');
+}
+
+function renderCardText(card) {
+  let html = '';
+  const abilities = card.abilities || [];
+  const attacks = card.attacks || [];
+  const weaknesses = card.weaknesses || [];
+  const resistances = card.resistances || [];
+  const retreat = card.retreatCost || [];
+
+  if (abilities.length) {
+    html += `<div class="card-section-title">Abilities</div>`;
+    abilities.forEach(a => {
+      html += `<div class="ability-row">
+        <span class="ability-name">${a.name}</span>
+        <span class="ability-type">${a.type}</span>
+        <div class="ability-text">${a.text || ''}</div>
+      </div>`;
+    });
+  }
+  if (attacks.length) {
+    html += `<div class="card-section-title">Attacks</div>`;
+    attacks.forEach(a => {
+      html += `<div class="attack-row">
+        <div class="attack-cost">${energyCostDots(a.cost)}</div>
+        <div class="attack-info">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <span class="attack-name">${a.name}</span>
+            <span class="attack-damage">${a.damage || ''}</span>
+          </div>
+          ${a.text ? `<div class="attack-text">${a.text}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+  if (weaknesses.length || resistances.length || retreat.length) {
+    html += `<div class="wr-row">
+      ${weaknesses.length ? `<div class="wr-item"><span>Weakness: </span><strong>${weaknesses.map(w=>w.type+' '+w.value).join(', ')}</strong></div>` : ''}
+      ${resistances.length ? `<div class="wr-item"><span>Resistance: </span><strong>${resistances.map(r=>r.type+' '+r.value).join(', ')}</strong></div>` : ''}
+      ${retreat.length ? `<div class="wr-item"><span>Retreat: </span><strong>${retreat.length}⚪</strong></div>` : ''}
+    </div>`;
+  }
+  if (card.artist || card.flavorText) {
+    html += `<div style="margin-top:8px;font-size:11px;color:var(--muted)">
+      ${card.flavorText ? `<div style="font-style:italic;line-height:1.5;margin-bottom:4px">"${card.flavorText}"</div>` : ''}
+      ${card.artist ? `<div>Illus. ${card.artist}</div>` : ''}
+    </div>`;
+  }
+  return html;
+}
+
+function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice) {
+  const avg = marketPrice || 0;
+  const trend = trendPrice || 0;
+  const tcg = tcgPlayerPrice || 0;
+  const arrow = trendArrow(avg, trend);
+  return `<div class="price-block">
+    <div class="price-tile">
+      <div class="price-tile-label">Cardmarket</div>
+      <div class="price-tile-val">${avg ? '$'+avg.toFixed(2) : '—'}</div>
+      <div class="price-tile-sub">Avg ${trend ? '· Trend $'+trend.toFixed(2)+' '+arrow : ''}</div>
+    </div>
+    <div class="price-tile">
+      <div class="price-tile-label">TCGPlayer</div>
+      <div class="price-tile-val">${tcg ? '$'+tcg.toFixed(2) : '—'}</div>
+      <div class="price-tile-sub">Market price</div>
+    </div>
+  </div>`;
 }
 
 function renderDeckList(deck, inv) {
@@ -1462,8 +1822,102 @@ function renderDecks() {
   if (inventory.length >= 1) generateDecks();
 }
 
+// ═══ STATS ═══
+function renderStats() {
+  const totalCards = inventory.reduce((s, c) => s + c.qty, 0);
+  const totalValue = inventory.reduce((s, c) => s + (c.marketPrice || 0) * c.qty, 0);
+  const avgVal = inventory.length ? totalValue / inventory.length : 0;
+
+  // Summary tiles
+  document.getElementById('stat-total-cards').textContent = totalCards;
+  document.getElementById('stat-total-entries').textContent = inventory.length;
+  document.getElementById('stat-total-value').textContent = '$' + totalValue.toFixed(0);
+  document.getElementById('stat-avg-value').textContent = '$' + avgVal.toFixed(2);
+
+  // Top 5 most valuable
+  const sorted = [...inventory].sort((a, b) => (b.marketPrice || 0) - (a.marketPrice || 0)).slice(0, 5);
+  const fl = c => finishLabel(c.finish);
+  document.getElementById('stat-top-cards').innerHTML = sorted.length
+    ? sorted.map((c, i) => `<div class="top-card-row">
+        <img src="${c.img}" alt="${c.name}" onerror="this.style.display='none'">
+        <div class="top-card-info">
+          <div class="top-card-name">${c.name}</div>
+          <div class="top-card-sub">${c.set} · ${fl(c).icon} ${fl(c).label}</div>
+        </div>
+        <div class="top-card-val">${c.marketPrice ? '$'+c.marketPrice.toFixed(2) : '—'}</div>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:13px;padding:1rem 0">No cards yet</div>';
+
+  // Value by type
+  const typeValues = {};
+  inventory.forEach(c => {
+    (c.types || ['Colorless']).forEach(t => {
+      typeValues[t] = (typeValues[t] || 0) + (c.marketPrice || 0) * c.qty;
+    });
+  });
+  const maxTypeVal = Math.max(...Object.values(typeValues), 1);
+  document.getElementById('stat-type-bars').innerHTML = Object.entries(typeValues)
+    .sort((a,b) => b[1]-a[1])
+    .map(([type, val]) => {
+      const col = ENERGY_COLORS[type] || '#888';
+      const pct = (val / maxTypeVal * 100).toFixed(0);
+      return `<div class="type-bar-row">
+        <div class="type-bar-label">${type}</div>
+        <div class="type-bar-track"><div class="type-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="type-bar-val">$${val.toFixed(0)}</div>
+      </div>`;
+    }).join('') || '<div style="color:var(--muted);font-size:13px">No data</div>';
+
+  // Set completion
+  const setBuckets = {};
+  inventory.forEach(c => {
+    if (!setBuckets[c.set]) setBuckets[c.set] = 0;
+    setBuckets[c.set] += c.qty;
+  });
+  document.getElementById('stat-sets').innerHTML = Object.entries(setBuckets)
+    .sort((a,b) => b[1]-a[1])
+    .map(([set, count]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px">${set}</div>
+      <div class="qty-badge">${count}</div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:13px;padding:1rem 0">No cards yet</div>';
+}
+
+// ═══ EXPORT / IMPORT ═══
+function exportVault() {
+  const data = JSON.stringify({ inventory, listings, wishlist }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'parrot-vault-backup.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('✓ Vault exported');
+}
+
+function importVault() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.inventory) inventory = data.inventory;
+      if (data.listings) listings = data.listings;
+      if (data.wishlist) wishlist = data.wishlist;
+      save(); renderInventory(); renderWishlist();
+      toast(`✓ Imported ${inventory.length} cards`);
+    } catch { toast('Import failed — invalid file'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
 // ═══ INIT ═══
 renderInventory();
+renderWishlist();
 
 // ═══ SERVICE WORKER ═══
 if ('serviceWorker' in navigator) {
