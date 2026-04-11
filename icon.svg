@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="90" fill="#0d0d0f"/>
+
+  <!-- Tail feathers -->
+  <ellipse cx="168" cy="368" rx="16" ry="72" fill="#1a9445" transform="rotate(-28 168 368)"/>
+  <ellipse cx="192" cy="382" rx="15" ry="80" fill="#1fad52" transform="rotate(-10 192 382)"/>
+  <ellipse cx="218" cy="386" rx="14" ry="76" fill="#1a9445" transform="rotate(10 218 386)"/>
+
+  <!-- Body -->
+  <ellipse cx="228" cy="292" rx="82" ry="108" fill="#24b85a"/>
+
+  <!-- Wing detail -->
+  <path d="M160 250 Q148 300 155 345 Q182 320 195 268 Z" fill="#1a9445"/>
+
+  <!-- Neck join -->
+  <ellipse cx="262" cy="205" rx="52" ry="42" fill="#24b85a"/>
+
+  <!-- Head -->
+  <circle cx="278" cy="162" r="78" fill="#24b85a"/>
+
+  <!-- Crown feathers -->
+  <ellipse cx="252" cy="92"  rx="12" ry="28" fill="#1fad52" transform="rotate(-22 252 92)"/>
+  <ellipse cx="276" cy="84"  rx="11" ry="26" fill="#28c966" transform="rotate(-4 276 84)"/>
+  <ellipse cx="298" cy="91"  rx="10" ry="22" fill="#1fad52" transform="rotate(18 298 91)"/>
+
+  <!-- Eye ring -->
+  <circle cx="312" cy="148" r="22" fill="#f5f0e8"/>
+  <!-- Pupil -->
+  <circle cx="314" cy="148" r="13" fill="#0d0d0f"/>
+  <!-- Shine -->
+  <circle cx="319" cy="143" r="4" fill="rgba(255,255,255,0.85)"/>
+
+  <!-- Beak upper -->
+  <path d="M348 152 Q394 140 398 163 Q390 182 348 178 Z" fill="#e8c84a"/>
+  <!-- Beak lower / hook -->
+  <path d="M350 174 Q386 170 388 186 Q376 204 350 198 Z" fill="#c4a832"/>
+
+  <!-- Chest highlight -->
+  <ellipse cx="235" cy="290" rx="36" ry="52" fill="#2ed46a" opacity="0.28"/>
+
+  <!-- Perch -->
+  <rect x="118" y="392" width="240" height="20" rx="10" fill="#6b4423"/>
+  <rect x="118" y="392" width="240" height="7"  rx="4"  fill="#835430" opacity="0.7"/>
+
+  <!-- Wordmark -->
+  <text x="256" y="458" font-family="Arial Black, Impact, sans-serif"
+    font-size="42" font-weight="900" fill="#e8c84a"
+    text-anchor="middle" letter-spacing="2">PARROT</text>
+  <text x="256" y="492" font-family="Arial Black, Impact, sans-serif"
+    font-size="26" font-weight="900" fill="#888"
+    text-anchor="middle" letter-spacing="6">VAULT</text>
+</svg>

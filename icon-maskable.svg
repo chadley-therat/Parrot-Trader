@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full bleed background — no rounded corners, OS clips it -->
+  <rect width="512" height="512" fill="#0d0d0f"/>
+
+  <!-- Scaled into safe zone (80% / ~410px centered) -->
+
+  <!-- Tail feathers -->
+  <ellipse cx="178" cy="355" rx="14" ry="62" fill="#1a9445" transform="rotate(-28 178 355)"/>
+  <ellipse cx="200" cy="368" rx="13" ry="70" fill="#1fad52" transform="rotate(-10 200 368)"/>
+  <ellipse cx="224" cy="372" rx="12" ry="66" fill="#1a9445" transform="rotate(10 224 372)"/>
+
+  <!-- Body -->
+  <ellipse cx="235" cy="282" rx="72" ry="95" fill="#24b85a"/>
+
+  <!-- Wing -->
+  <path d="M172 244 Q160 290 167 332 Q192 310 204 260 Z" fill="#1a9445"/>
+
+  <!-- Neck -->
+  <ellipse cx="266" cy="200" rx="46" ry="38" fill="#24b85a"/>
+
+  <!-- Head -->
+  <circle cx="280" cy="160" r="70" fill="#24b85a"/>
+
+  <!-- Crown -->
+  <ellipse cx="257" cy="97"  rx="10" ry="24" fill="#1fad52" transform="rotate(-22 257 97)"/>
+  <ellipse cx="279" cy="90"  rx="10" ry="22" fill="#28c966" transform="rotate(-4 279 90)"/>
+  <ellipse cx="299" cy="97"  rx="9"  ry="19" fill="#1fad52" transform="rotate(18 299 97)"/>
+
+  <!-- Eye -->
+  <circle cx="312" cy="147" r="19" fill="#f5f0e8"/>
+  <circle cx="314" cy="147" r="12" fill="#0d0d0f"/>
+  <circle cx="318" cy="143" r="4"  fill="rgba(255,255,255,0.85)"/>
+
+  <!-- Beak -->
+  <path d="M344 150 Q386 139 390 160 Q382 178 344 174 Z" fill="#e8c84a"/>
+  <path d="M346 171 Q380 167 382 182 Q371 198 346 194 Z" fill="#c4a832"/>
+
+  <!-- Chest highlight -->
+  <ellipse cx="242" cy="280" rx="32" ry="46" fill="#2ed46a" opacity="0.28"/>
+
+  <!-- Perch -->
+  <rect x="128" y="370" width="220" height="18" rx="9" fill="#6b4423"/>
+
+  <!-- Wordmark -->
+  <text x="256" y="434" font-family="Arial Black, Impact, sans-serif"
+    font-size="38" font-weight="900" fill="#e8c84a"
+    text-anchor="middle" letter-spacing="2">PARROT</text>
+  <text x="256" y="464" font-family="Arial Black, Impact, sans-serif"
+    font-size="23" font-weight="900" fill="#888"
+    text-anchor="middle" letter-spacing="5">VAULT</text>
+</svg>

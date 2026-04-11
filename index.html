@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Parrot Trader Vault</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e8c84a">
+<meta name="description" content="Pokémon TCG collection tracker, deck builder and storefront manager">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Parrot Vault">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --surface3: #26262e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --muted: #888;
+    --accent: #e8c84a;
+    --accent2: #c4a832;
+    --red: #e05252;
+    --green: #52c97d;
+    --blue: #5294e0;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --nav-h: 72px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; overflow-x: hidden; }
+  h1, h2, .brand { font-family: 'Bebas Neue', cursive; letter-spacing: 0.04em; }
+  input, select, textarea, button { font-family: inherit; }
+
+  /* ── Layout ── */
+  #app { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); min-height: 100vh; }
+  .screen { display: none; padding: 0 0 1rem; }
+  .screen.active { display: block; }
+  .page-header { padding: 1.2rem 1.1rem 0.6rem; display: flex; align-items: center; justify-content: space-between; }
+  .page-title { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 0.06em; color: var(--accent); }
+
+  /* ── Bottom Nav ── */
+  #bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(22,22,26,0.96); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; align-items: stretch; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; cursor: pointer; color: var(--muted); transition: color 0.15s; padding: 0; }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .card-sm { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+  /* ── Search bar ── */
+  .search-wrap { padding: 0.6rem 1.1rem; position: relative; }
+  .search-wrap input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 50px; padding: 0.65rem 1rem 0.65rem 2.6rem; color: var(--text); font-size: 15px; outline: none; }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 1.9rem; top: 50%; transform: translateY(-50%); opacity: 0.5; pointer-events: none; }
+
+  /* ── Chip filters ── */
+  .chip-row { display: flex; gap: 8px; padding: 0 1.1rem 0.8rem; overflow-x: auto; scrollbar-width: none; }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: 0.35rem 0.9rem; font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #0d0d0f; font-weight: 600; }
+
+  /* ── Inventory grid ── */
+  .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1.1rem; }
+  @media (min-width: 600px) { .inv-grid { grid-template-columns: repeat(5, 1fr); } }
+  @media (min-width: 900px) { .inv-grid { grid-template-columns: repeat(7, 1fr); max-width: 1200px; margin: 0 auto; } }
+  .inv-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; padding: 4px 4px 0; }
+  .inv-card:active { transform: scale(0.97); border-color: var(--accent); }
+  .inv-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; border-radius: 8px; }
+  .inv-card-info { padding: 5px 4px 4px; }
+  .inv-card-name { font-size: 11px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .inv-card-qty { font-size: 11px; color: var(--muted); margin-top: 1px; display: flex; justify-content: space-between; }
+  .qty-badge { background: var(--accent); color: #0d0d0f; border-radius: 4px; padding: 0 5px; font-size: 10px; font-weight: 700; }
+  .listed-badge { background: var(--green); color: #0d0d0f; border-radius: 4px; padding: 0 5px; font-size: 10px; font-weight: 700; }
+
+  /* ── Empty state ── */
+  .empty { text-align: center; padding: 3rem 1.5rem; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.4rem; }
+
+  /* ── FAB / Button ── */
+  .fab { position: fixed; bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); right: 1.1rem; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 90; box-shadow: 0 4px 20px rgba(232,200,74,0.35); transition: transform 0.1s; }
+  .fab:active { transform: scale(0.93); }
+  .fab svg { width: 24px; height: 24px; color: #0d0d0f; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.65rem 1.2rem; border-radius: 50px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: #0d0d0f; }
+  .btn-primary:active { background: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+  .btn-outline:active { background: var(--surface2); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+  .btn-sm { padding: 0.4rem 0.8rem; font-size: 12px; }
+  .btn-block { width: 100%; }
+
+  /* ── Modal / Sheet ── */
+  .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; }
+  .sheet-overlay.open { display: flex; align-items: flex-end; }
+  .sheet { background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding: 0 1.2rem calc(1.5rem + env(safe-area-inset-bottom)); animation: slideUp 0.28s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0.8rem auto 1.2rem; }
+  .sheet-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.2rem; }
+
+  /* ── Search results ── */
+  .result-list { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+  .result-item { display: flex; gap: 12px; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.15s; }
+  .result-item:active { border-color: var(--accent); }
+  .result-item img { width: 48px; border-radius: 4px; }
+  .result-info { flex: 1; min-width: 0; }
+  .result-name { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result-set { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .result-price { font-size: 13px; color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+  /* ── Card detail sheet ── */
+  .card-detail { display: flex; gap: 14px; margin-bottom: 1.2rem; align-items: flex-start; }
+  .card-detail img { width: 110px; border-radius: 8px; }
+  .card-meta { flex: 1; }
+  .card-meta h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+  .meta-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .meta-row span:last-child { color: var(--text); font-weight: 500; }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0.6rem 0.9rem; color: var(--text); font-size: 15px; outline: none; }
+  .form-input:focus { border-color: var(--accent); }
+  select.form-input { appearance: none; }
+  .qty-control { display: flex; align-items: center; gap: 12px; }
+  .qty-control button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .qty-control span { font-size: 1.3rem; font-weight: 600; min-width: 28px; text-align: center; }
+
+  /* ── Store ── */
+  .listing-list { display: flex; flex-direction: column; gap: 10px; padding: 0 1.1rem; }
+  .listing-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; gap: 12px; align-items: center; padding: 10px; }
+  .listing-item img { width: 52px; border-radius: 4px; }
+  .listing-info { flex: 1; min-width: 0; }
+  .listing-name { font-weight: 500; font-size: 14px; }
+  .listing-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .listing-price { font-size: 1.1rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .listing-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+
+  /* ── Deck builder ── */
+  .deck-list { display: flex; flex-direction: column; gap: 14px; padding: 0 1.1rem; }
+  .deck-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+  .deck-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+  .deck-name { font-family: 'Bebas Neue', cursive; font-size: 1.4rem; color: var(--accent); letter-spacing: 0.05em; }
+  .deck-type { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .deck-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 0.8rem; }
+  /* Owned card thumbnails */
+  .deck-owned-imgs { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0 10px; }
+  .deck-owned-imgs img { width: 44px; border-radius: 5px; flex-shrink: 0; }
+  /* Decklist */
+  .dl-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 4px; padding: 0; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; width: 100%; text-align: left; }
+  .dl-body { margin-top: 8px; display: none; }
+  .dl-body.open { display: block; }
+  .dl-section { margin-bottom: 10px; }
+  .dl-section-hdr { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
+  .dl-row { display: flex; align-items: center; gap: 5px; padding: 2px 0; }
+  .dl-qty { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 20px; text-align: right; }
+  .dl-name { font-size: 12px; flex: 1; }
+  .dl-name.owned { color: var(--text); }
+  .dl-name.missing { color: var(--muted); font-style: italic; }
+  .dl-check { font-size: 10px; font-weight: 700; }
+  .dl-check.owned { color: var(--green); }
+  .dl-check.partial { color: var(--accent); font-size: 9px; }
+  .dl-check.missing { color: var(--red); opacity: 0.7; }
+  .dl-name.partial { color: var(--accent); }
+  .readiness-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em; }
+  .readiness-ready { background: rgba(82,201,125,0.15); color: var(--green); }
+  .readiness-near { background: rgba(232,200,74,0.15); color: var(--accent); }
+  .readiness-building { background: rgba(82,148,224,0.15); color: var(--blue); }
+  .personalized-line { font-size: 12px; color: var(--accent); background: rgba(232,200,74,0.07); border-left: 2px solid var(--accent); padding: 6px 10px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 8px 0; }
+  .deck-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; }
+  .deck-missing-count { color: var(--muted); }
+  .deck-missing-count strong { color: var(--red); }
+
+  /* ── Toasts ── */
+  #toast { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); background: var(--surface3); color: var(--text); padding: 0.65rem 1.2rem; border-radius: 50px; font-size: 13px; font-weight: 500; z-index: 999; opacity: 0; transition: opacity 0.2s; border: 1px solid var(--border2); white-space: nowrap; pointer-events: none; }
+  #toast.show { opacity: 1; }
+
+  /* ── Utility ── */
+  .flex { display: flex; }
+  .gap-8 { gap: 8px; }
+  .mt-1 { margin-top: 0.5rem; }
+  .mt-2 { margin-top: 1rem; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+  .tag-r { background: rgba(232,200,74,0.12); color: var(--accent); }
+  .tag-g { background: rgba(82,201,125,0.12); color: var(--green); }
+  .tag-b { background: rgba(82,148,224,0.12); color: var(--blue); }
+  .loading-dots::after { content: ''; animation: dots 1.2s infinite; }
+  @keyframes dots { 0%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
+  .spin { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0 1.1rem; margin-bottom: 0.6rem; margin-top: 0.5rem; }
+
+  /* ── Voice search ── */
+  .mic-btn { position: absolute; right: 1.9rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: var(--muted); transition: color 0.15s; display: flex; align-items: center; justify-content: center; }
+  .mic-btn:hover { color: var(--text); }
+  .mic-btn.listening { color: var(--red); animation: pulse 0.9s ease-in-out infinite; }
+  .mic-btn.listening svg { filter: drop-shadow(0 0 4px var(--red)); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .search-wrap input { padding-right: 2.6rem; }
+  .mic-btn-sheet { right: 0.8rem; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══════════ INVENTORY SCREEN ═══════════ -->
+  <div id="screen-inventory" class="screen active">
+    <div class="page-header">
+      <div class="page-title">My Vault</div>
+      <div style="font-size:13px;color:var(--muted)" id="inv-count">0 cards</div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="inv-search" placeholder="Search your vault…" oninput="filterInventory()">
+      <button class="mic-btn" id="mic-inv" onclick="startVoiceSearch('inv-search', filterInventory)" title="Voice search" aria-label="Voice search">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </button>
+    </div>
+    <div class="chip-row" id="type-chips">
+      <div class="chip active" onclick="setTypeFilter('All',this)">All</div>
+      <div class="chip" onclick="setTypeFilter('Fire',this)">🔥 Fire</div>
+      <div class="chip" onclick="setTypeFilter('Water',this)">💧 Water</div>
+      <div class="chip" onclick="setTypeFilter('Grass',this)">🌿 Grass</div>
+      <div class="chip" onclick="setTypeFilter('Electric',this)">⚡ Electric</div>
+      <div class="chip" onclick="setTypeFilter('Psychic',this)">🔮 Psychic</div>
+      <div class="chip" onclick="setTypeFilter('Fighting',this)">🥊 Fighting</div>
+      <div class="chip" onclick="setTypeFilter('Colorless',this)">⚪ Colorless</div>
+    </div>
+    <div class="inv-grid" id="inv-grid"></div>
+    <div class="empty" id="inv-empty" style="display:none">
+      <div class="empty-icon">🃏</div>
+      <h3>Your vault is empty</h3>
+      <p>Tap + to add your first card</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ STORE SCREEN ═══════════ -->
+  <div id="screen-store" class="screen">
+    <div class="page-header">
+      <div class="page-title">Storefront</div>
+      <div style="font-size:13px;color:var(--green);font-weight:600" id="store-total">$0.00</div>
+    </div>
+    <div class="section-label">Active Listings</div>
+    <div class="listing-list" id="listing-list"></div>
+    <div class="empty" id="store-empty">
+      <div class="empty-icon">🏪</div>
+      <h3>No listings yet</h3>
+      <p>Open a card in your vault and tap "List for Sale"</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ DECKS SCREEN ═══════════ -->
+  <div id="screen-decks" class="screen">
+    <div class="page-header">
+      <div class="page-title">Deck Lab</div>
+      <button class="btn btn-outline btn-sm" onclick="generateDecks()">Suggest</button>
+    </div>
+    <div class="deck-list" id="deck-list">
+      <div class="empty" id="deck-empty">
+        <div class="empty-icon">⚗️</div>
+        <h3>No deck suggestions yet</h3>
+        <p>Add cards to your vault, then tap "Suggest" to build decks from your collection</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Bottom Nav -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" id="nav-inventory" onclick="showScreen('inventory')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="nav-label">Vault</span>
+  </button>
+  <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18M8 5l-1 4M16 5l1 4"/></svg>
+    <span class="nav-label">Store</span>
+  </button>
+  <button class="nav-btn" id="nav-decks" onclick="showScreen('decks')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="13" height="17" rx="2"/><rect x="7" y="2" width="13" height="17" rx="2" fill="none"/><path d="M8 10h6M8 14h4"/></svg>
+    <span class="nav-label">Decks</span>
+  </button>
+</nav>
+
+<!-- FAB: Add Card -->
+<button class="fab" id="fab-add" onclick="openAddSheet()">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- SHEET: Add Card Search -->
+<div class="sheet-overlay" id="add-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Card to Vault</div>
+    <div class="search-wrap" style="padding:0;margin-bottom:1rem">
+      <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="card-search-input" placeholder="Search Pokémon cards…" oninput="debounceSearch()" style="padding-left:2.4rem;padding-right:2.6rem">
+      <button class="mic-btn mic-btn-sheet" id="mic-card" onclick="startVoiceSearch('card-search-input', searchCards)" title="Voice search" aria-label="Voice search">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </button>
+    </div>
+    <div id="search-status" style="font-size:13px;color:var(--muted);margin-bottom:0.8rem;min-height:18px"></div>
+    <div class="result-list" id="search-results"></div>
+  </div>
+</div>
+
+<!-- SHEET: Card Detail / Add to Vault -->
+<div class="sheet-overlay" id="detail-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- SHEET: List for Sale -->
+<div class="sheet-overlay" id="list-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">List for Sale</div>
+    <div id="list-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const POKEMON_API = 'https://api.pokemontcg.io/v2';
+let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
+let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
+let searchTimeout = null;
+let activeCard = null;
+let typeFilter = 'All';
+
+// ═══ VOICE SEARCH ═══
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRecognition = null;
+let micPermissionGranted = false;
+
+async function ensureMicPermission() {
+  if (micPermissionGranted) return true;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+    micPermissionGranted = true;
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function startVoiceSearch(inputId, onResult) {
+  if (!SpeechRecognition) {
+    toast('Voice search not supported in this browser');
+    return;
+  }
+  const micId = inputId === 'inv-search' ? 'mic-inv' : 'mic-card';
+  const micBtn = document.getElementById(micId);
+
+  // Toggle off if already listening
+  if (activeRecognition) {
+    activeRecognition.stop();
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+  recognition.continuous = false;
+  activeRecognition = recognition;
+  if (micBtn) micBtn.classList.add('listening');
+
+  recognition.onresult = e => {
+    const result = e.results[e.results.length - 1];
+    const transcript = result[0].transcript;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.value = transcript;
+    if (result.isFinal) {
+      // Bypass debounce — fire immediately on confirmed voice result
+      clearTimeout(searchTimeout);
+      onResult();
+    }
+  };
+  recognition.onerror = e => {
+    if (e.error === 'not-allowed') {
+      micPermissionGranted = false;
+      toast('Microphone permission denied');
+    } else if (e.error === 'no-speech') {
+      // user didn't speak — ignore silently
+    } else if (e.error !== 'aborted') {
+      toast('Voice error: ' + e.error);
+    }
+  };
+  recognition.onend = () => {
+    activeRecognition = null;
+    if (micBtn) micBtn.classList.remove('listening');
+  };
+
+  ensureMicPermission().then(granted => {
+    if (!granted) {
+      activeRecognition = null;
+      if (micBtn) micBtn.classList.remove('listening');
+      toast('Microphone permission denied');
+      return;
+    }
+    try {
+      recognition.start();
+    } catch(e) {
+      activeRecognition = null;
+      if (micBtn) micBtn.classList.remove('listening');
+      toast('Could not start voice search');
+    }
+  });
+}
+
+// ═══ NAVIGATION ═══
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  const fab = document.getElementById('fab-add');
+  fab.style.display = name === 'inventory' ? 'flex' : 'none';
+  if (name === 'store') renderStore();
+  if (name === 'decks') renderDecks();
+}
+
+// ═══ TOAST ═══
+function toast(msg, dur=2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ═══ SAVE ═══
+function save() {
+  localStorage.setItem('tcg_inventory', JSON.stringify(inventory));
+  localStorage.setItem('tcg_listings', JSON.stringify(listings));
+}
+
+// ═══ SHEETS ═══
+function closeAllSheets() {
+  document.querySelectorAll('.sheet-overlay').forEach(s => s.classList.remove('open'));
+}
+document.querySelectorAll('.sheet-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeAllSheets(); });
+});
+function openAddSheet() {
+  closeAllSheets();
+  document.getElementById('add-sheet').classList.add('open');
+  document.getElementById('card-search-input').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-status').textContent = '';
+  setTimeout(() => document.getElementById('card-search-input').focus(), 300);
+}
+
+// ═══ POKEMON API SEARCH ═══
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(searchCards, 250);
+}
+
+const JUNK_SET = /trainer kit|POP Series|Black Star Promos|Nintendo Black Star|Wizards Black Star|Best of Game|McDonald's|League Promo/i;
+const JUNK_SERIES = /^(POP Series|Online)$/i;
+
+function isLegitCard(c) {
+  const setName = c.set?.name || '';
+  const series = c.set?.series || '';
+  return !JUNK_SET.test(setName) && !JUNK_SERIES.test(series);
+}
+
+async function fetchApiCards(nameQuery) {
+  const q = nameQuery.replace(/['"]/g, '').trim();
+  const encoded = encodeURIComponent('*' + q + '*');
+  const res = await fetch(`${POKEMON_API}/cards?q=name:${encoded}&pageSize=80&orderBy=-set.releaseDate&select=id,name,images,set,types,rarity,cardmarket`);
+  const data = await res.json();
+  return (data.data || []).filter(isLegitCard).slice(0, 25);
+}
+
+function buildResultItem(c) {
+  const price = c.cardmarket?.prices?.averageSellPrice;
+  const priceStr = price ? `$${price.toFixed(2)}` : '—';
+  const img = c.images?.small || '';
+  const types = (c.types || []).join(', ') || 'Unknown';
+  return `<div class="result-item" onclick="openCardDetail(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+    <img src="${img}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'">
+    <div class="result-info">
+      <div class="result-name">${c.name}</div>
+      <div class="result-set">${c.set?.name || ''} · ${types}</div>
+    </div>
+    <div class="result-price">${priceStr}</div>
+  </div>`;
+}
+
+function sectionLabel(text) {
+  return `<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:6px 0 5px">${text}</div>`;
+}
+
+async function searchCards() {
+  const q = document.getElementById('card-search-input').value.trim();
+  const status = document.getElementById('search-status');
+  const results = document.getElementById('search-results');
+  if (q.length < 2) { results.innerHTML = ''; status.textContent = ''; return; }
+
+  // ── Instant vault matches ──
+  const ql = q.toLowerCase();
+  const vaultMatches = inventory.filter(c =>
+    c.name.toLowerCase().includes(ql) || c.set.toLowerCase().includes(ql)
+  );
+  let html = '';
+  if (vaultMatches.length) {
+    html += sectionLabel('In Your Vault');
+    html += vaultMatches.slice(0, 4).map(c => {
+      const fl = finishLabel(c.finish);
+      const uid = c.uid || c.id + '__normal';
+      return `<div class="result-item" style="border-color:rgba(82,201,125,0.3);background:rgba(82,201,125,0.04)"
+        onclick="closeAllSheets();openVaultCard('${uid}')">
+        <img src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'">
+        <div class="result-info">
+          <div class="result-name">${c.name}</div>
+          <div class="result-set">${c.set} · ${fl.icon} ${fl.label}</div>
+        </div>
+        <div class="result-price" style="color:var(--green)">×${c.qty}</div>
+      </div>`;
+    }).join('');
+    if (vaultMatches.length > 4) html += `<div style="font-size:12px;color:var(--muted);padding:3px 0 4px">+${vaultMatches.length - 4} more in vault</div>`;
+  }
+  results.innerHTML = html;
+  status.innerHTML = '<span class="loading-dots">Searching</span>';
+
+  try {
+    // ── Substring wildcard search ──
+    let cards = await fetchApiCards(q);
+    let retryNote = '';
+
+    // ── Auto-retry: strip to first meaningful word if multi-word found nothing ──
+    if (!cards.length && /\s/.test(q)) {
+      const firstWord = q.split(/\s+/)[0];
+      cards = await fetchApiCards(firstWord);
+      if (cards.length) retryNote = ` for "${firstWord}"`;
+    }
+
+    if (!cards.length && !vaultMatches.length) {
+      status.textContent = 'No cards found';
+    } else if (cards.length) {
+      status.textContent = `${cards.length} card${cards.length !== 1 ? 's' : ''} found${retryNote}`;
+      if (vaultMatches.length) results.innerHTML += sectionLabel('Add New');
+      results.innerHTML += cards.map(buildResultItem).join('');
+    } else {
+      status.textContent = '';
+    }
+  } catch(e) {
+    status.textContent = 'Search failed — check connection';
+  }
+}
+
+// ═══ CARD DETAIL SHEET ═══
+const FINISHES = [
+  { id: 'normal',    label: 'Normal',                  icon: '⬜' },
+  { id: 'rholo',     label: 'Reverse Holo',             icon: '🔷' },
+  { id: 'holo',      label: 'Holo',                     icon: '✨' },
+  { id: 'fullart',   label: 'Full Art',                 icon: '🖼️' },
+  { id: 'altart',    label: 'Alt Art / Illus. Rare',    icon: '🎨' },
+  { id: 'sir',       label: 'Special Illus. Rare',      icon: '🌟' },
+  { id: 'hyper',     label: 'Hyper Rare / Gold',        icon: '💛' },
+  { id: 'promo',     label: 'Promo',                    icon: '🎖️' },
+  { id: 'firstprint',label: '1st Edition',              icon: '①'  },
+  { id: 'shadowless',label: 'Shadowless',               icon: '🔲' },
+];
+
+function finishLabel(id) {
+  return FINISHES.find(f => f.id === id) || { label: id || 'Normal', icon: '⬜' };
+}
+
+function openCardDetail(card) {
+  activeCard = card;
+  const existingAll = inventory.filter(i => i.id === card.id);
+  const price = card.cardmarket?.prices?.averageSellPrice;
+  const img = card.images?.large || card.images?.small || '';
+  const types = (card.types || []).join(', ') || 'Unknown';
+  const rarity = card.rarity || '—';
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="sheet-title">${card.name}</div>
+    <div class="card-detail">
+      <img src="${img}" alt="${card.name}" style="width:110px;border-radius:8px">
+      <div class="card-meta">
+        <div class="meta-row"><span>Set</span><span>${card.set?.name || '—'}</span></div>
+        <div class="meta-row"><span>Type</span><span>${types}</span></div>
+        <div class="meta-row"><span>Rarity</span><span>${rarity}</span></div>
+        <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
+      </div>
+    </div>
+    ${existingAll.length ? `
+      <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
+        ✓ In vault: ${existingAll.map(e => `${finishLabel(e.finish).icon} ${finishLabel(e.finish).label} ×${e.qty}`).join(' · ')}
+      </div>
+    ` : ''}
+    <div class="form-group">
+      <label class="form-label">Finish</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px" id="finish-grid">
+        ${FINISHES.map(f => `
+          <button onclick="selectFinish('${f.id}',this)" id="fin-${f.id}"
+            style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;transition:all 0.15s;-webkit-tap-highlight-color:transparent">
+            <span style="font-size:16px;line-height:1">${f.icon}</span>
+            <span style="font-size:13px;color:var(--text)">${f.label}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Condition</label>
+      <select class="form-input" id="det-condition">
+        <option>Near Mint</option><option>Lightly Played</option><option>Moderately Played</option><option>Heavily Played</option><option>Damaged</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantity to Add</label>
+      <div class="qty-control">
+        <button onclick="adjQty(-1)">−</button>
+        <span id="det-qty">1</span>
+        <button onclick="adjQty(1)">+</button>
+      </div>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary btn-block" onclick="addToVault()">Add to Vault</button>
+    </div>
+  `;
+  // Default to Normal finish
+  selectFinish('normal', document.getElementById('fin-normal'));
+  document.getElementById('detail-sheet').classList.add('open');
+}
+
+let activeFinish = 'normal';
+function selectFinish(id, el) {
+  activeFinish = id;
+  document.querySelectorAll('#finish-grid button').forEach(b => {
+    b.style.borderColor = 'var(--border2)';
+    b.style.background = 'var(--surface2)';
+    b.querySelector('span:last-child').style.color = 'var(--text)';
+  });
+  el.style.borderColor = 'var(--accent)';
+  el.style.background = 'rgba(232,200,74,0.1)';
+  el.querySelector('span:last-child').style.color = 'var(--accent)';
+}
+
+function adjQty(delta) {
+  const el = document.getElementById('det-qty');
+  const v = Math.max(1, parseInt(el.textContent) + delta);
+  el.textContent = v;
+}
+
+function addToVault() {
+  if (!activeCard) return;
+  const qty = parseInt(document.getElementById('det-qty').textContent);
+  const condition = document.getElementById('det-condition').value;
+  const finish = activeFinish || 'normal';
+  const uid = activeCard.id + '__' + finish;
+  const existing = inventory.find(i => i.uid === uid);
+  if (existing) {
+    existing.qty += qty;
+    existing.condition = condition;
+  } else {
+    inventory.push({
+      uid,
+      id: activeCard.id,
+      name: activeCard.name,
+      img: activeCard.images?.small || '',
+      imgLg: activeCard.images?.large || activeCard.images?.small || '',
+      set: activeCard.set?.name || '',
+      types: activeCard.types || [],
+      rarity: activeCard.rarity || '',
+      marketPrice: activeCard.cardmarket?.prices?.averageSellPrice || 0,
+      finish,
+      qty,
+      condition,
+      addedAt: Date.now()
+    });
+  }
+  save();
+  renderInventory();
+  closeAllSheets();
+  const fl = finishLabel(finish);
+  toast(`✓ ${fl.icon} ${activeCard.name} (${fl.label}) added`);
+}
+
+// ═══ INVENTORY RENDER ═══
+function setTypeFilter(type, el) {
+  typeFilter = type;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterInventory();
+}
+
+function filterInventory() {
+  const q = document.getElementById('inv-search').value.toLowerCase();
+  let cards = inventory;
+  if (typeFilter !== 'All') cards = cards.filter(c => c.types.includes(typeFilter));
+  if (q) cards = cards.filter(c => c.name.toLowerCase().includes(q) || c.set.toLowerCase().includes(q));
+  renderInventoryGrid(cards);
+}
+
+function renderInventory() {
+  const total = inventory.reduce((s, c) => s + c.qty, 0);
+  document.getElementById('inv-count').textContent = `${inventory.length} entries · ${total} cards`;
+  filterInventory();
+}
+
+function renderInventoryGrid(cards) {
+  const grid = document.getElementById('inv-grid');
+  const empty = document.getElementById('inv-empty');
+  if (!cards.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  const isListed = uid => listings.some(l => l.uid === uid);
+  grid.innerHTML = cards.map(c => {
+    const fl = finishLabel(c.finish);
+    const uid = c.uid || (c.id + '__normal');
+    return `
+    <div class="inv-card" onclick="openVaultCard('${uid}')">
+      <div style="position:relative">
+        <img src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2212%22>No img</text></svg>'">
+        ${c.finish && c.finish !== 'normal' ? `<div style="position:absolute;top:4px;right:4px;font-size:13px;line-height:1;background:rgba(0,0,0,0.65);border-radius:4px;padding:2px 3px">${fl.icon}</div>` : ''}
+      </div>
+      <div class="inv-card-info">
+        <div class="inv-card-name">${c.name}</div>
+        ${c.finish && c.finish !== 'normal' ? `<div style="font-size:10px;color:var(--accent);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fl.label}</div>` : ''}
+        <div class="inv-card-qty">
+          <span class="qty-badge">×${c.qty}</span>
+          ${isListed(uid) ? '<span class="listed-badge">$</span>' : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openVaultCard(uid) {
+  const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
+  if (!card) return;
+  const cardUid = card.uid || card.id + '__normal';
+  const listing = listings.find(l => l.uid === cardUid);
+  const fl = finishLabel(card.finish);
+  document.getElementById('detail-content').innerHTML = `
+    <div class="sheet-title">${card.name}</div>
+    <div class="card-detail">
+      <img src="${card.imgLg || card.img}" alt="${card.name}" style="width:110px;border-radius:8px">
+      <div class="card-meta">
+        <div class="meta-row"><span>Set</span><span>${card.set}</span></div>
+        <div class="meta-row"><span>Rarity</span><span>${card.rarity || '—'}</span></div>
+        <div class="meta-row"><span>Finish</span><span>${fl.icon} ${fl.label}</span></div>
+        <div class="meta-row"><span>Condition</span><span>${card.condition}</span></div>
+        <div class="meta-row"><span>Quantity</span><span>${card.qty}</span></div>
+        <div class="meta-row"><span>Market Price</span><span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantity</label>
+      <div class="qty-control">
+        <button onclick="adjVaultQty('${cardUid}',-1)">−</button>
+        <span id="vault-qty">${card.qty}</span>
+        <button onclick="adjVaultQty('${cardUid}',1)">+</button>
+      </div>
+    </div>
+    <div class="flex gap-8" style="margin-bottom:10px">
+      ${listing
+        ? `<button class="btn btn-outline btn-block" style="color:var(--red);border-color:var(--red)" onclick="removeListing('${cardUid}')">Remove Listing ($${listing.price})</button>`
+        : `<button class="btn btn-primary btn-block" onclick="openListSheet('${cardUid}')">List for Sale</button>`
+      }
+    </div>
+    <button class="btn btn-danger btn-block btn-sm" onclick="removeFromVault('${cardUid}')">Remove from Vault</button>
+  `;
+  document.getElementById('detail-sheet').classList.add('open');
+}
+
+function adjVaultQty(uid, delta) {
+  const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
+  if (!card) return;
+  card.qty = Math.max(1, card.qty + delta);
+  document.getElementById('vault-qty').textContent = card.qty;
+  save();
+  renderInventory();
+}
+
+function removeFromVault(uid) {
+  inventory = inventory.filter(c => (c.uid || c.id+'__normal') !== uid);
+  listings = listings.filter(l => l.uid !== uid);
+  save();
+  renderInventory();
+  closeAllSheets();
+  toast('Card removed from vault');
+}
+
+// ═══ STORE / LISTINGS ═══
+function openListSheet(uid) {
+  const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
+  if (!card) return;
+  closeAllSheets();
+  const mp = card.marketPrice || 0;
+  const fl = finishLabel(card.finish);
+  const sug = mp ? [
+    {label:'Quick sell', val:(mp*0.85).toFixed(2), desc:'-15%'},
+    {label:'Market',     val: mp.toFixed(2),        desc:'avg'},
+    {label:'Premium',   val:(mp*1.15).toFixed(2), desc:'+15%'},
+  ] : [];
+  document.getElementById('list-content').innerHTML = `
+    <div class="card-detail" style="margin-bottom:1.2rem">
+      <img src="${card.img}" style="width:70px;border-radius:6px;flex-shrink:0">
+      <div>
+        <div style="font-weight:600;font-size:15px">${card.name}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px">${card.set} · ${card.condition}</div>
+        <div style="font-size:13px;margin-top:3px">${fl.icon} <span style="color:var(--accent)">${fl.label}</span></div>
+        ${mp ? `<div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Cardmarket avg</span>
+          <span style="font-size:16px;font-weight:700;color:var(--accent)">$${mp.toFixed(2)}</span>
+        </div>` : '<div style="font-size:12px;color:var(--muted);margin-top:6px">No market data</div>'}
+      </div>
+    </div>
+    ${mp ? `<div style="margin-bottom:1rem">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Price suggestions</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${sug.map(s => `<button onclick="setListPrice(${s.val},${mp})"
+          style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 4px;cursor:pointer;text-align:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${s.label}</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text)">$${s.val}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">${s.desc}</div>
+        </button>`).join('')}
+      </div>
+    </div>` : ''}
+    <div class="form-group">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <label class="form-label" style="margin:0">Your Price ($)</label>
+        <span id="price-hint" style="font-size:12px;transition:color 0.2s"></span>
+      </div>
+      <input type="number" class="form-input" id="list-price" step="0.01" min="0.01" placeholder="0.00"
+        value="${mp ? mp.toFixed(2) : ''}" oninput="updatePriceHint(${mp})">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantity to List</label>
+      <input type="number" class="form-input" id="list-qty" min="1" max="${card.qty}" value="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input type="text" class="form-input" id="list-notes" placeholder="e.g. PSA graded, mint corners…">
+    </div>
+    <button class="btn btn-primary btn-block" onclick="createListing('${uid}')">Create Listing</button>
+  `;
+  document.getElementById('list-sheet').classList.add('open');
+  if (mp) updatePriceHint(mp);
+}
+
+function setListPrice(price, mp) {
+  const el = document.getElementById('list-price');
+  if (el) { el.value = price; updatePriceHint(mp); }
+}
+
+function updatePriceHint(mp) {
+  const hint = document.getElementById('price-hint');
+  if (!hint || !mp) return;
+  const val = parseFloat(document.getElementById('list-price').value);
+  if (!val) { hint.textContent = ''; return; }
+  const diff = ((val - mp) / mp) * 100;
+  if (Math.abs(diff) < 1) {
+    hint.textContent = 'at market price';
+    hint.style.color = 'var(--accent)';
+  } else if (diff > 0) {
+    hint.textContent = `+${diff.toFixed(0)}% above market`;
+    hint.style.color = 'var(--blue)';
+  } else {
+    hint.textContent = `${Math.abs(diff).toFixed(0)}% below market`;
+    hint.style.color = 'var(--green)';
+  }
+}
+
+function createListing(uid) {
+  const price = parseFloat(document.getElementById('list-price').value);
+  const qty = parseInt(document.getElementById('list-qty').value);
+  const notes = document.getElementById('list-notes').value;
+  const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
+  if (!price || price <= 0 || !card) { toast('Enter a valid price'); return; }
+  if (qty < 1 || qty > card.qty) { toast('Invalid quantity'); return; }
+  listings = listings.filter(l => l.uid !== uid);
+  listings.push({ uid, price, qty, notes, listedAt: Date.now() });
+  save();
+  closeAllSheets();
+  renderInventory();
+  const fl = finishLabel(card.finish);
+  toast(`✓ Listed ${fl.icon} ${card.name} for $${price.toFixed(2)}`);
+}
+
+function removeListing(uid) {
+  listings = listings.filter(l => l.uid !== uid);
+  save();
+  closeAllSheets();
+  renderInventory();
+  toast('Listing removed');
+}
+
+function renderStore() {
+  const list = document.getElementById('listing-list');
+  const empty = document.getElementById('store-empty');
+  const total = document.getElementById('store-total');
+  if (!listings.length) {
+    list.innerHTML = '';
+    empty.style.display = '';
+    total.textContent = '$0.00';
+    return;
+  }
+  empty.style.display = 'none';
+  let sum = 0;
+  list.innerHTML = listings.map(l => {
+    const card = inventory.find(c => (c.uid || c.id+'__normal') === l.uid);
+    if (!card) return '';
+    sum += l.price * l.qty;
+    const fl = finishLabel(card.finish);
+    return `<div class="listing-item">
+      <img src="${card.img}" alt="${card.name}">
+      <div class="listing-info">
+        <div class="listing-name">${card.name}</div>
+        <div class="listing-detail">${fl.icon} ${fl.label} · ${card.condition}</div>
+        <div class="listing-detail" style="margin-top:2px">${card.set}${l.notes ? ' · ' + l.notes : ''}</div>
+        <div class="listing-detail" style="margin-top:2px">Qty: ${l.qty}</div>
+      </div>
+      <div class="listing-actions">
+        <div class="listing-price">$${l.price.toFixed(2)}</div>
+        <button class="btn btn-outline btn-sm" onclick="removeListing('${l.uid}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+  total.textContent = '$' + sum.toFixed(2);
+}
+
+// ═══ DECK BUILDER — Limitless TCG meta + AI theorycrafting ═══
+
+// ═══ DECK SCORING ═══
+const TIER_WEIGHT = { S: 1.0, A: 0.8, B: 0.6, Rogue: 0.4 };
+
+function matchCardInInventory(cardName, inv) {
+  const norm = s => s.toLowerCase()
+    .replace(/[''`]/g, '')       // remove apostrophes
+    .replace(/[-–—]/g, ' ')      // hyphens to space
+    .replace(/[^a-z0-9 ]/g, '')  // strip remaining punctuation
+    .replace(/\s+/g, ' ')
+    .trim();
+  const target = norm(cardName);
+  return inv.filter(c => norm(c.name) === target);
+}
+
+function scoreDeck(deck, inv) {
+  if (!deck.decklist) return { pct: 0, totalOwned: 0, totalNeeded: 1, cardDetails: [], matchedInvCards: [] };
+  const allCards = [...deck.decklist.pokemon, ...deck.decklist.trainer, ...deck.decklist.energy];
+  const totalNeeded = allCards.reduce((s, c) => s + c.qty, 0);
+  let totalOwned = 0;
+  const cardDetails = allCards.map(c => {
+    const matches = matchCardInInventory(c.name, inv);
+    const ownedQty = Math.min(matches.reduce((s, m) => s + m.qty, 0), c.qty);
+    totalOwned += ownedQty;
+    return { name: c.name, needed: c.qty, owned: ownedQty, invCards: matches };
+  });
+  const pct = totalNeeded > 0 ? totalOwned / totalNeeded : 0;
+  const seen = new Set();
+  const matchedInvCards = cardDetails.flatMap(c => c.invCards).filter(c => {
+    if (seen.has(c.uid)) return false;
+    seen.add(c.uid); return true;
+  }).slice(0, 6);
+  return { pct, totalOwned, totalNeeded, cardDetails, matchedInvCards };
+}
+
+function readinessBadge(pct) {
+  if (pct >= 0.8) return `<span class="readiness-badge readiness-ready">READY</span>`;
+  if (pct >= 0.6) return `<span class="readiness-badge readiness-near">NEAR COMPLETE</span>`;
+  if (pct >= 0.3) return `<span class="readiness-badge readiness-building">BUILDING</span>`;
+  return '';
+}
+
+function personalizedLine(deck, cardDetails) {
+  if (!deck.decklist) return '';
+  const pokemonNames = new Set(deck.decklist.pokemon.map(p => p.name));
+  const partials = cardDetails.filter(c => pokemonNames.has(c.name) && c.owned > 0 && c.owned < c.needed);
+  const pokemonMissing = cardDetails.filter(c => pokemonNames.has(c.name) && c.owned === 0);
+  const trainerMissing = cardDetails.filter(c => !pokemonNames.has(c.name) && c.owned === 0);
+
+  if (partials.length > 0) {
+    const c = partials[0];
+    return `You have ${c.owned}/${c.needed} ${c.name} — ${c.needed - c.owned} more and this slot is complete.`;
+  }
+  if (pokemonMissing.length === 0 && trainerMissing.length > 0) {
+    return `Pokémon line complete — only missing ${trainerMissing.length} trainer/energy slot${trainerMissing.length > 1 ? 's' : ''}.`;
+  }
+  if (pokemonMissing.length === 1) {
+    return `One Pokémon away from a full line: still need ${pokemonMissing[0].name}.`;
+  }
+  return '';
+}
+
+function renderDeckList(deck, inv) {
+  if (!deck.decklist) return '';
+  const renderSection = (title, cards) => {
+    const total = cards.reduce((s, c) => s + c.qty, 0);
+    const rows = cards.map(c => {
+      const matches = matchCardInInventory(c.name, inv);
+      const ownedQty = Math.min(matches.reduce((s, m) => s + m.qty, 0), c.qty);
+      const status = ownedQty >= c.qty ? 'owned' : ownedQty > 0 ? 'partial' : 'missing';
+      const indicator = status === 'owned' ? '✓' : status === 'partial' ? `${ownedQty}/${c.qty}` : '✗';
+      return `<div class="dl-row">
+        <span class="dl-qty">${c.qty}×</span>
+        <span class="dl-name ${status}">${c.name}</span>
+        <span class="dl-check ${status}">${indicator}</span>
+      </div>`;
+    }).join('');
+    return `<div class="dl-section">
+      <div class="dl-section-hdr"><span>${title}</span><span>${total}</span></div>
+      ${rows}
+    </div>`;
+  };
+  const id = 'dl-' + deck.id;
+  return `
+    <button class="dl-toggle" onclick="toggleDl('${id}')">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" id="${id}-arrow" style="transition:transform 0.2s"><path d="M9 5l7 7-7 7"/></svg>
+      Full Decklist
+    </button>
+    <div class="dl-body" id="${id}">
+      ${renderSection('Pokémon', deck.decklist.pokemon)}
+      ${renderSection('Trainer', deck.decklist.trainer)}
+      ${renderSection('Energy', deck.decklist.energy)}
+    </div>`;
+}
+
+function toggleDl(id) {
+  const body = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+// Live Limitless TCG meta (SVI-ASC format, April 2026)
+const META_DECKS = [
+  {
+    id: 'dragapult',
+    name: 'Dragapult ex',
+    tier: 'S', share: '20.2%',
+    archetype: 'Spread / Control',
+    energy: ['Psychic'],
+    keyCards: ['Dragapult ex', 'Dreepy', 'Drakloak', 'Dusknoir', 'Duskull', 'Dusclops', 'Pidgeot ex', 'Pidgey', 'Pidgeotto'],
+    strategy: 'Use Phantom Dive to spread 50 damage across the bench while Dusknoir relocates damage counters for knock-outs. The premier spread control deck in format.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/284',
+    decklist: {
+      pokemon: [
+        {name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},
+        {name:'Dusknoir',qty:2},{name:'Dusclops',qty:2},{name:'Duskull',qty:4},
+        {name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}
+      ],
+      trainer: [
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},
+        {name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},
+        {name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},
+        {name:'TM: Devolution',qty:2},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1}
+      ],
+      energy: [{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]
+    }
+  },
+  {
+    id: 'gardevoir',
+    name: 'Gardevoir ex',
+    tier: 'S', share: '12.3%',
+    archetype: 'Psychic Accel',
+    energy: ['Psychic'],
+    keyCards: ['Gardevoir ex', 'Ralts', 'Kirlia', 'Scream Tail', 'Munkidori'],
+    strategy: 'Psychic Embrace accelerates Psychic energy from the discard to power up big attackers. One of the most consistent energy acceleration engines ever printed.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/255',
+    decklist: {
+      pokemon: [
+        {name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},
+        {name:'Scream Tail',qty:2},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}
+      ],
+      trainer: [
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},
+        {name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},
+        {name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},
+        {name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:3}
+      ],
+      energy: [{name:'Psychic Energy',qty:11}]
+    }
+  },
+  {
+    id: 'grimmsnarl',
+    name: "Marnie's Grimmsnarl ex",
+    tier: 'S', share: '11.2%',
+    archetype: 'Dark Accel / Beatdown',
+    energy: ['Darkness'],
+    keyCards: ["Marnie's Grimmsnarl ex", "Marnie's Impidimp", "Marnie's Morgrem", 'Pecharunt ex'],
+    strategy: "Punk Up ability accelerates Darkness energy onto Grimmsnarl ex to power Shadow Bullet — 180 damage plus 30 snipe. Pecharunt ex adds poison disruption.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/329',
+    decklist: {
+      pokemon: [
+        {name:"Marnie's Grimmsnarl ex",qty:3},{name:"Marnie's Morgrem",qty:2},{name:"Marnie's Impidimp",qty:4},
+        {name:'Pecharunt ex',qty:2},{name:'Munkidori',qty:2}
+      ],
+      trainer: [
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Colress Experiment',qty:3},{name:'Pecharunt Promo',qty:1}
+      ],
+      energy: [{name:'Darkness Energy',qty:11},{name:'Reversal Energy',qty:2}]
+    }
+  },
+  {
+    id: 'gholdengo',
+    name: 'Gholdengo ex',
+    tier: 'A', share: '9.8%',
+    archetype: 'Item Lock / Control',
+    energy: ['Metal', 'Psychic'],
+    keyCards: ['Gholdengo ex', 'Roaring Moon ex', 'Fezandipiti ex'],
+    strategy: 'Make It Rain blocks opponents from playing Item cards while building a board. Fezandipiti ex adds disruption and Roaring Moon provides a heavy hitting pivot.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/267',
+    decklist: {
+      pokemon: [
+        {name:'Gholdengo ex',qty:3},{name:'Gimmighoul',qty:4},{name:'Fezandipiti ex',qty:2},
+        {name:'Roaring Moon ex',qty:2},{name:'Munkidori',qty:1}
+      ],
+      trainer: [
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Colress Experiment',qty:3},{name:'Calamitous Wasteland',qty:2}
+      ],
+      energy: [{name:'Metal Energy',qty:8},{name:'Psychic Energy',qty:4}]
+    }
+  },
+  {
+    id: 'zoroark',
+    name: "N's Zoroark ex",
+    tier: 'A', share: '9.4%',
+    archetype: 'Dark / Disruption',
+    energy: ['Darkness'],
+    keyCards: ["N's Zoroark ex", "N's Zorua", 'Pecharunt ex', 'Munkidori'],
+    strategy: "N's Zoroark copies the attacks of Darkness types on your bench. Combined with Pecharunt ex and Munkidori for disruption, this deck can adapt to any situation.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/320',
+    decklist: {
+      pokemon: [
+        {name:"N's Zoroark ex",qty:3},{name:"N's Zorua",qty:4},{name:'Pecharunt ex',qty:2},
+        {name:'Munkidori',qty:2},{name:"N's Snorlax",qty:1}
+      ],
+      trainer: [
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:"N's PC",qty:4}
+      ],
+      energy: [{name:'Darkness Energy',qty:10},{name:'Reversal Energy',qty:3}]
+    }
+  },
+  {
+    id: 'froslass',
+    name: 'Froslass Munkidori',
+    tier: 'A', share: '5.5%',
+    archetype: 'Poison / Status',
+    energy: ['Water', 'Psychic'],
+    keyCards: ['Froslass', 'Snorunt', 'Munkidori', 'Pecharunt ex'],
+    strategy: "Froslass's ability poisons and confuses on evolution. Stack with Munkidori's damage moving and Pecharunt ex for a relentless status loop your opponent struggles to escape.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/288',
+    decklist: {
+      pokemon: [
+        {name:'Froslass',qty:3},{name:'Snorunt',qty:4},{name:'Munkidori',qty:3},
+        {name:'Pecharunt ex',qty:2},{name:'Greninja ex',qty:1}
+      ],
+      trainer: [
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},
+        {name:'Prime Catcher',qty:1},{name:'Toxic Chain',qty:2}
+      ],
+      energy: [{name:'Water Energy',qty:7},{name:'Psychic Energy',qty:4}]
+    }
+  },
+  {
+    id: 'megaabsol',
+    name: 'Mega Absol Box',
+    tier: 'A', share: '5.3%',
+    archetype: 'Dark / Disruption Beatdown',
+    energy: ['Darkness'],
+    keyCards: ['Mega Absol ex', 'Absol', 'Mega Kangaskhan ex', 'Kangaskhan'],
+    strategy: 'Chaos Claws discards opponent hand cards while dealing damage. Pair with Mega Kangaskhan ex for a powerful two-attacker Dark box strategy.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/344',
+    decklist: {
+      pokemon: [
+        {name:'Mega Absol ex',qty:3},{name:'Absol',qty:2},{name:'Mega Kangaskhan ex',qty:2},
+        {name:'Kangaskhan',qty:2},{name:'Pecharunt ex',qty:1}
+      ],
+      trainer: [
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Mega Turbo',qty:3},{name:'Spirit Token',qty:2}
+      ],
+      energy: [{name:'Darkness Energy',qty:11},{name:'Basic Darkness Energy',qty:4}]
+    }
+  },
+  {
+    id: 'charizard',
+    name: 'Charizard ex',
+    tier: 'A', share: '4.9%',
+    archetype: 'Fire Beatdown',
+    energy: ['Fire'],
+    keyCards: ['Charizard ex', 'Charmeleon', 'Charmander', 'Pidgeot ex', 'Noctowl'],
+    strategy: 'Infernal Reign fetches Fire energy from the deck to power Burning Darkness — scales with prizes taken. Pidgeot ex or Noctowl provides draw/search consistency.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/264',
+    decklist: {
+      pokemon: [
+        {name:'Charizard ex',qty:3},{name:'Charmeleon',qty:2},{name:'Charmander',qty:4},
+        {name:'Pidgeot ex',qty:2},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3},{name:'Rotom V',qty:1}
+      ],
+      trainer: [
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:1},
+        {name:'Prime Catcher',qty:1},{name:'Nest Ball',qty:2}
+      ],
+      energy: [{name:'Fire Energy',qty:11}]
+    }
+  },
+  {
+    id: 'ragingbolt',
+    name: 'Raging Bolt ex',
+    tier: 'B', share: '4.1%',
+    archetype: 'Lightning Aggro',
+    energy: ['Lightning', 'Fighting'],
+    keyCards: ['Raging Bolt ex', 'Teal Mask Ogerpon ex', 'Munkidori'],
+    strategy: 'Raging Bolt accelerates itself with Bellowing Thunder, attaching 3 energy from hand. Ogerpon ex and Munkidori provide support and pivot options.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/280',
+    decklist: {
+      pokemon: [
+        {name:'Raging Bolt ex',qty:3},{name:'Teal Mask Ogerpon ex',qty:2},{name:'Munkidori',qty:2},
+        {name:'Bloodmoon Ursaluna ex',qty:1},{name:'Radiant Charizard',qty:1}
+      ],
+      trainer: [
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Energy Switch',qty:3},{name:'Defiance Band',qty:2}
+      ],
+      energy: [{name:'Lightning Energy',qty:10},{name:'Fighting Energy',qty:4}]
+    }
+  },
+  {
+    id: 'crustle',
+    name: 'Crustle Mysterious Rock Inn',
+    tier: 'B', share: '4.7%',
+    archetype: 'Stall / Mill',
+    energy: ['Fighting'],
+    keyCards: ['Crustle', 'Dwebble', 'Mysterious Rock Inn'],
+    strategy: 'Shell Trap sets up massive damage counters on anything that attacks Crustle. Mysterious Rock Inn stadium locks down opponent energy recovery for a grinding win.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/341',
+    decklist: {
+      pokemon: [
+        {name:'Crustle',qty:4},{name:'Dwebble',qty:4},{name:'Manaphy',qty:2},
+        {name:'Snorlax',qty:2},{name:'Mew ex',qty:1}
+      ],
+      trainer: [
+        {name:'Mysterious Rock Inn',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},
+        {name:'Nest Ball',qty:4},{name:'Ultra Ball',qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},
+        {name:'Prime Catcher',qty:1},{name:'Defiance Band',qty:3}
+      ],
+      energy: [{name:'Fighting Energy',qty:8},{name:'Reversal Energy',qty:2}]
+    }
+  }
+];
+
+async function generateDecks() {
+  if (inventory.length < 1) {
+    toast('Add cards to your vault first');
+    return;
+  }
+
+  const deckList = document.getElementById('deck-list');
+  const empty = document.getElementById('deck-empty');
+  empty.style.display = 'none';
+
+  // Show loading state
+  deckList.innerHTML = `
+    <div style="padding:2rem 1rem;text-align:center;color:var(--muted)">
+      <div style="font-size:1.8rem;margin-bottom:0.8rem">⚗️</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Analyzing your vault...</div>
+      <div style="font-size:13px">Comparing against Limitless TCG meta & theorycrafting with AI</div>
+    </div>`;
+
+  // Score each meta deck using full decklist + quantity matching
+  const scored = META_DECKS.map(deck => {
+    const { pct, totalOwned, totalNeeded, cardDetails, matchedInvCards } = scoreDeck(deck, inventory);
+    const composite = (TIER_WEIGHT[deck.tier] || 0.4) * pct;
+    return { ...deck, pct, totalOwned, totalNeeded, cardDetails, matchedInvCards, composite };
+  }).sort((a, b) => b.composite - a.composite);
+
+  // Build AI prompt
+  const invSummary = inventory.map(c => `${c.name} (${(c.types||[]).join('/')}, qty:${c.qty})`).join(', ');
+  const topMeta = scored.slice(0,5).map(d => {
+    const ownedCards = d.cardDetails.filter(c => c.owned > 0).map(c => `${c.name} (${c.owned}/${c.needed})`).join(', ') || 'none';
+    return `${d.name} [${d.tier}-tier, ${d.share}, ${Math.round(d.pct*100)}% complete] — owned: ${ownedCards}`;
+  }).join('\n');
+
+  const prompt = `You are a competitive Pokémon TCG deck advisor. A player's vault contains: ${invSummary}.
+
+Current Limitless TCG Standard meta top decks (SVI-ASC, April 2026):
+${topMeta}
+
+Also consider rogue/theorycraft potential from their collection.
+
+Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck suggestions. Each object:
+{
+  "name": "deck name",
+  "tier": "S/A/B/Rogue",
+  "viability": "Ready to play / Needs a few key cards / Theorycraft",
+  "ownedKeyCards": ["card1","card2"],
+  "missingKeyCards": ["card1","card2"],
+  "strategy": "2-3 sentence competitive analysis mentioning the player's specific cards",
+  "energyTypes": ["Fire"],
+  "metaScore": 0-100
+}`;
+
+  let aiSuggestions = null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '[]';
+    aiSuggestions = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    aiSuggestions = null;
+  }
+
+  // Render meta decks first (top 3 by score), then AI suggestions
+  const tierColor = { S: 'var(--accent)', A: 'var(--green)', B: 'var(--blue)', Rogue: 'var(--muted)' };
+  const viabilityColor = { 'Ready to play': 'var(--green)', 'Needs a few key cards': 'var(--accent)', 'Theorycraft': 'var(--blue)' };
+
+  let html = '';
+
+  // Section: Limitless Meta Matches — ranked by composite score
+  html += `<div class="section-label" style="padding:0;margin:0 0 0.6rem">Best Matches For Your Vault</div>`;
+  html += scored.slice(0, 6).map((deck, rank) => {
+    const pctInt = Math.round(deck.pct * 100);
+    const barColor = pctInt >= 80 ? 'var(--green)' : pctInt >= 60 ? 'var(--accent)' : pctInt >= 30 ? 'var(--blue)' : 'var(--muted)';
+    const ownedImgs = deck.matchedInvCards.map(c =>
+      `<img src="${c.img}" alt="${c.name}" onerror="this.style.display='none'">`
+    ).join('');
+    const missingSlots = deck.cardDetails.filter(c => c.owned < c.needed);
+    const missingCount = missingSlots.length;
+    const badge = readinessBadge(deck.pct);
+    const insight = personalizedLine(deck, deck.cardDetails);
+
+    return `<div class="deck-card">
+      <div class="deck-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+            <div class="deck-name">${deck.name}</div>
+            ${rank === 0 ? `<span style="font-size:9px;font-weight:700;padding:2px 6px;background:rgba(232,200,74,0.2);color:var(--accent);border-radius:4px;letter-spacing:0.06em">BEST MATCH</span>` : ''}
+          </div>
+          <div class="deck-type">${deck.archetype} · ${deck.energy.join('/')}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:700;color:${tierColor[deck.tier] || 'var(--muted)'}">${deck.tier}-Tier</div>
+          <div style="font-size:11px;color:var(--muted)">${deck.share} meta</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        ${badge}
+        <span style="font-size:12px;color:var(--muted)">${deck.totalOwned}/${deck.totalNeeded} cards owned</span>
+      </div>
+      <div style="margin-bottom:0.7rem">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
+          <span>Vault coverage</span>
+          <span style="color:${barColor};font-weight:600">${pctInt}%</span>
+        </div>
+        <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pctInt}%;background:${barColor};border-radius:3px;transition:width 0.6s ease"></div>
+        </div>
+      </div>
+      ${ownedImgs ? `<div class="deck-owned-imgs">${ownedImgs}</div>` : ''}
+      ${insight ? `<div class="personalized-line">${insight}</div>` : ''}
+      <div class="deck-desc">${deck.strategy}</div>
+      ${renderDeckList(deck, inventory)}
+      <div class="deck-footer">
+        <div class="deck-missing-count">
+          ${missingCount === 0
+            ? `<span style="color:var(--green);font-weight:600">✓ All slots covered</span>`
+            : `<strong style="color:var(--red)">${missingCount}</strong> slot${missingCount > 1 ? 's' : ''} to acquire`}
+        </div>
+        <a href="${deck.limitlessUrl}" target="_blank" style="font-size:12px;color:var(--blue);text-decoration:none">Limitless ↗</a>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Section: AI Theorycraft
+  if (aiSuggestions && aiSuggestions.length) {
+    html += `<div class="section-label" style="padding:0;margin:1rem 0 0.6rem">AI Theorycraft Picks</div>`;
+    html += aiSuggestions.map(deck => {
+      const vc = viabilityColor[deck.viability] || 'var(--muted)';
+      const tc = tierColor[deck.tier] || 'var(--muted)';
+      const score = Math.min(100, Math.max(0, deck.metaScore || 50));
+      return `<div class="deck-card" style="border-color:rgba(232,200,74,0.2)">
+        <div class="deck-header">
+          <div>
+            <div class="deck-name">${deck.name}</div>
+            <div class="deck-type">${(deck.energyTypes||[]).join('/')} energy</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;font-weight:700;color:${tc}">${deck.tier}</div>
+            <div style="font-size:10px;padding:2px 7px;background:rgba(232,200,74,0.1);color:var(--accent);border-radius:4px;margin-top:2px">AI Pick</div>
+          </div>
+        </div>
+        <div style="margin-bottom:0.8rem">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
+            <span style="color:${vc};font-weight:500">${deck.viability}</span>
+            <span>Meta score: ${score}/100</span>
+          </div>
+          <div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${score}%;background:${vc};border-radius:2px"></div>
+          </div>
+        </div>
+        <div class="deck-desc">${deck.strategy}</div>
+        <div class="deck-stats" style="margin-top:0.8rem">
+          ${(deck.ownedKeyCards||[]).length ? `<div class="deck-stat">You own: <strong>${deck.ownedKeyCards.slice(0,3).join(', ')}</strong></div>` : ''}
+          ${(deck.missingKeyCards||[]).length ? `<div class="deck-stat">Missing: <strong>${deck.missingKeyCards.slice(0,3).join(', ')}</strong></div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    html += `<div class="section-label" style="padding:0;margin:1rem 0 0.6rem">AI Theorycraft</div>
+    <div class="deck-card" style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem">
+      AI analysis unavailable — Limitless meta results above are still accurate
+    </div>`;
+  }
+
+  deckList.innerHTML = html;
+  toast('✓ Deck analysis complete');
+}
+
+function renderDecks() {
+  if (document.getElementById('deck-list').querySelector('.deck-card')) return;
+  if (inventory.length >= 1) generateDecks();
+}
+
+// ═══ INIT ═══
+renderInventory();
+
+// ═══ SERVICE WORKER ═══
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "Parrot Trader Vault",
+  "short_name": "Parrot Vault",
+  "description": "Pokémon TCG collection tracker, deck builder and storefront manager",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0d0f",
+  "theme_color": "#e8c84a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["games", "utilities"],
+  "lang": "en"
+}
