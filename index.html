@@ -199,13 +199,11 @@
   .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0 1.1rem; margin-bottom: 0.6rem; margin-top: 0.5rem; }
 
   /* ── Voice search ── */
-  .mic-btn { position: absolute; right: 1.9rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: var(--muted); transition: color 0.15s; display: flex; align-items: center; justify-content: center; }
-  .mic-btn:hover { color: var(--text); }
-  .mic-btn.listening { color: var(--red); animation: pulse 0.9s ease-in-out infinite; }
-  .mic-btn.listening svg { filter: drop-shadow(0 0 4px var(--red)); }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .search-wrap input { padding-right: 2.6rem; }
-  .mic-btn-sheet { right: 0.8rem; }
+  .voice-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 50px; padding: 0.42rem 1.1rem; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.18s; -webkit-tap-highlight-color: transparent; }
+  .voice-btn:active { background: var(--surface3); }
+  .voice-btn.listening { background: rgba(224,82,82,0.1); border-color: var(--red); color: var(--red); animation: pulse 0.9s ease-in-out infinite; }
+  .voice-btn.listening svg { filter: drop-shadow(0 0 3px var(--red)); }
 
 /* ── Legality badges ── */
 .legal-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; }
@@ -320,8 +318,11 @@
     <div class="search-wrap">
       <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="inv-search" placeholder="Search your vault…" oninput="filterInventory()">
-      <button class="mic-btn" id="mic-inv" onclick="startVoiceSearch('inv-search', filterInventory)" title="Voice search" aria-label="Voice search">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+    </div>
+    <div style="padding: 0 1.1rem 0.7rem">
+      <button class="voice-btn" id="voice-btn-vault" onclick="startVoiceSearch('inv-search', filterInventory, 'voice-btn-vault')">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span>Tap to speak</span>
       </button>
     </div>
     <div class="chip-row" id="format-chips">
@@ -500,11 +501,14 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Add Card to Vault</div>
-    <div class="search-wrap" style="padding:0;margin-bottom:1rem">
+    <div class="search-wrap" style="padding:0;margin-bottom:0.5rem">
       <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="card-search-input" placeholder="Search Pokémon cards…" oninput="debounceSearch()" style="padding-left:2.4rem;padding-right:2.6rem">
-      <button class="mic-btn mic-btn-sheet" id="mic-card" onclick="startVoiceSearch('card-search-input', searchCards)" title="Voice search" aria-label="Voice search">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      <input type="text" id="card-search-input" placeholder="Search Pokémon cards…" oninput="debounceSearch()" style="padding-left:2.4rem">
+    </div>
+    <div style="margin-bottom:0.9rem">
+      <button class="voice-btn" id="voice-btn-add" onclick="startVoiceSearch('card-search-input', searchCards, 'voice-btn-add')">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span>Tap to speak</span>
       </button>
     </div>
     <div id="search-status" style="font-size:13px;color:var(--muted);margin-bottom:0.8rem;min-height:18px"></div>
@@ -589,13 +593,24 @@ async function ensureMicPermission() {
   }
 }
 
-function startVoiceSearch(inputId, onResult) {
+function setVoiceBtnState(btn, listening) {
+  if (!btn) return;
+  const label = btn.querySelector('span');
+  if (listening) {
+    btn.classList.add('listening');
+    if (label) label.textContent = 'Listening…';
+  } else {
+    btn.classList.remove('listening');
+    if (label) label.textContent = 'Tap to speak';
+  }
+}
+
+function startVoiceSearch(inputId, onResult, btnId) {
   if (!SpeechRecognition) {
     toast('Voice search not supported in this browser');
     return;
   }
-  const micId = inputId === 'inv-search' ? 'mic-inv' : 'mic-card';
-  const micBtn = document.getElementById(micId);
+  const micBtn = document.getElementById(btnId);
 
   // Toggle off if already listening
   if (activeRecognition) {
@@ -609,7 +624,7 @@ function startVoiceSearch(inputId, onResult) {
   recognition.maxAlternatives = 1;
   recognition.continuous = false;
   activeRecognition = recognition;
-  if (micBtn) micBtn.classList.add('listening');
+  setVoiceBtnState(micBtn, true);
 
   recognition.onresult = e => {
     const result = e.results[e.results.length - 1];
@@ -618,7 +633,6 @@ function startVoiceSearch(inputId, onResult) {
     if (!input) return;
     input.value = transcript;
     if (result.isFinal) {
-      // Bypass debounce — fire immediately on confirmed voice result
       clearTimeout(searchTimeout);
       onResult();
     }
@@ -635,13 +649,13 @@ function startVoiceSearch(inputId, onResult) {
   };
   recognition.onend = () => {
     activeRecognition = null;
-    if (micBtn) micBtn.classList.remove('listening');
+    setVoiceBtnState(micBtn, false);
   };
 
   ensureMicPermission().then(granted => {
     if (!granted) {
       activeRecognition = null;
-      if (micBtn) micBtn.classList.remove('listening');
+      setVoiceBtnState(micBtn, false);
       toast('Microphone permission denied');
       return;
     }
@@ -649,7 +663,7 @@ function startVoiceSearch(inputId, onResult) {
       recognition.start();
     } catch(e) {
       activeRecognition = null;
-      if (micBtn) micBtn.classList.remove('listening');
+      setVoiceBtnState(micBtn, false);
       toast('Could not start voice search');
     }
   });
@@ -2056,8 +2070,7 @@ async function loadAllVersions(cardName) {
   if (!el) return;
   el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:6px 4px">Loading all prints…</div>';
   try {
-    const q = encodeURIComponent(`name:"${cardName.replace(/"/g, '')}"`);
-    const res = await fetch(`${POKEMON_API}/cards?q=name:${q}&pageSize=250&orderBy=-set.releaseDate&select=id,name,images,set,rarity,cardmarket,legalities,supertype,tcgplayer`);
+    const res = await fetch(`${POKEMON_API}/cards?q=${encodeURIComponent(`name:"${cardName.replace(/"/g,'')}"`)}&pageSize=250&orderBy=-set.releaseDate&select=id,name,images,set,rarity,cardmarket,legalities,supertype,tcgplayer`);
     const data = await res.json();
     // Exact name match only (API wildcard can return partials)
     const cards = (data.data || []).filter(c => c.name.toLowerCase() === cardName.toLowerCase());
