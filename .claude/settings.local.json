@@ -6,7 +6,10 @@
       "WebSearch",
       "WebFetch(domain:blog.pricecharting.com)",
       "WebFetch(domain:dlthub.com)",
-      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\\) -replace 'tcgvault-v5', 'tcgvault-v6' | Set-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\")"
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\\) -replace 'tcgvault-v5', 'tcgvault-v6' | Set-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\")",
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\\) -replace 'tcgvault-v6', 'tcgvault-v7' | Set-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ]
   }
 }

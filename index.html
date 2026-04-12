@@ -570,6 +570,8 @@ let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
 let customDecks = JSON.parse(localStorage.getItem('tcg_custom_decks') || '[]');
 let priceCache = JSON.parse(localStorage.getItem('tcg_price_cache') || '{}');
+let cachedAiSuggestions = JSON.parse(localStorage.getItem('tcg_ai_suggestions') || 'null');
+let cachedAiTime = parseInt(localStorage.getItem('tcg_ai_time') || '0');
 let searchTimeout = null;
 let activeCard = null;
 let typeFilter = 'All';
@@ -1080,6 +1082,9 @@ function openVaultCard(uid) {
       </div>
     </div>
     <div class="flex gap-8" style="margin-bottom:10px">
+      <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="addVaultCardToWishlist('${cardUid}')">
+        ${(() => { const w = wishlist.find(x => x.id === card.id); return w ? `♡ ×${w.qty||1}` : '♡ Wish'; })()}
+      </button>
       ${listing
         ? `<button class="btn btn-outline btn-block" style="color:var(--red);border-color:var(--red)" onclick="removeListing('${cardUid}')">Remove Listing ($${listing.price})</button>`
         : `<button class="btn btn-primary btn-block" onclick="openListSheet('${cardUid}')">List for Sale</button>`
@@ -1251,7 +1256,12 @@ function renderStore() {
 function addToWishlist() {
   if (!activeCard) return;
   const exists = wishlist.find(w => w.id === activeCard.id);
-  if (exists) { toast('Already in wishlist'); return; }
+  if (exists) {
+    exists.qty = (exists.qty || 1) + 1;
+    save(); renderWishlist(); closeAllSheets();
+    toast(`♡ ${activeCard.name} — need ×${exists.qty}`);
+    return;
+  }
   wishlist.push({
     id: activeCard.id,
     name: activeCard.name,
@@ -1262,11 +1272,10 @@ function addToWishlist() {
     rarity: activeCard.rarity || '',
     marketPrice: activeCard.cardmarket?.prices?.averageSellPrice || 0,
     legalities: activeCard.legalities || {},
-    addedAt: Date.now()
+    addedAt: Date.now(),
+    qty: 1
   });
-  save();
-  renderWishlist();
-  closeAllSheets();
+  save(); renderWishlist(); closeAllSheets();
   toast(`♡ ${activeCard.name} added to wishlist`);
 }
 
@@ -1286,7 +1295,10 @@ function renderWishlist() {
   const filtered = q ? wishlist.filter(w => w.name.toLowerCase().includes(q) || w.set.toLowerCase().includes(q)) : wishlist;
   grid.innerHTML = filtered.map(w => `
     <div class="wish-card" onclick="openWishCard('${w.id}')">
-      <img src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/></svg>'">
+      <div style="position:relative">
+        <img src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/></svg>'" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;border-radius:8px">
+        ${(w.qty||1) > 1 ? `<div style="position:absolute;bottom:4px;right:4px;background:var(--accent);color:#0d0d0f;border-radius:4px;padding:0 5px;font-size:10px;font-weight:700">×${w.qty}</div>` : ''}
+      </div>
       <div class="wish-card-info">
         <div class="wish-card-name">${w.name}</div>
         <div class="wish-card-price">${w.marketPrice ? '$'+w.marketPrice.toFixed(2) : '—'}</div>
@@ -1302,10 +1314,18 @@ function openWishCard(id) {
     <div class="card-detail">
       <img src="${w.imgLg || w.img}" alt="${w.name}" style="width:110px;border-radius:8px">
       <div class="card-meta">
-        <div class="meta-row"><span>Set</span><span>${w.set}</span></div>
+        <div class="meta-row"><span>Set</span><span>${w.set || '—'}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${w.rarity || '—'}</span></div>
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${w.marketPrice ? '$'+w.marketPrice.toFixed(2) : '—'}</span></div>
         <div class="meta-row" style="border:none"><span>Format</span><span>${legalityBadges(w.legalities)}</span></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Copies Needed</label>
+      <div class="qty-control">
+        <button onclick="adjWishQty('${w.id}',-1)">−</button>
+        <span id="wish-qty">${w.qty || 1}</span>
+        <button onclick="adjWishQty('${w.id}',1)">+</button>
       </div>
     </div>
     <div class="flex gap-8" style="margin-bottom:10px">
@@ -1806,7 +1826,7 @@ const META_DECKS = [
   }
 ];
 
-async function generateDecks() {
+async function generateDecks(forceRefreshAI = false) {
   if (inventory.length < 1) {
     toast('Add cards to your vault first');
     return;
@@ -1816,29 +1836,35 @@ async function generateDecks() {
   const empty = document.getElementById('deck-empty');
   empty.style.display = 'none';
 
-  // Show loading state
-  deckList.innerHTML = `
-    <div style="padding:2rem 1rem;text-align:center;color:var(--muted)">
-      <div style="font-size:1.8rem;margin-bottom:0.8rem">⚗️</div>
-      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Analyzing your vault...</div>
-      <div style="font-size:13px">Comparing against Limitless TCG meta & theorycrafting with AI</div>
-    </div>`;
+  const AI_CACHE_TTL = 24 * 60 * 60 * 1000;
+  const aiIsStale = !cachedAiSuggestions || forceRefreshAI || (Date.now() - cachedAiTime > AI_CACHE_TTL);
 
-  // Score each meta deck using full decklist + quantity matching
+  // Show loading only when we need to call the AI
+  if (aiIsStale) {
+    deckList.innerHTML = `
+      <div style="padding:2rem 1rem;text-align:center;color:var(--muted)">
+        <div style="font-size:1.8rem;margin-bottom:0.8rem">⚗️</div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Analyzing your vault...</div>
+        <div style="font-size:13px">Comparing against Limitless TCG meta &amp; theorycrafting with AI</div>
+      </div>`;
+  }
+
+  // Score each meta deck — always runs, is fast and local
   const scored = META_DECKS.map(deck => {
     const { pct, totalOwned, totalNeeded, cardDetails, matchedInvCards } = scoreDeck(deck, inventory);
     const composite = (TIER_WEIGHT[deck.tier] || 0.4) * pct;
     return { ...deck, pct, totalOwned, totalNeeded, cardDetails, matchedInvCards, composite };
   }).sort((a, b) => b.composite - a.composite);
 
-  // Build AI prompt
-  const invSummary = inventory.map(c => `${c.name} (${(c.types||[]).join('/')}, qty:${c.qty})`).join(', ');
-  const topMeta = scored.slice(0,5).map(d => {
-    const ownedCards = d.cardDetails.filter(c => c.owned > 0).map(c => `${c.name} (${c.owned}/${c.needed})`).join(', ') || 'none';
-    return `${d.name} [${d.tier}-tier, ${d.share}, ${Math.round(d.pct*100)}% complete] — owned: ${ownedCards}`;
-  }).join('\n');
-
-  const prompt = `You are a competitive Pokémon TCG deck advisor. A player's vault contains: ${invSummary}.
+  // AI suggestions — use cache or fetch fresh
+  let aiSuggestions = aiIsStale ? null : cachedAiSuggestions;
+  if (aiIsStale) {
+    const invSummary = inventory.map(c => `${c.name} (${(c.types||[]).join('/')}, qty:${c.qty})`).join(', ');
+    const topMeta = scored.slice(0,5).map(d => {
+      const ownedCards = d.cardDetails.filter(c => c.owned > 0).map(c => `${c.name} (${c.owned}/${c.needed})`).join(', ') || 'none';
+      return `${d.name} [${d.tier}-tier, ${d.share}, ${Math.round(d.pct*100)}% complete] — owned: ${ownedCards}`;
+    }).join('\n');
+    const prompt = `You are a competitive Pokémon TCG deck advisor. A player's vault contains: ${invSummary}.
 
 Current Limitless TCG Standard meta top decks (SVI-ASC, April 2026):
 ${topMeta}
@@ -1856,23 +1882,22 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
   "energyTypes": ["Fire"],
   "metaScore": 0-100
 }`;
-
-  let aiSuggestions = null;
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.[0]?.text || '[]';
-    aiSuggestions = JSON.parse(raw.replace(/```json|```/g,'').trim());
-  } catch(e) {
-    aiSuggestions = null;
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      const raw = data.content?.[0]?.text || '[]';
+      aiSuggestions = JSON.parse(raw.replace(/```json|```/g,'').trim());
+      cachedAiSuggestions = aiSuggestions;
+      cachedAiTime = Date.now();
+      localStorage.setItem('tcg_ai_suggestions', JSON.stringify(aiSuggestions));
+      localStorage.setItem('tcg_ai_time', cachedAiTime.toString());
+    } catch(e) {
+      aiSuggestions = cachedAiSuggestions; // fall back to stale cache on error
+    }
   }
 
   // Render meta decks first (top 3 by score), then AI suggestions
@@ -1977,14 +2002,24 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
     </div>`;
   }
 
+  // Freshness note for cached AI
+  if (!aiIsStale && cachedAiTime) {
+    const ageMs = Date.now() - cachedAiTime;
+    const ageHrs = Math.floor(ageMs / 3600000);
+    const ageMins = Math.floor(ageMs / 60000);
+    const ageStr = ageHrs > 0 ? `${ageHrs}h ago` : ageMins > 0 ? `${ageMins}m ago` : 'just now';
+    html = `<div style="font-size:12px;color:var(--muted);text-align:center;padding:4px 0 8px">
+      Scores live · AI picks from ${ageStr} · <button onclick="generateDecks(true)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;font-weight:500">Refresh AI ↻</button>
+    </div>` + html;
+  }
+
   deckList.innerHTML = html;
-  toast('✓ Deck analysis complete');
+  toast(aiIsStale ? '✓ Deck analysis complete' : '✓ Vault scores updated');
 }
 
 function renderDecks() {
   if (activeDeckTab === 'mydecks') { renderMyDecks(); return; }
-  if (document.getElementById('deck-list').querySelector('.deck-card')) return;
-  if (inventory.length >= 1) generateDecks();
+  if (inventory.length >= 1) generateDecks(); // always re-scores locally; uses cached AI
 }
 
 // ═══ STATS ═══
@@ -2078,6 +2113,78 @@ function handleImport(e) {
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ═══ WISHLIST EXTRAS ═══
+function adjWishQty(id, delta) {
+  const w = wishlist.find(x => x.id === id);
+  if (!w) return;
+  w.qty = Math.max(1, (w.qty || 1) + delta);
+  const el = document.getElementById('wish-qty');
+  if (el) el.textContent = w.qty;
+  save();
+  renderWishlist();
+}
+
+function addVaultCardToWishlist(uid) {
+  const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
+  if (!card) return;
+  const exists = wishlist.find(w => w.id === card.id);
+  if (exists) {
+    exists.qty = (exists.qty || 1) + 1;
+    save(); renderWishlist();
+    toast(`♡ ${card.name} — need ×${exists.qty}`);
+  } else {
+    wishlist.push({
+      id: card.id, name: card.name, img: card.img,
+      imgLg: card.imgLg || card.img, set: card.set,
+      types: card.types || [], rarity: card.rarity || '',
+      marketPrice: card.marketPrice || 0,
+      legalities: card.legalities || {},
+      addedAt: Date.now(), qty: 1
+    });
+    save(); renderWishlist();
+    toast(`♡ ${card.name} added to wishlist`);
+  }
+  // Refresh button label in open sheet
+  const btn = document.querySelector(`button[onclick="addVaultCardToWishlist('${uid}')"]`);
+  if (btn) {
+    const w2 = wishlist.find(x => x.id === card.id);
+    btn.textContent = w2 ? `♡ ×${w2.qty||1}` : '♡ Wish';
+  }
+}
+
+// Returns count of cards added; silentMode=true skips confirm/toast
+function wishlistMissingCards(deckId, silentMode = false) {
+  const deck = customDecks.find(d => d.id === deckId);
+  if (!deck || !deck.decklist) return 0;
+  const { cardDetails } = scoreDeck(deck, inventory);
+  const missing = cardDetails.filter(c => c.owned < c.needed);
+  if (!missing.length) {
+    if (!silentMode) toast('No missing cards!');
+    return 0;
+  }
+  let added = 0;
+  missing.forEach(c => {
+    const needed = c.needed - c.owned;
+    const exists = wishlist.find(w => w.name.toLowerCase() === c.name.toLowerCase());
+    if (exists) {
+      exists.qty = Math.max(exists.qty || 1, needed);
+    } else {
+      const ref = inventory.find(x => x.name.toLowerCase() === c.name.toLowerCase());
+      wishlist.push({
+        id: 'wish_deck_' + Date.now() + '_' + added,
+        name: c.name, img: ref?.img || '', imgLg: ref?.imgLg || ref?.img || '',
+        set: ref?.set || '', types: ref?.types || [], rarity: ref?.rarity || '',
+        marketPrice: ref?.marketPrice || 0, legalities: ref?.legalities || {},
+        addedAt: Date.now(), qty: needed
+      });
+      added++;
+    }
+  });
+  save(); renderWishlist();
+  if (!silentMode) toast(`♡ ${missing.length} missing card${missing.length!==1?'s':''} added to wishlist`);
+  return missing.length;
 }
 
 // ═══ DELETE VAULT ═══
@@ -2277,11 +2384,12 @@ function renderMyDecks() {
     return;
   }
   list.innerHTML = customDecks.map(deck => {
-    const { pct, totalOwned, totalNeeded } = scoreDeck(deck, inventory);
+    const { pct, totalOwned, totalNeeded, cardDetails } = scoreDeck(deck, inventory);
     const pctInt = Math.round(pct * 100);
     const barColor = pctInt >= 80 ? 'var(--green)' : pctInt >= 60 ? 'var(--accent)' : pctInt >= 30 ? 'var(--blue)' : 'var(--muted)';
     const dl = deck.decklist || { pokemon:[], trainer:[], energy:[] };
     const totalCards = [...dl.pokemon, ...dl.trainer, ...dl.energy].reduce((s,c)=>s+c.qty, 0);
+    const missingCount = cardDetails.filter(c => c.owned < c.needed).length;
     return `<div class="deck-card">
       <div class="deck-header">
         <div>
@@ -2301,6 +2409,11 @@ function renderMyDecks() {
         <div style="height:100%;width:${pctInt}%;background:${barColor};border-radius:3px"></div>
       </div>
       ${renderDeckList(deck, inventory)}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        ${missingCount > 0
+          ? `<button class="btn btn-outline btn-block btn-sm" onclick="wishlistMissingCards('${deck.id}')">♡ Wishlist ${missingCount} missing card${missingCount!==1?'s':''}</button>`
+          : `<div style="font-size:12px;color:var(--green);font-weight:600;text-align:center">✓ You own every card in this deck</div>`}
+      </div>
     </div>`;
   }).join('');
 }
@@ -2471,7 +2584,16 @@ function saveDeck() {
   save();
   closeAllSheets();
   renderMyDecks();
-  toast(`✓ "${name}" saved`);
+  // Auto-wishlist missing cards
+  const savedDeck = editingDeckId
+    ? customDecks.find(d => d.id === editingDeckId)
+    : customDecks[customDecks.length - 1];
+  if (savedDeck) {
+    const added = wishlistMissingCards(savedDeck.id, true);
+    toast(added > 0 ? `✓ "${name}" saved · ♡ ${added} missing card${added!==1?'s':''} wishlisted` : `✓ "${name}" saved`);
+  } else {
+    toast(`✓ "${name}" saved`);
+  }
 }
 
 // ═══ INIT ═══
