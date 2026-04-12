@@ -443,9 +443,12 @@
     <div style="padding: 0 1.1rem 0.5rem; display: flex; gap: 10px;">
       <button class="btn btn-outline btn-block" id="refresh-prices-btn" onclick="refreshAllPrices()">↻ Refresh Prices</button>
     </div>
-    <div style="padding: 0 1.1rem 1.5rem; display: flex; gap: 10px;">
-      <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Vault</button>
-      <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Vault</button>
+    <div style="padding: 0 1.1rem 1.5rem; display: flex; gap: 10px; flex-direction: column;">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Vault</button>
+        <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Vault</button>
+      </div>
+      <button class="btn btn-danger btn-block" onclick="deleteVault()">🗑 Delete Entire Vault</button>
     </div>
   </div>
 
@@ -704,7 +707,7 @@ function debounceSearch() {
   searchTimeout = setTimeout(searchCards, 250);
 }
 
-const JUNK_SET = /trainer kit|POP Series|Black Star Promos|Nintendo Black Star|Wizards Black Star|Best of Game|McDonald's|League Promo/i;
+const JUNK_SET = /trainer kit|POP Series|Nintendo Black Star|Wizards Black Star|Best of Game|McDonald's|League Promo/i;
 const JUNK_SERIES = /^(POP Series|Online)$/i;
 
 function isLegitCard(c) {
@@ -870,6 +873,11 @@ function openCardDetail(card) {
         <button onclick="adjQty(1)">+</button>
       </div>
     </div>
+    <button class="dl-toggle" onclick="toggleAllVersions()" style="margin-bottom:12px">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" id="all-versions-arrow" style="transition:transform 0.2s"><path d="M9 5l7 7-7 7"/></svg>
+      All Versions of This Card
+    </button>
+    <div id="all-versions-body" style="display:none;margin-bottom:12px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px"></div>
     <div class="flex gap-8">
       <button class="btn btn-outline" onclick="addToWishlist()" style="flex-shrink:0">♡ Wish</button>
       <button class="btn btn-primary btn-block" onclick="addToVault()">Add to Vault</button>
@@ -2017,6 +2025,69 @@ function handleImport(e) {
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ═══ DELETE VAULT ═══
+function deleteVault() {
+  const n = inventory.length;
+  if (!n) { toast('Vault is already empty'); return; }
+  if (!confirm(`Delete all ${n} vault entr${n === 1 ? 'y' : 'ies'}?\n\nActive listings will also be removed. This cannot be undone.`)) return;
+  inventory = [];
+  listings = [];
+  save();
+  renderInventory();
+  renderStats();
+  toast('Vault cleared');
+}
+
+// ═══ ALL VERSIONS ═══
+function toggleAllVersions() {
+  const body = document.getElementById('all-versions-body');
+  const arrow = document.getElementById('all-versions-arrow');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(90deg)';
+  if (!isOpen && activeCard) loadAllVersions(activeCard.name);
+}
+
+async function loadAllVersions(cardName) {
+  const el = document.getElementById('all-versions-body');
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:6px 4px">Loading all prints…</div>';
+  try {
+    const q = encodeURIComponent(`name:"${cardName.replace(/"/g, '')}"`);
+    const res = await fetch(`${POKEMON_API}/cards?q=name:${q}&pageSize=250&orderBy=-set.releaseDate&select=id,name,images,set,rarity,cardmarket,legalities,supertype,tcgplayer`);
+    const data = await res.json();
+    // Exact name match only (API wildcard can return partials)
+    const cards = (data.data || []).filter(c => c.name.toLowerCase() === cardName.toLowerCase());
+    if (!cards.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:6px 4px">No other prints found</div>';
+      return;
+    }
+    cards.forEach(cacheCardPrices);
+    el.innerHTML = cards.map(c => {
+      const price = c.cardmarket?.prices?.averageSellPrice;
+      const inVault = inventory.some(i => i.id === c.id);
+      const isCurrent = c.id === activeCard?.id;
+      return `<div class="result-item" style="${isCurrent ? 'border-color:var(--accent);background:rgba(232,200,74,0.05)' : ''}"
+          onclick="openCardDetail(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+        <img src="${c.images?.small||''}" loading="lazy" onerror="this.style.display='none'" style="width:44px">
+        <div class="result-info">
+          <div class="result-name" style="font-size:13px">${c.set?.name || '—'}</div>
+          <div class="result-set">${c.rarity || '—'}</div>
+          <div style="margin-top:3px">${legalityBadges(c.legalities)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:600;color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</div>
+          ${inVault ? '<div style="font-size:10px;color:var(--green);margin-top:3px;font-weight:600">✓ owned</div>' : ''}
+          ${isCurrent ? '<div style="font-size:10px;color:var(--accent);margin-top:3px">viewing</div>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--red);padding:6px 4px">Failed to load</div>';
+  }
 }
 
 // ═══ SORT ═══
