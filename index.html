@@ -491,6 +491,11 @@
   </button>
 </nav>
 
+<!-- FAB: Voice Search -->
+<button class="fab" id="fab-voice" onclick="openAddSheetWithVoice()" style="bottom:calc(var(--nav-h) + 80px + env(safe-area-inset-bottom));background:var(--surface2);border:1px solid var(--border2);box-shadow:0 4px 16px rgba(0,0,0,0.3)">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--text);width:22px;height:22px"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+</button>
+
 <!-- FAB: Add Card -->
 <button class="fab" id="fab-add" onclick="openAddSheet()">
   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -676,7 +681,9 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
   const fab = document.getElementById('fab-add');
+  const fabVoice = document.getElementById('fab-voice');
   fab.style.display = name === 'inventory' ? 'flex' : 'none';
+  if (fabVoice) fabVoice.style.display = name === 'inventory' ? 'flex' : 'none';
   if (name === 'store') renderStore();
   if (name === 'decks') renderDecks();
   if (name === 'stats') renderStats();
@@ -713,6 +720,12 @@ function openAddSheet() {
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-status').textContent = '';
   setTimeout(() => document.getElementById('card-search-input').focus(), 300);
+}
+
+function openAddSheetWithVoice() {
+  openAddSheet();
+  // Small delay so the sheet finishes animating before mic permission fires
+  setTimeout(() => startVoiceSearch('card-search-input', searchCards, 'voice-btn-add'), 450);
 }
 
 // ═══ POKEMON API SEARCH ═══
