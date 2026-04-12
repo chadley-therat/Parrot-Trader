@@ -868,7 +868,7 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
-    ${renderPriceBlock(price, card.cardmarket?.prices?.trendPrice, card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0, card.id)}
+    ${renderPriceBlock(price, card.cardmarket?.prices?.trendPrice, card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0, card.id, card.name, card.set?.name)}
     ${renderCardText(card)}
     ${existingAll.length ? `
       <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
@@ -1069,7 +1069,7 @@ function openVaultCard(uid) {
         <div class="meta-row"><span>Market Price</span><span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span></div>
       </div>
     </div>
-    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice, card.id)}
+    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice, card.id, card.name, card.set)}
     ${renderCardText(card)}
     <div class="form-group">
       <label class="form-label">Quantity</label>
@@ -1476,7 +1476,22 @@ function renderCardText(card) {
   return html;
 }
 
-function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId) {
+function toPCSlug(str) {
+  return (str || '').toLowerCase()
+    .replace(/[''`]/g, '')
+    .replace(/&/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function priceChartingUrl(cardName, setName) {
+  if (cardName && setName) {
+    return `https://www.pricecharting.com/game/pokemon-${toPCSlug(setName)}/${toPCSlug(cardName)}`;
+  }
+  return `https://www.pricecharting.com/search-products?q=${encodeURIComponent((cardName||'') + (setName ? ' '+setName : ''))}&type=pokemon`;
+}
+
+function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId, cardName, setName) {
   const cached = cardId ? getCachedPrice(cardId) : null;
   const avg = (cached ? cached.market : marketPrice) || 0;
   const trend = (cached ? cached.trend : trendPrice) || 0;
@@ -1489,6 +1504,7 @@ function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId) {
     const ageMins = Math.floor(ageMs / 60000);
     freshNote = ageHrs > 0 ? `Prices cached ${ageHrs}h ago` : ageMins > 0 ? `Prices cached ${ageMins}m ago` : 'Prices just updated';
   }
+  const pcUrl = cardName ? priceChartingUrl(cardName, setName) : null;
   return `<div class="price-block">
     <div class="price-tile">
       <div class="price-tile-label">Cardmarket</div>
@@ -1501,7 +1517,17 @@ function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId) {
       <div class="price-tile-sub">Market price</div>
     </div>
   </div>
-  ${freshNote ? `<div class="price-cached-note">${freshNote}</div>` : ''}`;
+  ${freshNote ? `<div class="price-cached-note">${freshNote}</div>` : ''}
+  ${pcUrl ? `<a href="${pcUrl}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;text-decoration:none;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#e05252;flex-shrink:0"></div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)">PriceCharting</div>
+        <div style="font-size:11px;color:var(--muted)">Price history &amp; grades</div>
+      </div>
+    </div>
+    <span style="font-size:12px;color:var(--blue);font-weight:500">View Chart ↗</span>
+  </a>` : ''}`;
 }
 
 function renderDeckList(deck, inv) {

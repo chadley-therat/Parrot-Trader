@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wc -l /c/Users/chadl/Documents/GitHub/Parrot-Trader/*.html)"
+      "Bash(wc -l /c/Users/chadl/Documents/GitHub/Parrot-Trader/*.html)",
+      "WebFetch(domain:www.pricecharting.com)",
+      "WebSearch",
+      "WebFetch(domain:blog.pricecharting.com)",
+      "WebFetch(domain:dlthub.com)",
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\\) -replace 'tcgvault-v5', 'tcgvault-v6' | Set-Content 'C:\\\\Users\\\\chadl\\\\Documents\\\\GitHub\\\\Parrot-Trader\\\\sw.js'\")"
     ]
   }
 }
