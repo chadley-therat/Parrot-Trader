@@ -292,6 +292,27 @@
 /* ── Price cache note ── */
 .price-cached-note { font-size: 11px; color: var(--muted); text-align: right; margin-top: -6px; margin-bottom: 8px; }
 
+/* ── Bulk Calculator ── */
+.calc-row { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border); }
+.calc-row:last-child { border-bottom:none; }
+.calc-check { width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);background:var(--surface2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0d0d0f;transition:all 0.12s; }
+.calc-check.on { background:var(--accent);border-color:var(--accent); }
+.calc-img { width:38px;border-radius:4px;flex-shrink:0; }
+.calc-info { flex:1;min-width:0; }
+.calc-name { font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.calc-sub  { font-size:11px;color:var(--muted);margin-top:1px; }
+.calc-price { font-size:14px;font-weight:700;color:var(--accent);white-space:nowrap; }
+.calc-qty-wrap { display:flex;align-items:center;gap:5px;flex-shrink:0; }
+.calc-qty-wrap button { width:24px;height:24px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.calc-qty-wrap span { font-size:13px;font-weight:600;min-width:18px;text-align:center; }
+.calc-summary { background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem;margin-top:1rem;margin-bottom:0.8rem; }
+.calc-summary-row { display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0; }
+.calc-summary-row.total { font-size:1.1rem;font-weight:700;padding-top:10px;margin-top:4px;border-top:1px solid var(--border2); }
+.calc-summary-row.total span:last-child { color:var(--accent); }
+.calc-source-tabs { display:flex;gap:6px;margin-bottom:0.8rem; }
+.calc-source-tab { flex:1;padding:0.45rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;text-align:center; }
+.calc-source-tab.active { background:var(--accent);border-color:var(--accent);color:#0d0d0f;font-weight:600; }
+
 /* ── Card Zoom Overlay ── */
 #card-zoom-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:zoom-out;padding:1.2rem; }
 #card-zoom-overlay.open { display:flex; }
@@ -347,6 +368,12 @@
       <div class="chip active" onclick="setFormatFilter('All',this)">All Formats</div>
       <div class="chip" onclick="setFormatFilter('Standard',this)">Standard</div>
       <div class="chip" onclick="setFormatFilter('Expanded',this)">Expanded</div>
+    </div>
+    <div class="chip-row" id="supertype-chips">
+      <div class="chip active" onclick="setSupertypeFilter('All',this)">All Cards</div>
+      <div class="chip" onclick="setSupertypeFilter('Pokémon',this)">🐾 Pokémon</div>
+      <div class="chip" onclick="setSupertypeFilter('Trainer',this)">🎴 Trainer</div>
+      <div class="chip" onclick="setSupertypeFilter('Energy',this)">⚡ Energy</div>
     </div>
     <div class="chip-row" id="type-chips">
       <div class="chip active" onclick="setTypeFilter('All',this)">All Types</div>
@@ -416,8 +443,11 @@
   <!-- ═══════════ WISHLIST SCREEN ═══════════ -->
   <div id="screen-wishlist" class="screen">
     <div class="page-header">
-      <div class="page-title">Wishlist</div>
-      <div style="font-size:13px;color:var(--muted)" id="wishlist-count"></div>
+      <div>
+        <div class="page-title">Wishlist</div>
+        <div style="font-size:12px;color:var(--muted)" id="wishlist-count"></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="openBulkCalc()">🧮 Calculator</button>
     </div>
     <div class="search-wrap">
       <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -583,6 +613,15 @@
   </div>
 </div>
 
+<!-- SHEET: Bulk Purchase Calculator -->
+<div class="sheet-overlay" id="calc-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Bulk Purchase Calculator</div>
+    <div id="calc-content"></div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -608,6 +647,7 @@ let activeCard = null;
 let typeFilter = 'All';
 let formatFilter = 'All';
 let sortMode = 'date-desc';
+let supertypeFilter = 'All';
 let selectMode = false;
 let selectedUids = new Set();
 let activeDeckTab = 'meta';
@@ -1007,6 +1047,7 @@ function addToVault() {
       number: activeCard.number || '',
       artist: activeCard.artist || '',
       flavorText: activeCard.flavorText || '',
+      supertype: activeCard.supertype || '',
       tcgPlayerPrice: activeCard.tcgplayer?.prices?.holofoil?.market || activeCard.tcgplayer?.prices?.normal?.market || activeCard.tcgplayer?.prices?.['1stEditionNormal']?.market || 0,
       trendPrice: activeCard.cardmarket?.prices?.trendPrice || 0
     });
@@ -1033,10 +1074,28 @@ function setFormatFilter(fmt, el) {
   filterInventory();
 }
 
+function setSupertypeFilter(stype, el) {
+  supertypeFilter = stype;
+  document.querySelectorAll('#supertype-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterInventory();
+}
+
+function getCardSupertype(c) {
+  if (c.supertype) return c.supertype;
+  if (c.attacks && c.attacks.length) return 'Pokémon';
+  if ((c.name || '').toLowerCase().includes('energy')) return 'Energy';
+  // Trainers have no attacks and name doesn't contain energy
+  return 'Trainer';
+}
+
 function filterInventory() {
   const q = document.getElementById('inv-search').value.toLowerCase();
   let cards = inventory;
-  if (typeFilter !== 'All') cards = cards.filter(c => c.types && c.types.includes(typeFilter));
+  if (supertypeFilter !== 'All') cards = cards.filter(c => getCardSupertype(c) === supertypeFilter);
+  if (supertypeFilter === 'Pokémon' || supertypeFilter === 'All') {
+    if (typeFilter !== 'All') cards = cards.filter(c => c.types && c.types.includes(typeFilter));
+  }
   if (formatFilter === 'Standard') cards = cards.filter(c => c.legalities?.standard === 'Legal');
   if (formatFilter === 'Expanded') cards = cards.filter(c => c.legalities?.expanded === 'Legal');
   if (q) cards = cards.filter(c => c.name.toLowerCase().includes(q) || c.set.toLowerCase().includes(q));
@@ -1396,6 +1455,178 @@ function removeFromWishlist(id) {
   renderWishlist();
   closeAllSheets();
   toast('Removed from wishlist');
+}
+
+// ═══ BULK PURCHASE CALCULATOR ═══
+let calcItems = [];      // { id, name, img, set, price, qty, checked }
+let calcPriceSource = 'cardmarket'; // 'cardmarket' | 'tcgplayer'
+
+function openBulkCalc(prefill) {
+  // prefill = optional array of { name, qty, price, img, set, id }
+  if (prefill) {
+    calcItems = prefill.map(x => ({ ...x, checked: true }));
+  } else {
+    // Build from wishlist
+    calcItems = wishlist.map(w => ({
+      id: w.id,
+      name: w.name,
+      img: w.img,
+      set: w.set,
+      priceCM: w.marketPrice || 0,
+      priceTCG: getCachedPrice(w.id)?.tcg || 0,
+      qty: w.qty || 1,
+      checked: true
+    }));
+  }
+  renderCalcSheet();
+  document.getElementById('calc-sheet').classList.add('open');
+}
+
+function renderCalcSheet() {
+  const el = document.getElementById('calc-content');
+  if (!calcItems.length) {
+    el.innerHTML = `<div class="empty" style="padding:2rem 0"><div class="empty-icon">🧮</div><h3>Nothing to calculate</h3><p>Add cards to your wishlist first</p></div>`;
+    return;
+  }
+
+  const priceKey = calcPriceSource === 'tcgplayer' ? 'priceTCG' : 'priceCM';
+  let subtotal = 0;
+  let totalCards = 0;
+  let checkedCount = 0;
+  calcItems.forEach(item => {
+    if (item.checked) {
+      const p = item[priceKey] || 0;
+      subtotal += p * item.qty;
+      totalCards += item.qty;
+      checkedCount++;
+    }
+  });
+
+  // Source tabs
+  let html = `<div class="calc-source-tabs">
+    <button class="calc-source-tab${calcPriceSource==='cardmarket'?' active':''}" onclick="setCalcSource('cardmarket')">Cardmarket</button>
+    <button class="calc-source-tab${calcPriceSource==='tcgplayer'?' active':''}" onclick="setCalcSource('tcgplayer')">TCGPlayer</button>
+  </div>`;
+
+  // Header: select all / deselect all
+  const allChecked = calcItems.every(i => i.checked);
+  html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px;margin-bottom:2px;border-bottom:1px solid var(--border2)">
+    <span style="font-size:12px;color:var(--muted)">${checkedCount} of ${calcItems.length} items selected</span>
+    <button onclick="calcToggleAll()" style="background:none;border:none;font-size:12px;color:var(--accent);cursor:pointer;font-weight:500">${allChecked ? 'Deselect All' : 'Select All'}</button>
+  </div>`;
+
+  // Item rows
+  html += `<div style="max-height:44vh;overflow-y:auto;margin-bottom:0.2rem">`;
+  html += calcItems.map((item, idx) => {
+    const price = item[priceKey] || 0;
+    const lineTotal = price * item.qty;
+    const priceStr = price ? `$${price.toFixed(2)}` : '—';
+    const lineTotalStr = price ? `$${lineTotal.toFixed(2)}` : '—';
+    return `<div class="calc-row">
+      <div class="calc-check${item.checked?' on':''}" onclick="calcToggle(${idx})">${item.checked?'✓':''}</div>
+      <img class="calc-img" src="${item.img||''}" onerror="this.style.display='none'" loading="lazy">
+      <div class="calc-info">
+        <div class="calc-name">${item.name}</div>
+        <div class="calc-sub">${item.set||''} · ${priceStr} each</div>
+      </div>
+      <div class="calc-qty-wrap">
+        <button onclick="calcAdjQty(${idx},-1)">−</button>
+        <span>${item.qty}</span>
+        <button onclick="calcAdjQty(${idx},1)">+</button>
+      </div>
+      <div class="calc-price" style="${!item.checked?'opacity:0.35':''}">${lineTotalStr}</div>
+    </div>`;
+  }).join('');
+  html += `</div>`;
+
+  // Summary box
+  const missingPriceCount = calcItems.filter(i => i.checked && !(i[priceKey])).length;
+  html += `<div class="calc-summary">
+    <div class="calc-summary-row"><span>Selected cards</span><span>${checkedCount} item${checkedCount!==1?'s':''} (${totalCards} total copies)</span></div>
+    <div class="calc-summary-row"><span>Price source</span><span style="color:var(--muted)">${calcPriceSource==='tcgplayer'?'TCGPlayer Market':'Cardmarket Avg'}</span></div>
+    ${missingPriceCount ? `<div class="calc-summary-row"><span style="color:var(--muted)">${missingPriceCount} card${missingPriceCount!==1?'s':''} without price data</span><span style="color:var(--muted)">excluded</span></div>` : ''}
+    <div class="calc-summary-row total"><span>Estimated Total</span><span>$${subtotal.toFixed(2)}</span></div>
+  </div>`;
+
+  // Action buttons
+  html += `<div style="display:flex;gap:8px;margin-bottom:0.5rem">
+    <button class="btn btn-outline btn-block btn-sm" onclick="calcCopyList()">📋 Copy List</button>
+    <button class="btn btn-primary btn-block btn-sm" onclick="calcAddMissingFromDecks()">+ From Decks</button>
+  </div>
+  <button class="btn btn-outline btn-block btn-sm" onclick="closeAllSheets()">Close</button>`;
+
+  el.innerHTML = html;
+}
+
+function setCalcSource(source) {
+  calcPriceSource = source;
+  renderCalcSheet();
+}
+
+function calcToggle(idx) {
+  if (idx < 0 || idx >= calcItems.length) return;
+  calcItems[idx].checked = !calcItems[idx].checked;
+  renderCalcSheet();
+}
+
+function calcToggleAll() {
+  const allChecked = calcItems.every(i => i.checked);
+  calcItems.forEach(i => i.checked = !allChecked);
+  renderCalcSheet();
+}
+
+function calcAdjQty(idx, delta) {
+  if (idx < 0 || idx >= calcItems.length) return;
+  calcItems[idx].qty = Math.max(1, calcItems[idx].qty + delta);
+  renderCalcSheet();
+}
+
+function calcCopyList() {
+  const priceKey = calcPriceSource === 'tcgplayer' ? 'priceTCG' : 'priceCM';
+  const lines = calcItems
+    .filter(i => i.checked)
+    .map(i => {
+      const price = i[priceKey] || 0;
+      const line = `${i.qty}× ${i.name}${i.set ? ' ['+i.set+']' : ''}${price ? ' — $'+price.toFixed(2)+' ea / $'+(price*i.qty).toFixed(2) : ' — no price data'}`;
+      return line;
+    });
+  const total = calcItems.filter(i=>i.checked).reduce((s,i)=>s+(i[priceKey]||0)*i.qty,0);
+  const text = ['=== Parrot Vault — Buy List ===', '', ...lines, '', `Estimated Total: $${total.toFixed(2)}`, `Source: ${calcPriceSource==='tcgplayer'?'TCGPlayer':'Cardmarket'}`].join('\n');
+  navigator.clipboard.writeText(text).then(() => toast('📋 List copied to clipboard')).catch(() => toast('Could not copy to clipboard'));
+}
+
+function calcAddMissingFromDecks() {
+  // Merge missing cards from all custom decks into the calculator
+  let added = 0;
+  customDecks.forEach(deck => {
+    if (!deck.decklist) return;
+    const { cardDetails } = scoreDeck(deck, inventory);
+    cardDetails.filter(c => c.owned < c.needed).forEach(c => {
+      const need = c.needed - c.owned;
+      const existing = calcItems.find(i => i.name.toLowerCase() === c.name.toLowerCase());
+      if (existing) {
+        existing.qty = Math.max(existing.qty, need);
+      } else {
+        const ref = inventory.find(x => x.name.toLowerCase() === c.name.toLowerCase())
+                 || wishlist.find(x => x.name.toLowerCase() === c.name.toLowerCase());
+        const cached = ref?.id ? getCachedPrice(ref.id) : null;
+        calcItems.push({
+          id: ref?.id || 'deck_'+c.name,
+          name: c.name,
+          img: ref?.img || '',
+          set: ref?.set || '',
+          priceCM: ref?.marketPrice || cached?.market || 0,
+          priceTCG: ref?.tcgPlayerPrice || cached?.tcg || 0,
+          qty: need,
+          checked: true
+        });
+        added++;
+      }
+    });
+  });
+  renderCalcSheet();
+  if (added) toast(`+ ${added} missing deck card${added!==1?'s':''} added`);
+  else toast('No new missing cards to add');
 }
 
 // ═══ DECK BUILDER — Limitless TCG meta + AI theorycrafting ═══
