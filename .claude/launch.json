@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Python HTTP server (port 3000)",
+      "runtimeExecutable": "C:\\Users\\chadl\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "3000"],
+      "port": 3000
+    },
+    {
+      "name": "Python HTTP server (port 8000)",
+      "runtimeExecutable": "C:\\Users\\chadl\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "8000"],
+      "port": 8000
+    },
+    {
+      "name": "LM Studio Node serve (port 3000)",
+      "runtimeExecutable": "C:\\Users\\chadl\\.lmstudio\\.internal\\utils\\node.exe",
+      "runtimeArgs": ["-e", "const h=require('http'),fs=require('fs'),p=require('path');h.createServer((q,r)=>{let f=p.join('.',q.url==='/'?'/index.html':q.url),e=p.extname(f),m={'':' text/html','.html':'text/html','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.css':'text/css'}[e]||'text/plain';fs.readFile(f,(err,d)=>{if(err){r.writeHead(404);r.end('Not found')}else{r.writeHead(200,{'Content-Type':m});r.end(d)}})}).listen(3000,()=>console.log('Serving on http://localhost:3000'))"],
+      "port": 3000
+    }
+  ]
+}

@@ -92,7 +92,7 @@
   #app { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); min-height: 100vh; }
   .screen { display: none; padding: 0 0 1rem; }
   .screen.active { display: block; }
-  .screen-inner { width: 100%; max-width: 1200px; margin: 0 auto; }
+  .screen-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.1rem; }
   .page-header { padding: 1.2rem 1.1rem 0.6rem; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin-left: auto; margin-right: auto; }
   .page-title { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 0.06em; color: var(--accent); }
 
@@ -113,18 +113,21 @@
   .search-wrap input::placeholder { color: var(--muted); }
   .search-wrap input:focus { border-color: var(--accent); }
   .search-icon { position: absolute; left: 1.9rem; top: 50%; transform: translateY(-50%); opacity: 0.5; pointer-events: none; }
+  /* When search-wrap is inside a padded .screen-inner, remove its own side padding */
+  .screen-inner .search-wrap { padding-left: 0; padding-right: 0; }
+  .screen-inner .search-wrap .search-icon { left: 0.8rem; }
 
   /* ── Chip filters ── */
-  .chip-row { display: flex; gap: 8px; padding: 0 1.1rem 0.8rem; overflow-x: auto; scrollbar-width: none; }
+  .chip-row { display: flex; gap: 8px; padding: 0 1.1rem 0.8rem; margin: 0 -1.1rem; overflow-x: auto; scrollbar-width: none; }
   .chip-row::-webkit-scrollbar { display: none; }
   .chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: 0.35rem 0.9rem; font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--muted); transition: all 0.15s; }
   .chip.active { background: var(--accent); border-color: var(--accent); color: #0d0d0f; font-weight: 600; }
 
   /* ── Inventory grid ── */
-  .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1.1rem; }
+  .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   @media (min-width: 600px) { .inv-grid { grid-template-columns: repeat(5, 1fr); } }
   @media (min-width: 900px) { .inv-grid { grid-template-columns: repeat(7, 1fr); } }
-  .inv-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; padding: 4px 4px 0; }
+  .inv-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; padding: 4px 4px 0; min-width: 0; overflow: hidden; }
   .inv-card:active { transform: scale(0.97); border-color: var(--accent); }
   .inv-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; border-radius: 8px; }
   .inv-card-info { padding: 5px 4px 4px; }
@@ -410,7 +413,7 @@
         <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="inv-search" placeholder="Search your binder…" oninput="filterInventory()">
       </div>
-      <div style="padding: 0 1.1rem 0.7rem">
+      <div style="padding: 0 0 0.7rem">
         <button class="voice-btn" id="voice-btn-vault" onclick="startVoiceSearch('inv-search', filterInventory, 'voice-btn-vault')">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
           <span>Tap to speak</span>
