@@ -291,6 +291,24 @@
 
 /* ── Price cache note ── */
 .price-cached-note { font-size: 11px; color: var(--muted); text-align: right; margin-top: -6px; margin-bottom: 8px; }
+
+/* ── Card Zoom Overlay ── */
+#card-zoom-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:zoom-out;padding:1.2rem; }
+#card-zoom-overlay.open { display:flex; }
+#card-zoom-overlay img { max-width:min(88vw,400px);max-height:min(76vh,560px);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,0.8);animation:zoomIn 0.2s ease;object-fit:contain; }
+@keyframes zoomIn { from{transform:scale(0.78);opacity:0} to{transform:scale(1);opacity:1} }
+#card-zoom-name { font-size:15px;font-weight:600;color:var(--text);text-align:center;line-height:1.3; }
+#card-zoom-meta { font-size:12px;color:var(--muted);text-align:center; }
+#card-zoom-close { position:absolute;top:max(env(safe-area-inset-top),0.8rem);right:1rem;background:rgba(255,255,255,0.12);backdrop-filter:blur(4px);border:none;color:var(--text);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:501;flex-shrink:0; }
+.zoom-img-wrap { position:relative;cursor:zoom-in;display:inline-block;flex-shrink:0; }
+.zoom-img-wrap::after { content:'⤢';position:absolute;bottom:4px;right:4px;font-size:13px;background:rgba(0,0,0,0.65);border-radius:4px;padding:1px 5px;opacity:0.85;pointer-events:none;color:#fff; }
+
+/* ── Deck search bar ── */
+.deck-search-wrap { position:relative;padding:0.3rem 1.1rem 0.5rem; }
+.deck-search-wrap input { width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:50px;padding:0.6rem 1rem 0.6rem 2.5rem;color:var(--text);font-size:14px;outline:none; }
+.deck-search-wrap input::placeholder { color:var(--muted); }
+.deck-search-wrap input:focus { border-color:var(--accent); }
+.deck-search-icon { position:absolute;left:1.85rem;top:50%;transform:translateY(-50%);opacity:0.45;pointer-events:none; }
 </style>
 </head>
 <body>
@@ -377,6 +395,11 @@
       <button class="tab-btn" id="tab-mydecks" onclick="switchDeckTab('mydecks')">My Decks</button>
     </div>
     <div id="meta-deck-panel">
+      <div class="deck-search-wrap">
+        <svg class="deck-search-icon" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="deck-search-input" placeholder="Filter decks or search Limitless…" oninput="filterMetaDecks()">
+      </div>
+      <div id="limitless-search-link" style="display:none;padding:0 1.1rem 0.4rem"></div>
       <div class="deck-list" id="deck-list">
         <div class="empty" id="deck-empty">
           <div class="empty-icon">⚗️</div>
@@ -562,6 +585,14 @@
 
 <!-- Toast -->
 <div id="toast"></div>
+
+<!-- Card Zoom Overlay -->
+<div id="card-zoom-overlay" onclick="closeCardZoom()">
+  <button id="card-zoom-close" onclick="event.stopPropagation();closeCardZoom()">✕</button>
+  <img id="card-zoom-img" src="" alt="">
+  <div id="card-zoom-name"></div>
+  <div id="card-zoom-meta"></div>
+</div>
 
 <script>
 const POKEMON_API = 'https://api.pokemontcg.io/v2';
@@ -859,10 +890,14 @@ function openCardDetail(card) {
   const types = (card.types || []).join(', ') || 'Unknown';
   const rarity = card.rarity || '—';
 
+  const zoomName = card.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  const zoomSet  = (card.set?.name||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   document.getElementById('detail-content').innerHTML = `
     <div class="sheet-title">${card.name}</div>
     <div class="card-detail">
-      <img src="${img}" alt="${card.name}" style="width:110px;border-radius:8px">
+      <div class="zoom-img-wrap" onclick="openCardZoom('${img}','${zoomName}','${zoomSet}')">
+        <img src="${img}" alt="${card.name}" style="width:110px;border-radius:8px;display:block">
+      </div>
       <div class="card-meta">
         <div class="meta-row"><span>Set</span><span>${card.set?.name || '—'}</span></div>
         <div class="meta-row"><span>Type</span><span>${types}</span></div>
@@ -1032,7 +1067,12 @@ function renderInventoryGrid(cards) {
     return `
     <div class="inv-card${isSel ? ' selected' : ''}" onclick="handleCardClick('${uid}',event)">
       <div style="position:relative">
-        <img src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2212%22>No img</text></svg>'">
+        <img src="${c.img}" alt="${c.name}" loading="lazy"
+          data-lg="${(c.imgLg||c.img).replace(/"/g,'&quot;')}"
+          data-name="${c.name.replace(/"/g,'&quot;')}"
+          data-set="${c.set.replace(/"/g,'&quot;')}"
+          ontouchstart="startZoomPress(this,event)" ontouchend="clearZoomPress()" ontouchmove="clearZoomPress()"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2212%22>No img</text></svg>'">
         <div style="position:absolute;top:4px;left:4px;display:flex;flex-direction:column;gap:2px">
           ${c.legalities ? legalityBadges(c.legalities) : ''}
         </div>
@@ -1058,10 +1098,15 @@ function openVaultCard(uid) {
   const cardUid = card.uid || card.id + '__normal';
   const listing = listings.find(l => l.uid === cardUid);
   const fl = finishLabel(card.finish);
+  const vzName = card.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  const vzSet  = card.set.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  const vzImg  = card.imgLg || card.img;
   document.getElementById('detail-content').innerHTML = `
     <div class="sheet-title">${card.name}</div>
     <div class="card-detail">
-      <img src="${card.imgLg || card.img}" alt="${card.name}" style="width:110px;border-radius:8px">
+      <div class="zoom-img-wrap" onclick="openCardZoom('${vzImg}','${vzName}','${vzSet}')">
+        <img src="${vzImg}" alt="${card.name}" style="width:110px;border-radius:8px;display:block">
+      </div>
       <div class="card-meta">
         <div class="meta-row"><span>Set</span><span>${card.set}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${card.rarity || '—'}</span></div>
@@ -1919,7 +1964,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
     const badge = readinessBadge(deck.pct);
     const insight = personalizedLine(deck, deck.cardDetails);
 
-    return `<div class="deck-card">
+    return `<div class="deck-card" data-deck-name="${deck.name.toLowerCase()}" data-deck-arch="${deck.archetype.toLowerCase()}" data-deck-energy="${deck.energy.join('/').toLowerCase()}">
       <div class="deck-header">
         <div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
@@ -1968,7 +2013,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
       const vc = viabilityColor[deck.viability] || 'var(--muted)';
       const tc = tierColor[deck.tier] || 'var(--muted)';
       const score = Math.min(100, Math.max(0, deck.metaScore || 50));
-      return `<div class="deck-card" style="border-color:rgba(232,200,74,0.2)">
+      return `<div class="deck-card" style="border-color:rgba(232,200,74,0.2)" data-deck-name="${(deck.name||'').toLowerCase()}" data-deck-arch="" data-deck-energy="${(deck.energyTypes||[]).join('/').toLowerCase()}">
         <div class="deck-header">
           <div>
             <div class="deck-name">${deck.name}</div>
@@ -2020,6 +2065,70 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
 function renderDecks() {
   if (activeDeckTab === 'mydecks') { renderMyDecks(); return; }
   if (inventory.length >= 1) generateDecks(); // always re-scores locally; uses cached AI
+}
+
+// ═══ DECK SEARCH / LIMITLESS ═══
+function filterMetaDecks() {
+  const inp = document.getElementById('deck-search-input');
+  const q = inp ? inp.value.trim().toLowerCase() : '';
+  const linkEl = document.getElementById('limitless-search-link');
+
+  // Show/hide Limitless deep-link
+  if (q.length > 1 && linkEl) {
+    linkEl.style.display = '';
+    const display = q.length > 22 ? q.substring(0, 22) + '…' : q;
+    linkEl.innerHTML = `<a href="https://limitlesstcg.com/decks?q=${encodeURIComponent(q)}&format=standard" target="_blank" rel="noopener noreferrer"
+      style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;text-decoration:none">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px;line-height:1">⚡</span>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Search <span style="color:var(--accent)">"${display}"</span> on Limitless TCG</div>
+          <div style="font-size:11px;color:var(--muted)">limitlesstcg.com · full Standard &amp; Expanded deck database</div>
+        </div>
+      </div>
+      <span style="font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap;margin-left:8px">Open ↗</span>
+    </a>`;
+  } else if (linkEl) {
+    linkEl.style.display = 'none';
+  }
+
+  // Filter the rendered meta deck cards by data attributes
+  document.querySelectorAll('#deck-list [data-deck-name]').forEach(card => {
+    const name   = card.dataset.deckName   || '';
+    const arch   = card.dataset.deckArch   || '';
+    const energy = card.dataset.deckEnergy || '';
+    const match  = !q || name.includes(q) || arch.includes(q) || energy.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+}
+
+// ═══ CARD ZOOM ═══
+let zoomPressTimer = null;
+
+function startZoomPress(el, e) {
+  clearZoomPress();
+  zoomPressTimer = setTimeout(() => {
+    zoomPressTimer = null;
+    if (e) e.preventDefault();
+    openCardZoom(el.dataset.lg || el.src, el.dataset.name || el.alt, el.dataset.set || '');
+  }, 440);
+}
+
+function clearZoomPress() {
+  if (zoomPressTimer) { clearTimeout(zoomPressTimer); zoomPressTimer = null; }
+}
+
+function openCardZoom(src, name, meta) {
+  document.getElementById('card-zoom-img').src = src || '';
+  document.getElementById('card-zoom-name').textContent = name || '';
+  document.getElementById('card-zoom-meta').textContent = meta || '';
+  document.getElementById('card-zoom-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCardZoom() {
+  document.getElementById('card-zoom-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 // ═══ STATS ═══
