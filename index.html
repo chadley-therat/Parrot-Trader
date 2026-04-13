@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Parrot Trader Vault</title>
+<title>Parrot Binder</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e8c84a">
 <meta name="description" content="Pokémon TCG collection tracker, deck builder and storefront manager">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Parrot Vault">
+<meta name="apple-mobile-web-app-title" content="Parrot Binder">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +33,56 @@
     --radius-sm: 8px;
     --nav-h: 72px;
   }
+
+  /* ── Themes ── */
+  [data-theme="midnight"] {
+    --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --surface3:#222d42;
+    --border:rgba(99,179,237,0.1); --border2:rgba(99,179,237,0.18);
+    --text:#e8f0fe; --muted:#7a92b4;
+    --accent:#63b3ed; --accent2:#4a9fd4;
+  }
+  [data-theme="forest"] {
+    --bg:#0a120a; --surface:#111a11; --surface2:#182418; --surface3:#1f2e1f;
+    --border:rgba(104,211,145,0.1); --border2:rgba(104,211,145,0.18);
+    --text:#e8f5ea; --muted:#7aaa84;
+    --accent:#68d391; --accent2:#4fba78;
+  }
+  [data-theme="crimson"] {
+    --bg:#120a0a; --surface:#1a1111; --surface2:#241818; --surface3:#2e1f1f;
+    --border:rgba(237,100,100,0.1); --border2:rgba(237,100,100,0.18);
+    --text:#fee8e8; --muted:#b47a7a;
+    --accent:#ed6464; --accent2:#d44a4a;
+  }
+  [data-theme="royal"] {
+    --bg:#0e0a18; --surface:#16112a; --surface2:#1e1838; --surface3:#271f46;
+    --border:rgba(183,148,246,0.1); --border2:rgba(183,148,246,0.18);
+    --text:#ede8fe; --muted:#9a86c4;
+    --accent:#b794f6; --accent2:#9f7ae0;
+  }
+  [data-theme="dawn"] {
+    --bg:#f4f1ec; --surface:#ffffff; --surface2:#f0ece6; --surface3:#e5e0d8;
+    --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+    --text:#1a1612; --muted:#6b6460;
+    --accent:#c4800a; --accent2:#a36808;
+    --red:#c0392b; --green:#27ae60; --blue:#2980b9;
+  }
+  [data-theme="slate"] {
+    --bg:#111418; --surface:#1a1f26; --surface2:#222830; --surface3:#2a303a;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+    --text:#dde3ec; --muted:#7a8898;
+    --accent:#7eb8f7; --accent2:#5a9ee0;
+  }
+
+  /* ── Theme swatch grid ── */
+  .theme-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:1.2rem; }
+  .theme-swatch { border-radius:var(--radius); overflow:hidden; border:2px solid transparent; cursor:pointer; transition:border-color 0.15s,transform 0.1s; }
+  .theme-swatch:active { transform:scale(0.95); }
+  .theme-swatch.active { border-color:var(--accent); }
+  .theme-swatch-preview { height:52px; display:flex; flex-direction:column; }
+  .theme-swatch-bar { flex:1; }
+  .theme-swatch-accent { height:12px; }
+  .theme-swatch-label { font-size:11px; font-weight:600; text-align:center; padding:5px 4px; background:var(--surface); color:var(--text); }
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; overflow-x: hidden; }
   h1, h2, .brand { font-family: 'Bebas Neue', cursive; letter-spacing: 0.04em; }
@@ -341,7 +391,7 @@
   <div id="screen-inventory" class="screen active">
     <div class="page-header">
       <div>
-        <div class="page-title">My Vault</div>
+        <div class="page-title">My Binder</div>
         <div style="font-size:12px;color:var(--muted)" id="inv-count">0 cards</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -358,7 +408,7 @@
     <div class="screen-inner">
       <div class="search-wrap">
         <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="inv-search" placeholder="Search your vault…" oninput="filterInventory()">
+        <input type="text" id="inv-search" placeholder="Search your binder…" oninput="filterInventory()">
       </div>
       <div style="padding: 0 1.1rem 0.7rem">
         <button class="voice-btn" id="voice-btn-vault" onclick="startVoiceSearch('inv-search', filterInventory, 'voice-btn-vault')">
@@ -393,7 +443,7 @@
       <div class="inv-grid" id="inv-grid"></div>
       <div class="empty" id="inv-empty" style="display:none">
         <div class="empty-icon">🃏</div>
-        <h3>Your vault is empty</h3>
+        <h3>Your binder is empty</h3>
         <p>Tap + to add your first card</p>
       </div>
     </div>
@@ -410,7 +460,7 @@
     <div class="empty" id="store-empty">
       <div class="empty-icon">🏪</div>
       <h3>No listings yet</h3>
-      <p>Open a card in your vault and tap "List for Sale"</p>
+      <p>Open a card in your binder and tap "List for Sale"</p>
     </div>
   </div>
 
@@ -434,7 +484,7 @@
         <div class="empty" id="deck-empty">
           <div class="empty-icon">⚗️</div>
           <h3>No deck suggestions yet</h3>
-          <p>Add cards to your vault, then tap "Suggest" to build decks from your collection</p>
+          <p>Add cards to your binder, then tap "Suggest" to build decks from your collection</p>
         </div>
       </div>
     </div>
@@ -468,6 +518,7 @@
   <div id="screen-stats" class="screen">
     <div class="page-header">
       <div class="page-title">Stats</div>
+      <button class="btn btn-outline btn-sm" onclick="openThemeSheet()">🎨 Theme</button>
     </div>
     <div class="stats-grid">
       <div class="stat-tile">
@@ -476,7 +527,7 @@
       </div>
       <div class="stat-tile">
         <div class="stat-tile-val" id="stat-total-value">$0</div>
-        <div class="stat-tile-label">Vault Value</div>
+        <div class="stat-tile-label">Binder Value</div>
       </div>
       <div class="stat-tile">
         <div class="stat-tile-val" id="stat-total-entries">0</div>
@@ -502,10 +553,10 @@
     </div>
     <div style="padding: 0 1.1rem 1.5rem; display: flex; gap: 10px; flex-direction: column;">
       <div style="display:flex;gap:10px">
-        <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Vault</button>
-        <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Vault</button>
+        <button class="btn btn-outline btn-block" onclick="exportVault()">⬆ Export Binder</button>
+        <button class="btn btn-outline btn-block" onclick="importVault()">⬇ Import Binder</button>
       </div>
-      <button class="btn btn-danger btn-block" onclick="deleteVault()">🗑 Delete Entire Vault</button>
+      <button class="btn btn-danger btn-block" onclick="deleteVault()">🗑 Delete Entire Binder</button>
     </div>
   </div>
 
@@ -526,7 +577,7 @@
 <nav id="bottom-nav">
   <button class="nav-btn active" id="nav-inventory" onclick="showScreen('inventory')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span class="nav-label">Vault</span>
+    <span class="nav-label">Binder</span>
   </button>
   <button class="nav-btn" id="nav-decks" onclick="showScreen('decks')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="13" height="17" rx="2"/><rect x="7" y="2" width="13" height="17" rx="2" fill="none"/><path d="M8 10h6M8 14h4"/></svg>
@@ -561,7 +612,7 @@
 <div class="sheet-overlay" id="add-sheet">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Add Card to Vault</div>
+    <div class="sheet-title">Add Card to Binder</div>
     <div class="search-wrap" style="padding:0;margin-bottom:0.5rem">
       <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="card-search-input" placeholder="Search Pokémon cards…" oninput="debounceSearch()" style="padding-left:2.4rem">
@@ -577,7 +628,7 @@
   </div>
 </div>
 
-<!-- SHEET: Card Detail / Add to Vault -->
+<!-- SHEET: Card Detail / Add to Binder -->
 <div class="sheet-overlay" id="detail-sheet">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -613,6 +664,15 @@
       <button class="btn btn-outline" onclick="closeAllSheets()" style="flex-shrink:0">Cancel</button>
       <button class="btn btn-primary btn-block" onclick="saveDeck()">Save Deck</button>
     </div>
+  </div>
+</div>
+
+<!-- SHEET: Theme Picker -->
+<div class="sheet-overlay" id="theme-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Choose Theme</div>
+    <div id="theme-content"></div>
   </div>
 </div>
 
@@ -862,7 +922,7 @@ async function searchCards() {
   );
   let html = '';
   if (vaultMatches.length) {
-    html += sectionLabel('In Your Vault');
+    html += sectionLabel('In Your Binder');
     html += vaultMatches.slice(0, 4).map(c => {
       const fl = finishLabel(c.finish);
       const uid = c.uid || c.id + '__normal';
@@ -876,7 +936,7 @@ async function searchCards() {
         <div class="result-price" style="color:var(--green)">×${c.qty}</div>
       </div>`;
     }).join('');
-    if (vaultMatches.length > 4) html += `<div style="font-size:12px;color:var(--muted);padding:3px 0 4px">+${vaultMatches.length - 4} more in vault</div>`;
+    if (vaultMatches.length > 4) html += `<div style="font-size:12px;color:var(--muted);padding:3px 0 4px">+${vaultMatches.length - 4} more in binder</div>`;
   }
   results.innerHTML = html;
   status.innerHTML = '<span class="loading-dots">Searching</span>';
@@ -952,7 +1012,7 @@ function openCardDetail(card) {
     ${renderCardText(card)}
     ${existingAll.length ? `
       <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
-        ✓ In vault: ${existingAll.map(e => `${finishLabel(e.finish).icon} ${finishLabel(e.finish).label} ×${e.qty}`).join(' · ')}
+        ✓ In binder: ${existingAll.map(e => `${finishLabel(e.finish).icon} ${finishLabel(e.finish).label} ×${e.qty}`).join(' · ')}
       </div>
     ` : ''}
     <div class="form-group">
@@ -987,7 +1047,7 @@ function openCardDetail(card) {
     <div id="all-versions-body" style="display:none;margin-bottom:12px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px"></div>
     <div class="flex gap-8">
       <button class="btn btn-outline" onclick="addToWishlist()" style="flex-shrink:0">♡ Wish</button>
-      <button class="btn btn-primary btn-block" onclick="addToVault()">Add to Vault</button>
+      <button class="btn btn-primary btn-block" onclick="addToVault()">Add to Binder</button>
     </div>
   `;
   // Default to Normal finish
@@ -1197,7 +1257,7 @@ function openVaultCard(uid) {
         : `<button class="btn btn-primary btn-block" onclick="openListSheet('${cardUid}')">List for Sale</button>`
       }
     </div>
-    <button class="btn btn-danger btn-block btn-sm" onclick="removeFromVault('${cardUid}')">Remove from Vault</button>
+    <button class="btn btn-danger btn-block btn-sm" onclick="removeFromVault('${cardUid}')">Remove from Binder</button>
   `;
   document.getElementById('detail-sheet').classList.add('open');
 }
@@ -1217,7 +1277,7 @@ function removeFromVault(uid) {
   save();
   renderInventory();
   closeAllSheets();
-  toast('Card removed from vault');
+  toast('Card removed from binder');
 }
 
 // ═══ STORE / LISTINGS ═══
@@ -1436,7 +1496,7 @@ function openWishCard(id) {
       </div>
     </div>
     <div class="flex gap-8" style="margin-bottom:10px">
-      <button class="btn btn-primary btn-block" onclick="moveWishToVault('${w.id}')">Move to Vault</button>
+      <button class="btn btn-primary btn-block" onclick="moveWishToVault('${w.id}')">Move to Binder</button>
     </div>
     <button class="btn btn-danger btn-block btn-sm" onclick="removeFromWishlist('${w.id}')">Remove from Wishlist</button>
   `;
@@ -1594,7 +1654,7 @@ function calcCopyList() {
       return line;
     });
   const total = calcItems.filter(i=>i.checked).reduce((s,i)=>s+(i[priceKey]||0)*i.qty,0);
-  const text = ['=== Parrot Vault — Buy List ===', '', ...lines, '', `Estimated Total: $${total.toFixed(2)}`, `Source: ${calcPriceSource==='tcgplayer'?'TCGPlayer':'Cardmarket'}`].join('\n');
+  const text = ['=== Parrot Binder — Buy List ===', '', ...lines, '', `Estimated Total: $${total.toFixed(2)}`, `Source: ${calcPriceSource==='tcgplayer'?'TCGPlayer':'Cardmarket'}`].join('\n');
   navigator.clipboard.writeText(text).then(() => toast('📋 List copied to clipboard')).catch(() => toast('Could not copy to clipboard'));
 }
 
@@ -2107,7 +2167,7 @@ const META_DECKS = [
 
 async function generateDecks(forceRefreshAI = false) {
   if (inventory.length < 1) {
-    toast('Add cards to your vault first');
+    toast('Add cards to your binder first');
     return;
   }
 
@@ -2123,7 +2183,7 @@ async function generateDecks(forceRefreshAI = false) {
     deckList.innerHTML = `
       <div style="padding:2rem 1rem;text-align:center;color:var(--muted)">
         <div style="font-size:1.8rem;margin-bottom:0.8rem">⚗️</div>
-        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Analyzing your vault...</div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Analyzing your binder...</div>
         <div style="font-size:13px">Comparing against Limitless TCG meta &amp; theorycrafting with AI</div>
       </div>`;
   }
@@ -2143,7 +2203,7 @@ async function generateDecks(forceRefreshAI = false) {
       const ownedCards = d.cardDetails.filter(c => c.owned > 0).map(c => `${c.name} (${c.owned}/${c.needed})`).join(', ') || 'none';
       return `${d.name} [${d.tier}-tier, ${d.share}, ${Math.round(d.pct*100)}% complete] — owned: ${ownedCards}`;
     }).join('\n');
-    const prompt = `You are a competitive Pokémon TCG deck advisor. A player's vault contains: ${invSummary}.
+    const prompt = `You are a competitive Pokémon TCG deck advisor. A player's binder contains: ${invSummary}.
 
 Current Limitless TCG Standard meta top decks (SVI-ASC, April 2026):
 ${topMeta}
@@ -2186,7 +2246,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
   let html = '';
 
   // Section: Limitless Meta Matches — ranked by composite score
-  html += `<div class="section-label" style="padding:0;margin:0 0 0.6rem">Best Matches For Your Vault</div>`;
+  html += `<div class="section-label" style="padding:0;margin:0 0 0.6rem">Best Matches For Your Binder</div>`;
   html += scored.slice(0, 6).map((deck, rank) => {
     const pctInt = Math.round(deck.pct * 100);
     const barColor = pctInt >= 80 ? 'var(--green)' : pctInt >= 60 ? 'var(--accent)' : pctInt >= 30 ? 'var(--blue)' : 'var(--muted)';
@@ -2218,7 +2278,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
       </div>
       <div style="margin-bottom:0.7rem">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
-          <span>Vault coverage</span>
+          <span>Binder coverage</span>
           <span style="color:${barColor};font-weight:600">${pctInt}%</span>
         </div>
         <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden">
@@ -2293,7 +2353,7 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
   }
 
   deckList.innerHTML = html;
-  toast(aiIsStale ? '✓ Deck analysis complete' : '✓ Vault scores updated');
+  toast(aiIsStale ? '✓ Deck analysis complete' : '✓ Binder scores updated');
 }
 
 function renderDecks() {
@@ -2431,9 +2491,9 @@ function exportVault() {
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'parrot-vault-backup.json';
+  a.href = url; a.download = 'parrot-binder-backup.json';
   a.click(); URL.revokeObjectURL(url);
-  toast('✓ Vault exported');
+  toast('✓ Binder exported');
 }
 
 function importVault() {
@@ -2533,14 +2593,14 @@ function wishlistMissingCards(deckId, silentMode = false) {
 // ═══ DELETE VAULT ═══
 function deleteVault() {
   const n = inventory.length;
-  if (!n) { toast('Vault is already empty'); return; }
-  if (!confirm(`Delete all ${n} vault entr${n === 1 ? 'y' : 'ies'}?\n\nActive listings will also be removed. This cannot be undone.`)) return;
+  if (!n) { toast('Binder is already empty'); return; }
+  if (!confirm(`Delete all ${n} binder entr${n === 1 ? 'y' : 'ies'}?\n\nActive listings will also be removed. This cannot be undone.`)) return;
   inventory = [];
   listings = [];
   save();
   renderInventory();
   renderStats();
-  toast('Vault cleared');
+  toast('Binder cleared');
 }
 
 // ═══ ALL VERSIONS ═══
@@ -2635,7 +2695,7 @@ function updateBulkBar() {
 function bulkDelete() {
   const n = selectedUids.size;
   if (!n) return;
-  if (!confirm(`Remove ${n} card${n>1?'s':''} from vault?`)) return;
+  if (!confirm(`Remove ${n} card${n>1?'s':''} from binder?`)) return;
   inventory = inventory.filter(c => !selectedUids.has(c.uid || c.id+'__normal'));
   listings = listings.filter(l => !selectedUids.has(l.uid));
   selectedUids.clear();
@@ -2745,7 +2805,7 @@ function renderMyDecks() {
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
-        <span>Vault coverage</span>
+        <span>Binder coverage</span>
         <span style="color:${barColor};font-weight:600">${pctInt}% (${totalOwned}/${totalNeeded})</span>
       </div>
       <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:0.8rem">
@@ -2938,6 +2998,82 @@ function saveDeck() {
     toast(`✓ "${name}" saved`);
   }
 }
+
+// ═══ THEME ═══
+const THEMES = [
+  {
+    id: 'default', name: 'Midnight Gold',
+    bg: '#0d0d0f', surface: '#16161a', accent: '#e8c84a'
+  },
+  {
+    id: 'midnight', name: 'Ocean',
+    bg: '#0a0e1a', surface: '#111827', accent: '#63b3ed'
+  },
+  {
+    id: 'forest', name: 'Forest',
+    bg: '#0a120a', surface: '#111a11', accent: '#68d391'
+  },
+  {
+    id: 'crimson', name: 'Crimson',
+    bg: '#120a0a', surface: '#1a1111', accent: '#ed6464'
+  },
+  {
+    id: 'royal', name: 'Royal',
+    bg: '#0e0a18', surface: '#16112a', accent: '#b794f6'
+  },
+  {
+    id: 'slate', name: 'Slate',
+    bg: '#111418', surface: '#1a1f26', accent: '#7eb8f7'
+  },
+  {
+    id: 'dawn', name: 'Dawn',
+    bg: '#f4f1ec', surface: '#ffffff', accent: '#c4800a'
+  },
+];
+
+let activeTheme = localStorage.getItem('tcg_theme') || 'default';
+
+function applyTheme(id) {
+  activeTheme = id;
+  const el = document.documentElement;
+  if (id === 'default') {
+    el.removeAttribute('data-theme');
+  } else {
+    el.setAttribute('data-theme', id);
+  }
+  localStorage.setItem('tcg_theme', id);
+  // Update meta theme-color to match bg
+  const t = THEMES.find(t => t.id === id) || THEMES[0];
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', t.bg);
+}
+
+function openThemeSheet() {
+  const el = document.getElementById('theme-content');
+  el.innerHTML = `
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Choose a colour theme for Parrot Binder. Your pick is saved automatically.</p>
+    <div class="theme-grid">
+      ${THEMES.map(t => `
+        <div class="theme-swatch${activeTheme === t.id ? ' active' : ''}" onclick="applyTheme('${t.id}');renderThemeSwatches()">
+          <div class="theme-swatch-preview">
+            <div class="theme-swatch-bar" style="background:${t.bg}"></div>
+            <div class="theme-swatch-bar" style="background:${t.surface}"></div>
+          </div>
+          <div class="theme-swatch-accent" style="background:${t.accent}"></div>
+          <div class="theme-swatch-label" style="background:${t.surface};color:${t.id==='dawn'?'#1a1612':'#f0ede8'}">${t.name}</div>
+        </div>`).join('')}
+    </div>
+    <button class="btn btn-outline btn-block" onclick="closeAllSheets()">Done</button>`;
+  document.getElementById('theme-sheet').classList.add('open');
+}
+
+function renderThemeSwatches() {
+  document.querySelectorAll('.theme-swatch').forEach((el, i) => {
+    el.classList.toggle('active', THEMES[i]?.id === activeTheme);
+  });
+}
+
+// Apply saved theme on boot
+applyTheme(activeTheme);
 
 // ═══ INIT ═══
 renderInventory();
