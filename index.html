@@ -42,7 +42,8 @@
   #app { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); min-height: 100vh; }
   .screen { display: none; padding: 0 0 1rem; }
   .screen.active { display: block; }
-  .page-header { padding: 1.2rem 1.1rem 0.6rem; display: flex; align-items: center; justify-content: space-between; }
+  .screen-inner { width: 100%; max-width: 1200px; margin: 0 auto; }
+  .page-header { padding: 1.2rem 1.1rem 0.6rem; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin-left: auto; margin-right: auto; }
   .page-title { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 0.06em; color: var(--accent); }
 
   /* ── Bottom Nav ── */
@@ -72,7 +73,7 @@
   /* ── Inventory grid ── */
   .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1.1rem; }
   @media (min-width: 600px) { .inv-grid { grid-template-columns: repeat(5, 1fr); } }
-  @media (min-width: 900px) { .inv-grid { grid-template-columns: repeat(7, 1fr); max-width: 1200px; margin: 0 auto; } }
+  @media (min-width: 900px) { .inv-grid { grid-template-columns: repeat(7, 1fr); } }
   .inv-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; padding: 4px 4px 0; }
   .inv-card:active { transform: scale(0.97); border-color: var(--accent); }
   .inv-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; border-radius: 8px; }
@@ -354,45 +355,47 @@
         <button class="select-btn" id="select-btn" onclick="toggleSelectMode()">Select</button>
       </div>
     </div>
-    <div class="search-wrap">
-      <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="inv-search" placeholder="Search your vault…" oninput="filterInventory()">
-    </div>
-    <div style="padding: 0 1.1rem 0.7rem">
-      <button class="voice-btn" id="voice-btn-vault" onclick="startVoiceSearch('inv-search', filterInventory, 'voice-btn-vault')">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span>Tap to speak</span>
-      </button>
-    </div>
-    <div class="chip-row" id="format-chips">
-      <div class="chip active" onclick="setFormatFilter('All',this)">All Formats</div>
-      <div class="chip" onclick="setFormatFilter('Standard',this)">Standard</div>
-      <div class="chip" onclick="setFormatFilter('Expanded',this)">Expanded</div>
-    </div>
-    <div class="chip-row" id="supertype-chips">
-      <div class="chip active" onclick="setSupertypeFilter('All',this)">All Cards</div>
-      <div class="chip" onclick="setSupertypeFilter('Pokémon',this)">🐾 Pokémon</div>
-      <div class="chip" onclick="setSupertypeFilter('Trainer',this)">🎴 Trainer</div>
-      <div class="chip" onclick="setSupertypeFilter('Energy',this)">⚡ Energy</div>
-    </div>
-    <div class="chip-row" id="type-chips">
-      <div class="chip active" onclick="setTypeFilter('All',this)">All Types</div>
-      <div class="chip" onclick="setTypeFilter('Fire',this)">🔥 Fire</div>
-      <div class="chip" onclick="setTypeFilter('Water',this)">💧 Water</div>
-      <div class="chip" onclick="setTypeFilter('Grass',this)">🌿 Grass</div>
-      <div class="chip" onclick="setTypeFilter('Electric',this)">⚡ Electric</div>
-      <div class="chip" onclick="setTypeFilter('Psychic',this)">🔮 Psychic</div>
-      <div class="chip" onclick="setTypeFilter('Fighting',this)">🥊 Fighting</div>
-      <div class="chip" onclick="setTypeFilter('Colorless',this)">⚪ Colorless</div>
-      <div class="chip" onclick="setTypeFilter('Darkness',this)">🌑 Dark</div>
-      <div class="chip" onclick="setTypeFilter('Metal',this)">⚙️ Metal</div>
-      <div class="chip" onclick="setTypeFilter('Dragon',this)">🐉 Dragon</div>
-    </div>
-    <div class="inv-grid" id="inv-grid"></div>
-    <div class="empty" id="inv-empty" style="display:none">
-      <div class="empty-icon">🃏</div>
-      <h3>Your vault is empty</h3>
-      <p>Tap + to add your first card</p>
+    <div class="screen-inner">
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="inv-search" placeholder="Search your vault…" oninput="filterInventory()">
+      </div>
+      <div style="padding: 0 1.1rem 0.7rem">
+        <button class="voice-btn" id="voice-btn-vault" onclick="startVoiceSearch('inv-search', filterInventory, 'voice-btn-vault')">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+          <span>Tap to speak</span>
+        </button>
+      </div>
+      <div class="chip-row" id="format-chips">
+        <div class="chip active" onclick="setFormatFilter('All',this)">All Formats</div>
+        <div class="chip" onclick="setFormatFilter('Standard',this)">Standard</div>
+        <div class="chip" onclick="setFormatFilter('Expanded',this)">Expanded</div>
+      </div>
+      <div class="chip-row" id="supertype-chips">
+        <div class="chip active" onclick="setSupertypeFilter('All',this)">All Cards</div>
+        <div class="chip" onclick="setSupertypeFilter('Pokémon',this)">🐾 Pokémon</div>
+        <div class="chip" onclick="setSupertypeFilter('Trainer',this)">🎴 Trainer</div>
+        <div class="chip" onclick="setSupertypeFilter('Energy',this)">⚡ Energy</div>
+      </div>
+      <div class="chip-row" id="type-chips">
+        <div class="chip active" onclick="setTypeFilter('All',this)">All Types</div>
+        <div class="chip" onclick="setTypeFilter('Fire',this)">🔥 Fire</div>
+        <div class="chip" onclick="setTypeFilter('Water',this)">💧 Water</div>
+        <div class="chip" onclick="setTypeFilter('Grass',this)">🌿 Grass</div>
+        <div class="chip" onclick="setTypeFilter('Electric',this)">⚡ Electric</div>
+        <div class="chip" onclick="setTypeFilter('Psychic',this)">🔮 Psychic</div>
+        <div class="chip" onclick="setTypeFilter('Fighting',this)">🥊 Fighting</div>
+        <div class="chip" onclick="setTypeFilter('Colorless',this)">⚪ Colorless</div>
+        <div class="chip" onclick="setTypeFilter('Darkness',this)">🌑 Dark</div>
+        <div class="chip" onclick="setTypeFilter('Metal',this)">⚙️ Metal</div>
+        <div class="chip" onclick="setTypeFilter('Dragon',this)">🐉 Dragon</div>
+      </div>
+      <div class="inv-grid" id="inv-grid"></div>
+      <div class="empty" id="inv-empty" style="display:none">
+        <div class="empty-icon">🃏</div>
+        <h3>Your vault is empty</h3>
+        <p>Tap + to add your first card</p>
+      </div>
     </div>
   </div>
 
