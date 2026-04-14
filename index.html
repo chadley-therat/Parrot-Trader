@@ -390,6 +390,27 @@
 .deck-search-wrap input::placeholder { color:var(--muted); }
 .deck-search-wrap input:focus { border-color:var(--accent); }
 .deck-search-icon { position:absolute;left:1.85rem;top:50%;transform:translateY(-50%);opacity:0.45;pointer-events:none; }
+
+/* ── Sets browser ── */
+.set-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 1.1rem 1rem; }
+@media (min-width:600px) { .set-grid { grid-template-columns:repeat(3,1fr); } }
+@media (min-width:900px) { .set-grid { grid-template-columns:repeat(4,1fr); } }
+.set-tile { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 0.6rem;cursor:pointer;transition:border-color 0.15s,transform 0.1s;text-align:center;display:flex;flex-direction:column;align-items:center; }
+.set-tile:active { transform:scale(0.96);border-color:var(--accent); }
+.set-tile-logo { width:100%;max-height:42px;object-fit:contain;margin-bottom:7px;flex-shrink:0; }
+.set-tile-sym { width:28px;height:28px;object-fit:contain;margin-bottom:7px;opacity:0.7; }
+.set-tile-name { font-size:12px;font-weight:600;line-height:1.3;color:var(--text); }
+.set-tile-meta { font-size:10px;color:var(--muted);margin-top:2px; }
+
+/* ── City League ── */
+.cl-list { display:flex;flex-direction:column;gap:10px; }
+.cl-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem; }
+.cl-header { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
+.cl-deck-name { font-size:14px;font-weight:700;color:var(--text); }
+.cl-event { font-size:11px;color:var(--muted);margin-top:2px; }
+.cl-badge { font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(232,200,74,0.15);color:var(--accent);white-space:nowrap;flex-shrink:0; }
+.cl-chips { display:flex;gap:5px;flex-wrap:wrap;margin-top:6px; }
+.cl-chip { font-size:10px;padding:1px 8px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -572,6 +593,39 @@
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
   <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoScan(event)">
 
+  <!-- ═══════════ SETS SCREEN ═══════════ -->
+  <div id="screen-sets" class="screen">
+    <div class="page-header">
+      <div class="page-title">Sets</div>
+    </div>
+    <div style="padding:0 1.1rem">
+      <div class="tab-row" style="padding:0 0 0.8rem">
+        <button class="tab-btn active" id="tab-sets-browse" onclick="switchSetsTab('browse')">Browse Sets</button>
+        <button class="tab-btn" id="tab-sets-city" onclick="switchSetsTab('city')">City League</button>
+      </div>
+    </div>
+
+    <!-- Browse panel -->
+    <div id="sets-browse-panel">
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="sets-search" placeholder="Search sets…" oninput="filterSetsGrid()">
+      </div>
+      <div id="sets-status" style="font-size:13px;color:var(--muted);padding:0 1.1rem 0.5rem;min-height:18px"></div>
+      <div class="set-grid" id="sets-grid">
+        <div class="empty" style="grid-column:1/-1">
+          <div class="empty-icon">📦</div>
+          <h3>Loading sets…</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- City League panel -->
+    <div id="sets-city-panel" style="display:none">
+      <div style="padding:0 1.1rem 1rem" class="cl-list" id="city-league-list"></div>
+    </div>
+  </div>
+
 </div><!-- /app -->
 
 <!-- Bulk Action Bar -->
@@ -605,6 +659,10 @@
   <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
     <span class="nav-label">Store</span>
+  </button>
+  <button class="nav-btn" id="nav-sets" onclick="showScreen('sets')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span class="nav-label">Sets</span>
   </button>
 </nav>
 
@@ -699,6 +757,20 @@
   </div>
 </div>
 
+<!-- SHEET: Set Card Browser -->
+<div class="sheet-overlay" id="set-cards-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="set-cards-header" style="margin-bottom:0.9rem"></div>
+    <div class="search-wrap" style="padding:0;margin-bottom:0.7rem">
+      <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="set-cards-search" placeholder="Filter cards…" oninput="filterSetCards()" style="padding-left:2.4rem">
+    </div>
+    <div id="set-cards-status" style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;min-height:16px"></div>
+    <div class="result-list" id="set-cards-list"></div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -711,7 +783,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v13
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v14
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -838,6 +910,7 @@ function showScreen(name) {
   if (name === 'decks') renderDecks();
   if (name === 'stats') renderStats();
   if (name === 'wishlist') renderWishlist();
+  if (name === 'sets') renderSetsScreen();
 }
 
 // ═══ TOAST ═══
@@ -1903,26 +1976,30 @@ function renderPriceBlock(marketPrice, trendPrice, tcgPlayerPrice, cardId, cardN
   </a>` : ''}`;
 }
 
+function buildDlSection(title, cards, inv) {
+  const total = cards.reduce((s, c) => s + c.qty, 0);
+  const rows = cards.map(c => {
+    let status = 'missing', indicator = '';
+    if (inv) {
+      const matches  = matchCardInInventory(c.name, inv);
+      const ownedQty = Math.min(matches.reduce((s, m) => s + m.qty, 0), c.qty);
+      status    = ownedQty >= c.qty ? 'owned' : ownedQty > 0 ? 'partial' : 'missing';
+      indicator = status === 'owned' ? '✓' : status === 'partial' ? `${ownedQty}/${c.qty}` : '✗';
+    }
+    return `<div class="dl-row">
+      <span class="dl-qty">${c.qty}×</span>
+      <span class="dl-name${inv ? ' ' + status : ''}">${c.name}</span>
+      ${inv ? `<span class="dl-check ${status}">${indicator}</span>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="dl-section">
+    <div class="dl-section-hdr"><span>${title}</span><span>${total}</span></div>
+    ${rows}
+  </div>`;
+}
+
 function renderDeckList(deck, inv) {
   if (!deck.decklist) return '';
-  const renderSection = (title, cards) => {
-    const total = cards.reduce((s, c) => s + c.qty, 0);
-    const rows = cards.map(c => {
-      const matches = matchCardInInventory(c.name, inv);
-      const ownedQty = Math.min(matches.reduce((s, m) => s + m.qty, 0), c.qty);
-      const status = ownedQty >= c.qty ? 'owned' : ownedQty > 0 ? 'partial' : 'missing';
-      const indicator = status === 'owned' ? '✓' : status === 'partial' ? `${ownedQty}/${c.qty}` : '✗';
-      return `<div class="dl-row">
-        <span class="dl-qty">${c.qty}×</span>
-        <span class="dl-name ${status}">${c.name}</span>
-        <span class="dl-check ${status}">${indicator}</span>
-      </div>`;
-    }).join('');
-    return `<div class="dl-section">
-      <div class="dl-section-hdr"><span>${title}</span><span>${total}</span></div>
-      ${rows}
-    </div>`;
-  };
   const id = 'dl-' + deck.id;
   return `
     <button class="dl-toggle" onclick="toggleDl('${id}')">
@@ -1930,9 +2007,9 @@ function renderDeckList(deck, inv) {
       Full Decklist
     </button>
     <div class="dl-body" id="${id}">
-      ${renderSection('Pokémon', deck.decklist.pokemon)}
-      ${renderSection('Trainer', deck.decklist.trainer)}
-      ${renderSection('Energy', deck.decklist.energy)}
+      ${buildDlSection('Pokémon', deck.decklist.pokemon, inv)}
+      ${buildDlSection('Trainer', deck.decklist.trainer, inv)}
+      ${buildDlSection('Energy',  deck.decklist.energy,  inv)}
     </div>`;
 }
 
@@ -3092,6 +3169,300 @@ applyTheme(activeTheme);
 // ═══ INIT ═══
 renderInventory();
 renderWishlist();
+
+// ═══ CITY LEAGUE RESULTS (April 2026) ═══
+const CITY_LEAGUE_RESULTS = [
+  {
+    id:'cl-01', date:'2026-04-13', event:'Tokyo Spring City League', country:'🇯🇵', placement:1,
+    deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+    decklist:{
+      pokemon:[
+        {name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},
+        {name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},
+        {name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}
+      ],
+      trainer:[
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},
+        {name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}
+      ],
+      energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]
+    }
+  },
+  {
+    id:'cl-02', date:'2026-04-12', event:'São Paulo City League', country:'🇧🇷', placement:1,
+    deck:'Raging Bolt ex', archetype:'Lightning Aggro', energy:['Lightning','Fighting'],
+    decklist:{
+      pokemon:[
+        {name:'Raging Bolt ex',qty:3},{name:'Teal Mask Ogerpon ex',qty:2},{name:'Munkidori',qty:2},
+        {name:'Bloodmoon Ursaluna ex',qty:1},{name:'Radiant Charizard',qty:1}
+      ],
+      trainer:[
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Energy Switch',qty:3},{name:'Defiance Band',qty:3}
+      ],
+      energy:[{name:'Lightning Energy',qty:10},{name:'Fighting Energy',qty:4}]
+    }
+  },
+  {
+    id:'cl-03', date:'2026-04-12', event:'Seoul City League', country:'🇰🇷', placement:1,
+    deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown', energy:['Fire'],
+    decklist:{
+      pokemon:[
+        {name:'Charizard ex',qty:3},{name:'Charmeleon',qty:2},{name:'Charmander',qty:4},
+        {name:'Pidgeot ex',qty:2},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3},{name:'Rotom V',qty:1}
+      ],
+      trainer:[
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:1},
+        {name:'Prime Catcher',qty:1},{name:'Nest Ball',qty:2}
+      ],
+      energy:[{name:'Fire Energy',qty:11}]
+    }
+  },
+  {
+    id:'cl-04', date:'2026-04-06', event:'Mexico City League', country:'🇲🇽', placement:1,
+    deck:"Marnie's Grimmsnarl ex", archetype:'Dark Accel', energy:['Darkness'],
+    decklist:{
+      pokemon:[
+        {name:"Marnie's Grimmsnarl ex",qty:3},{name:"Marnie's Morgrem",qty:2},{name:"Marnie's Impidimp",qty:4},
+        {name:'Pecharunt ex',qty:2},{name:'Munkidori',qty:2}
+      ],
+      trainer:[
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Colress Experiment',qty:3}
+      ],
+      energy:[{name:'Darkness Energy',qty:11},{name:'Reversal Energy',qty:2}]
+    }
+  },
+  {
+    id:'cl-05', date:'2026-04-06', event:'Sydney City League', country:'🇦🇺', placement:1,
+    deck:'Gardevoir ex', archetype:'Psychic Accel', energy:['Psychic'],
+    decklist:{
+      pokemon:[
+        {name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},
+        {name:'Scream Tail',qty:2},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}
+      ],
+      trainer:[
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},
+        {name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:2}
+      ],
+      energy:[{name:'Psychic Energy',qty:11}]
+    }
+  },
+  {
+    id:'cl-06', date:'2026-04-05', event:'Berlin City League', country:'🇩🇪', placement:1,
+    deck:"N's Zoroark ex", archetype:'Dark Disruption', energy:['Darkness'],
+    decklist:{
+      pokemon:[
+        {name:"N's Zoroark ex",qty:3},{name:"N's Zorua",qty:4},{name:'Pecharunt ex',qty:2},
+        {name:'Munkidori',qty:2},{name:"N's Snorlax",qty:1}
+      ],
+      trainer:[
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:"N's PC",qty:4},
+        {name:'Prime Catcher',qty:1}
+      ],
+      energy:[{name:'Darkness Energy',qty:10},{name:'Reversal Energy',qty:3}]
+    }
+  },
+  {
+    id:'cl-07', date:'2026-04-05', event:'Chicago City League', country:'🇺🇸', placement:1,
+    deck:'Gholdengo ex', archetype:'Item Lock Control', energy:['Metal','Psychic'],
+    decklist:{
+      pokemon:[
+        {name:'Gholdengo ex',qty:3},{name:'Gimmighoul',qty:4},{name:'Fezandipiti ex',qty:2},
+        {name:'Roaring Moon ex',qty:2},{name:'Munkidori',qty:1}
+      ],
+      trainer:[
+        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
+        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
+        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
+        {name:'Colress Experiment',qty:3},{name:'Calamitous Wasteland',qty:2}
+      ],
+      energy:[{name:'Metal Energy',qty:8},{name:'Psychic Energy',qty:4}]
+    }
+  },
+  {
+    id:'cl-08', date:'2026-03-30', event:'Toronto City League', country:'🇨🇦', placement:1,
+    deck:'Froslass / Munkidori', archetype:'Poison Status', energy:['Water','Psychic'],
+    decklist:{
+      pokemon:[
+        {name:'Froslass',qty:3},{name:'Snorunt',qty:4},{name:'Munkidori',qty:3},
+        {name:'Pecharunt ex',qty:2},{name:'Greninja ex',qty:1}
+      ],
+      trainer:[
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},
+        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
+        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},
+        {name:'Prime Catcher',qty:1},{name:'Toxic Chain',qty:2}
+      ],
+      energy:[{name:'Water Energy',qty:7},{name:'Psychic Energy',qty:4}]
+    }
+  }
+];
+
+// ═══ SETS SCREEN ═══
+let setsData = [];
+let setsTab = 'browse';
+let setCardsAll = [];
+let setsLoaded = false;
+
+function renderSetsScreen() {
+  if (setsTab === 'browse') {
+    if (!setsLoaded) loadSets();
+  } else {
+    renderCityLeague();
+  }
+}
+
+function switchSetsTab(tab) {
+  setsTab = tab;
+  document.getElementById('tab-sets-browse').classList.toggle('active', tab === 'browse');
+  document.getElementById('tab-sets-city').classList.toggle('active', tab === 'city');
+  document.getElementById('sets-browse-panel').style.display = tab === 'browse' ? '' : 'none';
+  document.getElementById('sets-city-panel').style.display  = tab === 'city'   ? '' : 'none';
+  if (tab === 'browse' && !setsLoaded) loadSets();
+  if (tab === 'city') renderCityLeague();
+}
+
+async function loadSets() {
+  const status = document.getElementById('sets-status');
+  const grid   = document.getElementById('sets-grid');
+  if (status) status.innerHTML = '<span class="loading-dots">Loading</span>';
+  try {
+    const res  = await fetch(`${POKEMON_API}/sets?orderBy=-releaseDate&pageSize=250`);
+    const data = await res.json();
+    // Filter out online-only / junk series
+    setsData = (data.data || []).filter(s => !/^(Online|POP Series)$/i.test(s.series));
+    setsLoaded = true;
+    if (status) status.textContent = `${setsData.length} sets`;
+    renderSetsGrid();
+  } catch(e) {
+    if (status) status.textContent = 'Failed to load — check connection';
+    if (grid) grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>Could not load sets</h3></div>';
+  }
+}
+
+function filterSetsGrid() { renderSetsGrid(); }
+
+function renderSetsGrid() {
+  const q    = (document.getElementById('sets-search')?.value || '').toLowerCase();
+  const grid = document.getElementById('sets-grid');
+  const sets = setsData.filter(s => !q || s.name.toLowerCase().includes(q) || s.series.toLowerCase().includes(q));
+  if (!sets.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><h3>No sets found</h3></div>';
+    return;
+  }
+  grid.innerHTML = sets.map(s => {
+    const logo = s.images?.logo || '';
+    const sym  = s.images?.symbol || '';
+    const imgEl = logo
+      ? `<img class="set-tile-logo" src="${logo}" alt="${s.name}" onerror="this.style.display='none'">`
+      : `<img class="set-tile-sym"  src="${sym}"  alt="${s.name}" onerror="this.style.display='none'">`;
+    return `<div class="set-tile" onclick="openSetCards(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      ${imgEl}
+      <div class="set-tile-name">${s.name}</div>
+      <div class="set-tile-meta">${s.series} · ${s.total} cards</div>
+    </div>`;
+  }).join('');
+}
+
+async function openSetCards(set) {
+  const header  = document.getElementById('set-cards-header');
+  const statusEl= document.getElementById('set-cards-status');
+  const listEl  = document.getElementById('set-cards-list');
+  document.getElementById('set-cards-search').value = '';
+  setCardsAll = [];
+  header.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px">
+      ${set.images?.logo ? `<img src="${set.images.logo}" style="height:34px;object-fit:contain" onerror="this.remove()">` : ''}
+      <div>
+        <div style="font-size:16px;font-weight:700">${set.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${set.series} · ${set.total} cards · ${set.releaseDate || ''}</div>
+      </div>
+    </div>`;
+  listEl.innerHTML = '';
+  statusEl.innerHTML = '<span class="loading-dots">Loading cards</span>';
+  document.getElementById('set-cards-sheet').classList.add('open');
+
+  try {
+    const res  = await fetch(`${POKEMON_API}/cards?q=set.id:${set.id}&pageSize=250&orderBy=number&select=id,name,images,set,types,rarity,cardmarket,legalities,supertype,number,tcgplayer`);
+    const data = await res.json();
+    setCardsAll = (data.data || []);
+    setCardsAll.forEach(cacheCardPrices);
+    statusEl.textContent = `${setCardsAll.length} cards`;
+    renderSetCardsList(setCardsAll);
+  } catch(e) {
+    statusEl.textContent = 'Failed to load cards';
+  }
+}
+
+function filterSetCards() {
+  const q = (document.getElementById('set-cards-search')?.value || '').toLowerCase();
+  const filtered = q ? setCardsAll.filter(c => c.name.toLowerCase().includes(q) || (c.rarity||'').toLowerCase().includes(q)) : setCardsAll;
+  renderSetCardsList(filtered);
+}
+
+function renderSetCardsList(cards) {
+  const listEl = document.getElementById('set-cards-list');
+  if (!cards.length) { listEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">No cards found</div>'; return; }
+  listEl.innerHTML = cards.map(c => buildResultItem(c)).join('');
+}
+
+// ── City League rendering ──
+function renderCityLeague() {
+  const el = document.getElementById('city-league-list');
+  if (!el) return;
+  el.innerHTML = CITY_LEAGUE_RESULTS.map(r => {
+    const dlId = 'cl-dl-' + r.id;
+    const totalPokemon = r.decklist.pokemon.reduce((s,c)=>s+c.qty,0);
+    const totalTrainer = r.decklist.trainer.reduce((s,c)=>s+c.qty,0);
+    const totalEnergy  = r.decklist.energy.reduce((s,c)=>s+c.qty,0);
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `<div class="cl-card">
+      <div class="cl-header">
+        <div>
+          <div class="cl-deck-name">${r.country} ${r.deck}</div>
+          <div class="cl-event">${r.event} · ${dateStr}</div>
+        </div>
+        <div class="cl-badge">1st Place</div>
+      </div>
+      <div class="cl-chips">
+        <span class="cl-chip">${r.archetype}</span>
+        ${r.energy.map(e=>`<span class="cl-chip">${e}</span>`).join('')}
+        <span class="cl-chip">${totalPokemon}P / ${totalTrainer}T / ${totalEnergy}E</span>
+      </div>
+      <button class="dl-toggle" onclick="toggleCLDl('${dlId}')">
+        <span style="transform:rotate(0deg);transition:transform 0.2s;display:inline-block" id="${dlId}-arrow">▶</span>
+        Full Decklist
+      </button>
+      <div class="dl-body" id="${dlId}">
+        ${buildDlSection('Pokémon', r.decklist.pokemon)}
+        ${buildDlSection('Trainer', r.decklist.trainer)}
+        ${buildDlSection('Energy',  r.decklist.energy)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCLDl(id) {
+  const body  = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+}
 
 // ═══ PHOTO SCAN ═══
 function openCameraCapture() {
