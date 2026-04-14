@@ -259,6 +259,12 @@
   .voice-btn.listening { background: rgba(224,82,82,0.1); border-color: var(--red); color: var(--red); animation: pulse 0.9s ease-in-out infinite; }
   .voice-btn.listening svg { filter: drop-shadow(0 0 3px var(--red)); }
 
+/* ── Photo Scan button ── */
+.scan-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 50px; padding: 0.42rem 1.1rem; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.18s; -webkit-tap-highlight-color: transparent; }
+.scan-btn:active { background: var(--surface3); }
+.scan-btn.scanning { background: rgba(82,148,224,0.1); border-color: var(--blue); color: var(--blue); animation: pulse 0.9s ease-in-out infinite; }
+.scan-btn.scanning svg { filter: drop-shadow(0 0 3px var(--blue)); }
+
 /* ── Legality badges ── */
 .legal-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; }
 .legal-std { background: rgba(82,201,125,0.18); color: #52c97d; }
@@ -564,6 +570,7 @@
   </div>
 
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+  <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoScan(event)">
 
 </div><!-- /app -->
 
@@ -620,10 +627,14 @@
       <svg class="search-icon" style="left:0.8rem" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="card-search-input" placeholder="Search Pokémon cards…" oninput="debounceSearch()" style="padding-left:2.4rem">
     </div>
-    <div style="margin-bottom:0.9rem">
+    <div style="margin-bottom:0.9rem;display:flex;gap:8px;flex-wrap:wrap">
       <button class="voice-btn" id="voice-btn-add" onclick="startVoiceSearch('card-search-input', searchCards, 'voice-btn-add')">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
         <span>Tap to speak</span>
+      </button>
+      <button class="scan-btn" id="scan-btn-add" onclick="openCameraCapture()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Scan card</span>
       </button>
     </div>
     <div id="search-status" style="font-size:13px;color:var(--muted);margin-bottom:0.8rem;min-height:18px"></div>
@@ -700,7 +711,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2';
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v13
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -3081,6 +3092,82 @@ applyTheme(activeTheme);
 // ═══ INIT ═══
 renderInventory();
 renderWishlist();
+
+// ═══ PHOTO SCAN ═══
+function openCameraCapture() {
+  const inp = document.getElementById('camera-input');
+  inp.value = '';
+  inp.click();
+}
+
+async function handlePhotoScan(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const scanBtn = document.getElementById('scan-btn-add');
+  const status  = document.getElementById('search-status');
+  const results = document.getElementById('search-results');
+
+  // Enter scanning state
+  if (scanBtn) { scanBtn.classList.add('scanning'); scanBtn.querySelector('span').textContent = 'Scanning…'; }
+  status.innerHTML = '<span class="loading-dots">Identifying card</span>';
+  results.innerHTML = '';
+
+  try {
+    const base64   = await fileToBase64(file);
+    const mimeType = file.type || 'image/jpeg';
+    const cardName = await identifyCardFromPhoto(base64, mimeType);
+
+    if (!cardName) {
+      status.textContent = 'Could not identify card — try again with better lighting';
+      return;
+    }
+
+    // Fill search input and run search
+    const input = document.getElementById('card-search-input');
+    input.value = cardName;
+    status.innerHTML = '<span class="loading-dots">Searching</span>';
+    await searchCards();
+
+  } catch(err) {
+    status.textContent = 'Scan failed — check connection';
+  } finally {
+    if (scanBtn) { scanBtn.classList.remove('scanning'); scanBtn.querySelector('span').textContent = 'Scan card'; }
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function identifyCardFromPhoto(base64, mediaType) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 60,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: 'This is a Pokémon TCG card. Reply with ONLY the exact card name printed on it — nothing else. No set info, no punctuation at the end, just the name (e.g. "Charizard ex" or "Professor\'s Research").' }
+        ]
+      }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text?.trim() || null;
+}
 
 // ═══ SERVICE WORKER ═══
 if ('serviceWorker' in navigator) {
