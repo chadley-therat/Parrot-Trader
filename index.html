@@ -259,11 +259,30 @@
   .voice-btn.listening { background: rgba(224,82,82,0.1); border-color: var(--red); color: var(--red); animation: pulse 0.9s ease-in-out infinite; }
   .voice-btn.listening svg { filter: drop-shadow(0 0 3px var(--red)); }
 
-/* ── Photo Scan button ── */
+/* ── Scan button (in add sheet) ── */
 .scan-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 50px; padding: 0.42rem 1.1rem; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.18s; -webkit-tap-highlight-color: transparent; }
 .scan-btn:active { background: var(--surface3); }
-.scan-btn.scanning { background: rgba(82,148,224,0.1); border-color: var(--blue); color: var(--blue); animation: pulse 0.9s ease-in-out infinite; }
-.scan-btn.scanning svg { filter: drop-shadow(0 0 3px var(--blue)); }
+
+/* ── Live Scan Overlay ── */
+#scan-overlay { position:fixed;inset:0;background:#000;z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center; }
+#scan-overlay.open { display:flex; }
+#scan-video { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+#scan-canvas-hidden { display:none; }
+.scan-vf { position:relative;z-index:2;width:min(72vw,270px);aspect-ratio:5/7;border-radius:16px;
+  box-shadow:0 0 0 200vmax rgba(0,0,0,0.58); }
+.scan-vf.found { box-shadow:0 0 0 200vmax rgba(0,0,0,0.58),0 0 0 3px var(--green),0 0 24px 4px rgba(82,201,125,0.45); }
+.scan-corner { position:absolute;width:24px;height:24px; }
+.scan-corner.tl { top:-2px;left:-2px;border-top:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:12px 0 0 0; }
+.scan-corner.tr { top:-2px;right:-2px;border-top:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 12px 0 0; }
+.scan-corner.bl { bottom:-2px;left:-2px;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 0 12px; }
+.scan-corner.br { bottom:-2px;right:-2px;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 0 12px 0; }
+.scan-line-el { position:absolute;left:5px;right:5px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px;opacity:0; }
+.scan-line-el.active { opacity:1;animation:scanSwipe 1.6s ease-in-out infinite; }
+@keyframes scanSwipe { 0%,100%{top:6%} 50%{top:88%} }
+#scan-close-btn { position:absolute;top:max(env(safe-area-inset-top),1rem);right:1rem;z-index:3;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);border:none;color:#fff;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+#scan-status-bar { position:absolute;bottom:calc(3.5rem + env(safe-area-inset-bottom));left:0;right:0;z-index:3;text-align:center;color:rgba(255,255,255,0.88);font-size:14px;font-weight:500;padding:0 1.5rem;pointer-events:none; }
+#scan-result-pill { position:absolute;bottom:calc(7rem + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);z-index:3;background:var(--green);color:#0d0d0f;border-radius:50px;padding:0.55rem 1.4rem;font-size:14px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity 0.22s,transform 0.22s;pointer-events:none;box-shadow:0 4px 20px rgba(82,201,125,0.4); }
+#scan-result-pill.show { opacity:1;transform:translateX(-50%) translateY(0); }
 
 /* ── Legality badges ── */
 .legal-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; }
@@ -771,6 +790,22 @@
   </div>
 </div>
 
+<!-- LIVE SCAN OVERLAY -->
+<div id="scan-overlay">
+  <video id="scan-video" autoplay playsinline muted></video>
+  <canvas id="scan-canvas-hidden"></canvas>
+  <button id="scan-close-btn" onclick="closeScanView()">✕</button>
+  <div class="scan-vf" id="scan-vf">
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+    <div class="scan-line-el" id="scan-line"></div>
+  </div>
+  <div id="scan-result-pill"></div>
+  <div id="scan-status-bar">Point camera at a Pokémon card</div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -783,7 +818,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v14
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v15
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -3464,60 +3499,128 @@ function toggleCLDl(id) {
   if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
 }
 
-// ═══ PHOTO SCAN ═══
+// ═══ LIVE SCAN ═══
+let scanStream = null;
+let scanActive = false;
+let scanAbort  = null;   // AbortController for the in-flight request
+
 function openCameraCapture() {
-  const inp = document.getElementById('camera-input');
-  inp.value = '';
-  inp.click();
-}
-
-async function handlePhotoScan(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  const scanBtn = document.getElementById('scan-btn-add');
-  const status  = document.getElementById('search-status');
-  const results = document.getElementById('search-results');
-
-  // Enter scanning state
-  if (scanBtn) { scanBtn.classList.add('scanning'); scanBtn.querySelector('span').textContent = 'Scanning…'; }
-  status.innerHTML = '<span class="loading-dots">Identifying card</span>';
-  results.innerHTML = '';
-
-  try {
-    const base64   = await fileToBase64(file);
-    const mimeType = file.type || 'image/jpeg';
-    const cardName = await identifyCardFromPhoto(base64, mimeType);
-
-    if (!cardName) {
-      status.textContent = 'Could not identify card — try again with better lighting';
-      return;
-    }
-
-    // Fill search input and run search
-    const input = document.getElementById('card-search-input');
-    input.value = cardName;
-    status.innerHTML = '<span class="loading-dots">Searching</span>';
-    await searchCards();
-
-  } catch(err) {
-    status.textContent = 'Scan failed — check connection';
-  } finally {
-    if (scanBtn) { scanBtn.classList.remove('scanning'); scanBtn.querySelector('span').textContent = 'Scan card'; }
+  if (navigator.mediaDevices?.getUserMedia) {
+    openScanView();
+  } else {
+    const inp = document.getElementById('camera-input');
+    inp.value = ''; inp.click();
   }
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+async function openScanView() {
+  const overlay = document.getElementById('scan-overlay');
+  const video   = document.getElementById('scan-video');
+  const line    = document.getElementById('scan-line');
+  const status  = document.getElementById('scan-status-bar');
+  const pill    = document.getElementById('scan-result-pill');
+  const vf      = document.getElementById('scan-vf');
+
+  pill.classList.remove('show');
+  vf.classList.remove('found');
+  line.classList.remove('active');
+  status.textContent = 'Starting camera…';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  closeAllSheets();
+
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+    video.srcObject = scanStream;
+    await video.play();
+    status.textContent = 'Hold card steady in frame';
+    line.classList.add('active');
+    scanActive = true;
+    continuousScanLoop();          // fire-and-forget; loop self-terminates when scanActive=false
+  } catch(e) {
+    closeScanView();
+    const inp = document.getElementById('camera-input');
+    inp.value = ''; inp.click();   // fallback to file picker
+  }
 }
 
-async function identifyCardFromPhoto(base64, mediaType) {
+function closeScanView() {
+  scanActive = false;
+  if (scanAbort) { scanAbort.abort(); scanAbort = null; }
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  document.getElementById('scan-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Continuous loop: next frame fires the instant the previous request finishes ──
+async function continuousScanLoop() {
+  while (scanActive) {
+    const base64 = captureViewfinderRegion();
+    if (!base64) { await sleep(150); continue; }
+
+    const status = document.getElementById('scan-status-bar');
+    if (status) status.textContent = 'Reading…';
+
+    try {
+      const name = await identifyFromStream(base64);
+      if (!scanActive) return;
+      if (name) { onCardIdentified(name); return; }
+      if (status) status.textContent = 'Hold card steady in frame';
+    } catch(e) {
+      if (!scanActive) return;
+      const status = document.getElementById('scan-status-bar');
+      if (status) status.textContent = 'Hold card steady in frame';
+    }
+
+    await sleep(180);   // brief pause so the camera has a fresh frame to render
+  }
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ── Crop precisely to the viewfinder rectangle in video-pixel space ──
+function captureViewfinderRegion() {
+  const video  = document.getElementById('scan-video');
+  const canvas = document.getElementById('scan-canvas-hidden');
+  if (!video.videoWidth || !video.videoHeight) return null;
+
+  const vw = video.videoWidth,  vh = video.videoHeight;
+  const sw = window.innerWidth, sh = window.innerHeight;
+
+  // object-fit:cover scale factor
+  const scale = Math.max(sw / vw, sh / vh);
+  const offX  = (vw * scale - sw) / 2 / scale;   // video px hidden on left
+  const offY  = (vh * scale - sh) / 2 / scale;   // video px hidden on top
+
+  // Viewfinder screen dimensions (mirrors the CSS)
+  const vfW = Math.min(0.72 * sw, 270);
+  const vfH = vfW * (7 / 5);
+  const vfX = (sw - vfW) / 2;   // screen px from left
+  const vfY = (sh - vfH) / 2;   // screen px from top
+
+  // Map to video-pixel space
+  const srcX = offX + vfX / scale;
+  const srcY = offY + vfY / scale;
+  const srcW = vfW / scale;
+  const srcH = vfH / scale;
+
+  // Render at 420 px wide — enough detail, small payload (~25–35 KB JPEG)
+  const outW = 420, outH = Math.round(outW * srcH / srcW);
+  canvas.width = outW; canvas.height = outH;
+  canvas.getContext('2d').drawImage(video, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+  return canvas.toDataURL('image/jpeg', 0.80).split(',')[1];
+}
+
+// ── Streaming request — result pill updates live as tokens arrive ──
+async function identifyFromStream(base64) {
+  scanAbort  = new AbortController();
+  const pill = document.getElementById('scan-result-pill');
+  pill.textContent = '';
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
+    signal: scanAbort.signal,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -3525,19 +3628,100 @@ async function identifyCardFromPhoto(base64, mediaType) {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-5',
-      max_tokens: 60,
+      model: 'claude-3-5-haiku-20241022',   // fastest production vision model
+      max_tokens: 25,                        // card names are short; tight cap = faster TTFT
+      stream: true,
       messages: [{
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-          { type: 'text', text: 'This is a Pokémon TCG card. Reply with ONLY the exact card name printed on it — nothing else. No set info, no punctuation at the end, just the name (e.g. "Charizard ex" or "Professor\'s Research").' }
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+          { type: 'text', text: 'Pokémon TCG card name shown? Reply ONLY the name (e.g. "Charizard ex") or null.' }
         ]
       }]
     })
   });
-  const data = await res.json();
-  return data.content?.[0]?.text?.trim() || null;
+
+  if (!res.ok) return null;
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '', buf = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+
+    const lines = buf.split('\n');
+    buf = lines.pop();                         // hold incomplete last line for next chunk
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const raw = line.slice(6).trim();
+      if (raw === '[DONE]') break;
+      try {
+        const ev = JSON.parse(raw);
+        if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') {
+          text += ev.delta.text;
+          // Stream name into pill as it arrives
+          if (text.trim().toLowerCase() !== 'null' && text.length <= 60) {
+            pill.textContent = text;
+            pill.classList.add('show');
+          }
+        }
+      } catch(_) {}
+    }
+  }
+
+  pill.classList.remove('show');
+  const name = text.trim();
+  if (!name || name.toLowerCase() === 'null' || name.length > 80) return null;
+  return name;
+}
+
+function onCardIdentified(name) {
+  scanActive = false;
+  if (scanAbort) { scanAbort.abort(); scanAbort = null; }
+
+  const pill = document.getElementById('scan-result-pill');
+  const vf   = document.getElementById('scan-vf');
+  document.getElementById('scan-line').classList.remove('active');
+  vf.classList.add('found');
+  pill.textContent = '✓ ' + name;
+  pill.classList.add('show');
+  document.getElementById('scan-status-bar').textContent = 'Card identified!';
+
+  setTimeout(() => {
+    closeScanView();
+    openAddSheet();
+    document.getElementById('card-search-input').value = name;
+    document.getElementById('search-status').innerHTML = '<span class="loading-dots">Searching</span>';
+    searchCards();
+  }, 750);
+}
+
+// ── Fallback: file-input path when getUserMedia unavailable ──
+async function handlePhotoScan(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const status = document.getElementById('search-status');
+  status.innerHTML = '<span class="loading-dots">Identifying card</span>';
+  document.getElementById('search-results').innerHTML = '';
+  try {
+    const base64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    const name = await identifyFromStream(base64);
+    if (!name) { status.textContent = 'Could not identify — try better lighting'; return; }
+    document.getElementById('card-search-input').value = name;
+    status.innerHTML = '<span class="loading-dots">Searching</span>';
+    await searchCards();
+  } catch(err) {
+    status.textContent = 'Scan failed — check connection';
+  }
 }
 
 // ═══ SERVICE WORKER ═══
