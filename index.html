@@ -564,6 +564,7 @@
     <div class="tab-row">
       <button class="tab-btn active" id="tab-meta" onclick="switchDeckTab('meta')">Meta</button>
       <button class="tab-btn" id="tab-mydecks" onclick="switchDeckTab('mydecks')">My Decks</button>
+      <button class="tab-btn" id="tab-cityleague" onclick="switchDeckTab('cityleague')">City League</button>
     </div>
     <div id="meta-deck-panel">
       <div class="deck-search-wrap">
@@ -582,6 +583,9 @@
     <div id="mydecks-panel" style="display:none">
       <div class="deck-list" id="mydecks-list"></div>
     </div>
+    <div id="cityleague-panel" style="display:none">
+      <div style="padding:0 1.1rem 1rem" class="cl-list" id="city-league-list"></div>
+    </div>
   </div>
 
   <!-- ═══════════ WISHLIST SCREEN ═══════════ -->
@@ -591,17 +595,40 @@
         <div class="page-title">Wishlist</div>
         <div style="font-size:12px;color:var(--muted)" id="wishlist-count"></div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openBulkCalc()">🧮 Calculator</button>
+      <button class="btn btn-outline btn-sm" id="wishlist-action-btn" onclick="handleWishlistAction()">🧮 Calculator</button>
     </div>
-    <div class="search-wrap">
-      <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="wishlist-search" placeholder="Search wishlist…" oninput="renderWishlist()">
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-wish-list" onclick="switchWishlistTab('list')">Wishlist</button>
+      <button class="tab-btn" id="tab-wish-sets" onclick="switchWishlistTab('sets')">Browse Sets</button>
     </div>
-    <div class="wishlist-grid" id="wishlist-grid"></div>
-    <div class="empty" id="wishlist-empty">
-      <div class="empty-icon">♡</div>
-      <h3>Wishlist is empty</h3>
-      <p>Search for a card and tap "♡ Wish" to add it</p>
+
+    <!-- Wishlist panel -->
+    <div id="wish-list-panel">
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="wishlist-search" placeholder="Search wishlist…" oninput="renderWishlist()">
+      </div>
+      <div class="wishlist-grid" id="wishlist-grid"></div>
+      <div class="empty" id="wishlist-empty">
+        <div class="empty-icon">♡</div>
+        <h3>Wishlist is empty</h3>
+        <p>Search for a card and tap "♡ Wish" to add it</p>
+      </div>
+    </div>
+
+    <!-- Browse Sets panel -->
+    <div id="wish-sets-panel" style="display:none">
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="sets-search" placeholder="Search sets…" oninput="filterSetsGrid()">
+      </div>
+      <div id="sets-status" style="font-size:13px;color:var(--muted);padding:0 1.1rem 0.5rem;min-height:18px"></div>
+      <div class="set-grid" id="sets-grid">
+        <div class="empty" style="grid-column:1/-1">
+          <div class="empty-icon">📦</div>
+          <h3>Loading sets…</h3>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -654,38 +681,6 @@
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
   <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoScan(event)">
 
-  <!-- ═══════════ SETS SCREEN ═══════════ -->
-  <div id="screen-sets" class="screen">
-    <div class="page-header">
-      <div class="page-title">Sets</div>
-    </div>
-    <div style="padding:0 1.1rem">
-      <div class="tab-row" style="padding:0 0 0.8rem">
-        <button class="tab-btn active" id="tab-sets-browse" onclick="switchSetsTab('browse')">Browse Sets</button>
-        <button class="tab-btn" id="tab-sets-city" onclick="switchSetsTab('city')">City League</button>
-      </div>
-    </div>
-
-    <!-- Browse panel -->
-    <div id="sets-browse-panel">
-      <div class="search-wrap">
-        <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="sets-search" placeholder="Search sets…" oninput="filterSetsGrid()">
-      </div>
-      <div id="sets-status" style="font-size:13px;color:var(--muted);padding:0 1.1rem 0.5rem;min-height:18px"></div>
-      <div class="set-grid" id="sets-grid">
-        <div class="empty" style="grid-column:1/-1">
-          <div class="empty-icon">📦</div>
-          <h3>Loading sets…</h3>
-        </div>
-      </div>
-    </div>
-
-    <!-- City League panel -->
-    <div id="sets-city-panel" style="display:none">
-      <div style="padding:0 1.1rem 1rem" class="cl-list" id="city-league-list"></div>
-    </div>
-  </div>
 
 </div><!-- /app -->
 
@@ -720,10 +715,6 @@
   <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
     <span class="nav-label">Store</span>
-  </button>
-  <button class="nav-btn" id="nav-sets" onclick="showScreen('sets')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-    <span class="nav-label">Sets</span>
   </button>
 </nav>
 
@@ -860,7 +851,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v17
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v18
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -877,6 +868,7 @@ let supertypeFilter = 'All';
 let selectMode = false;
 let selectedUids = new Set();
 let activeDeckTab = 'meta';
+let activeWishlistTab = 'list';
 let newDeckCards = [];
 let editingDeckId = null;
 
@@ -977,17 +969,18 @@ function startVoiceSearch(inputId, onResult, btnId) {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
+  const screenEl = document.getElementById('screen-' + name);
+  const navEl    = document.getElementById('nav-' + name);
+  if (screenEl) screenEl.classList.add('active');
+  if (navEl)    navEl.classList.add('active');
   const fab = document.getElementById('fab-add');
   const fabVoice = document.getElementById('fab-voice');
   fab.style.display = name === 'inventory' ? 'flex' : 'none';
   if (fabVoice) fabVoice.style.display = name === 'inventory' ? 'flex' : 'none';
-  if (name === 'store') renderStore();
-  if (name === 'decks') renderDecks();
-  if (name === 'stats') renderStats();
-  if (name === 'wishlist') renderWishlist();
-  if (name === 'sets') renderSetsScreen();
+  if (name === 'store')    renderStore();
+  if (name === 'decks')    renderDecks();
+  if (name === 'stats')    renderStats();
+  if (name === 'wishlist') { renderWishlist(); if (activeWishlistTab === 'sets' && !setsLoaded) loadSets(); }
 }
 
 // ═══ TOAST ═══
@@ -1056,10 +1049,17 @@ async function fetchApiCards(nameQuery) {
 function buildResultItem(c) {
   const price = c.cardmarket?.prices?.averageSellPrice;
   const priceStr = price ? `$${price.toFixed(2)}` : '—';
-  const img = c.images?.small || '';
+  const imgSm = c.images?.small || '';
+  const imgLg = c.images?.large || imgSm;
   const types = (c.types || []).join(', ') || 'Unknown';
+  const nm  = c.name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const st  = (c.set?.name || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   return `<div class="result-item" onclick="openCardDetail(${JSON.stringify(c).replace(/"/g,'&quot;')})">
-    <img src="${img}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'">
+    <img src="${imgSm}" alt="${c.name}" loading="lazy"
+      data-lg="${imgLg}" data-name="${nm}" data-set="${st}"
+      ontouchstart="startZoomPress(this,event)" ontouchend="clearZoomPress()" ontouchmove="clearZoomPress()"
+      onmousedown="startZoomPress(this,event)" onmouseup="clearZoomPress()" onmouseleave="clearZoomPress()"
+      onerror="this.style.display='none'">
     <div class="result-info">
       <div class="result-name">${c.name}</div>
       <div class="result-set">${c.set?.name || ''} · ${types}</div>
@@ -2526,6 +2526,9 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
         </div>
         <a href="${deck.limitlessUrl}" target="_blank" style="font-size:12px;color:var(--blue);text-decoration:none">Limitless ↗</a>
       </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-outline btn-block btn-sm" onclick="saveToMyDecks('meta','${deck.name.replace(/'/g,"\\'")}')">💾 Save to My Decks</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -2586,7 +2589,8 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
 }
 
 function renderDecks() {
-  if (activeDeckTab === 'mydecks') { renderMyDecks(); return; }
+  if (activeDeckTab === 'mydecks')    { renderMyDecks(); return; }
+  if (activeDeckTab === 'cityleague') { renderCityLeague(); return; }
   if (inventory.length >= 1) generateDecks(); // always re-scores locally; uses cached AI
 }
 
@@ -2988,16 +2992,38 @@ async function refreshAllPrices() {
   toast(`✓ Refreshed ${updated} card${updated!==1?'s':''}`);
 }
 
+// ═══ WISHLIST TABS ═══
+function switchWishlistTab(tab) {
+  activeWishlistTab = tab;
+  document.getElementById('wish-list-panel').style.display  = tab === 'list' ? '' : 'none';
+  document.getElementById('wish-sets-panel').style.display  = tab === 'sets' ? '' : 'none';
+  document.getElementById('tab-wish-list').classList.toggle('active', tab === 'list');
+  document.getElementById('tab-wish-sets').classList.toggle('active', tab === 'sets');
+  const btn = document.getElementById('wishlist-action-btn');
+  if (btn) btn.textContent = tab === 'list' ? '🧮 Calculator' : '';
+  if (btn) btn.style.display = tab === 'list' ? '' : 'none';
+  if (tab === 'sets' && !setsLoaded) loadSets();
+}
+function handleWishlistAction() {
+  if (activeWishlistTab === 'list') openBulkCalc();
+}
+
 // ═══ DECK TABS ═══
 function switchDeckTab(tab) {
   activeDeckTab = tab;
-  document.getElementById('meta-deck-panel').style.display = tab === 'meta' ? '' : 'none';
-  document.getElementById('mydecks-panel').style.display = tab === 'mydecks' ? '' : 'none';
-  document.getElementById('tab-meta').classList.toggle('active', tab === 'meta');
-  document.getElementById('tab-mydecks').classList.toggle('active', tab === 'mydecks');
+  document.getElementById('meta-deck-panel').style.display    = tab === 'meta'        ? '' : 'none';
+  document.getElementById('mydecks-panel').style.display      = tab === 'mydecks'     ? '' : 'none';
+  document.getElementById('cityleague-panel').style.display   = tab === 'cityleague'  ? '' : 'none';
+  document.getElementById('tab-meta').classList.toggle('active',        tab === 'meta');
+  document.getElementById('tab-mydecks').classList.toggle('active',     tab === 'mydecks');
+  document.getElementById('tab-cityleague').classList.toggle('active',  tab === 'cityleague');
   const btn = document.getElementById('decks-action-btn');
-  if (btn) btn.textContent = tab === 'meta' ? 'Suggest' : '+ New';
-  if (tab === 'mydecks') renderMyDecks();
+  if (btn) {
+    btn.textContent = tab === 'meta' ? 'Suggest' : tab === 'mydecks' ? '+ New' : '';
+    btn.style.display = tab === 'cityleague' ? 'none' : '';
+  }
+  if (tab === 'mydecks')    renderMyDecks();
+  if (tab === 'cityleague') renderCityLeague();
 }
 function handleDecksAction() {
   if (activeDeckTab === 'meta') generateDecks();
@@ -3568,23 +3594,6 @@ let setsTab = 'browse';
 let setCardsAll = [];
 let setsLoaded = false;
 
-function renderSetsScreen() {
-  if (setsTab === 'browse') {
-    if (!setsLoaded) loadSets();
-  } else {
-    renderCityLeague();
-  }
-}
-
-function switchSetsTab(tab) {
-  setsTab = tab;
-  document.getElementById('tab-sets-browse').classList.toggle('active', tab === 'browse');
-  document.getElementById('tab-sets-city').classList.toggle('active', tab === 'city');
-  document.getElementById('sets-browse-panel').style.display = tab === 'browse' ? '' : 'none';
-  document.getElementById('sets-city-panel').style.display  = tab === 'city'   ? '' : 'none';
-  if (tab === 'browse' && !setsLoaded) loadSets();
-  if (tab === 'city') renderCityLeague();
-}
 
 async function loadSets() {
   const status = document.getElementById('sets-status');
@@ -3703,6 +3712,9 @@ function renderCityLeague() {
         ${buildDlSection('Trainer', r.decklist.trainer)}
         ${buildDlSection('Energy',  r.decklist.energy)}
       </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <button class="btn btn-outline btn-block btn-sm" onclick="saveToMyDecks('city','${r.id}')">💾 Save to My Decks</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -3713,6 +3725,43 @@ function toggleCLDl(id) {
   if (!body) return;
   const open = body.classList.toggle('open');
   if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+}
+
+function saveToMyDecks(source, key) {
+  let srcName, srcDecklist;
+  if (source === 'meta') {
+    const deck = META_DECKS.find(d => d.name === key);
+    if (!deck) return;
+    srcName     = deck.name;
+    srcDecklist = deck.decklist;
+  } else if (source === 'city') {
+    const r = CITY_LEAGUE_RESULTS.find(d => d.id === key);
+    if (!r) return;
+    srcName     = `${r.deck} (City League)`;
+    srcDecklist = r.decklist;
+  } else return;
+
+  // Build cards array matching customDecks format
+  const cards = [
+    ...(srcDecklist.pokemon || []).map(c => ({ name: c.name, qty: c.qty, supertype: 'Pokémon' })),
+    ...(srcDecklist.trainer || []).map(c => ({ name: c.name, qty: c.qty, supertype: 'Trainer' })),
+    ...(srcDecklist.energy  || []).map(c => ({ name: c.name, qty: c.qty, supertype: 'Energy' })),
+  ];
+
+  // Avoid duplicates by name
+  const exists = customDecks.find(d => d.name === srcName);
+  if (exists) { toast(`"${srcName}" is already in My Decks`); return; }
+
+  const newDeck = {
+    id: 'deck_' + Date.now(),
+    name: srcName,
+    createdAt: Date.now(),
+    cards,
+    decklist: srcDecklist,
+  };
+  customDecks.push(newDeck);
+  save();
+  toast(`✓ Saved "${srcName}" to My Decks`);
 }
 
 // ═══ LIVE SCAN ═══
