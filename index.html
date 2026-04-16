@@ -410,6 +410,32 @@
 .deck-search-wrap input:focus { border-color:var(--accent); }
 .deck-search-icon { position:absolute;left:1.85rem;top:50%;transform:translateY(-50%);opacity:0.45;pointer-events:none; }
 
+/* ── Bulk Buy Calculator ── */
+.bb-line { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem 1rem;margin-bottom:10px; }
+.bb-line-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:0.7rem; }
+.bb-line-title { font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;color:var(--text); }
+.bb-sort { display:flex;border:1px solid var(--border2);border-radius:7px;overflow:hidden;flex-shrink:0; }
+.bb-sort-btn { padding:5px 13px;font-size:11px;font-weight:600;background:none;border:none;cursor:pointer;color:var(--muted);transition:all 0.15s;white-space:nowrap; }
+.bb-sort-btn.u.active { background:var(--surface3);color:var(--text); }
+.bb-sort-btn.s.active { background:var(--accent);color:#0d0d0f; }
+.bb-inputs { display:flex;align-items:center;gap:8px; }
+.bb-num { background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:0.52rem 0.5rem;color:var(--text);font-size:17px;font-weight:700;text-align:center;width:86px;outline:none;-moz-appearance:textfield; }
+.bb-num::-webkit-inner-spin-button,.bb-num::-webkit-outer-spin-button { -webkit-appearance:none; }
+.bb-num:focus { border-color:var(--accent); }
+.bb-price { background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:0.52rem 0.5rem;color:var(--accent);font-size:15px;font-weight:700;width:68px;outline:none;text-align:center;-moz-appearance:textfield; }
+.bb-price::-webkit-inner-spin-button,.bb-price::-webkit-outer-spin-button { -webkit-appearance:none; }
+.bb-price:focus { border-color:var(--accent); }
+.bb-sep { font-size:13px;color:var(--muted);flex-shrink:0; }
+.bb-sub { font-size:15px;font-weight:700;color:var(--accent);flex:1;text-align:right;white-space:nowrap;min-width:52px; }
+.bb-remove { background:none;border:none;cursor:pointer;color:var(--muted);font-size:17px;padding:2px 0 2px 4px;line-height:1;flex-shrink:0; }
+.bb-remove:active { color:var(--red); }
+.bb-total-bar { background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1rem; }
+.bb-total-row { display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);padding:4px 0;gap:10px; }
+.bb-total-row span:last-child { font-weight:600;color:var(--text);white-space:nowrap;flex-shrink:0; }
+.bb-total-row.count { font-size:11px;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:8px;border-bottom:1px solid var(--border); }
+.bb-total-row.grand { font-size:1.15rem;font-weight:700;padding-top:10px;margin-top:6px;border-top:2px solid var(--border2);color:var(--text); }
+.bb-total-row.grand span:last-child { color:var(--accent);font-size:1.3rem; }
+
 /* ── Sets browser ── */
 .set-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 1.1rem 1rem; }
 @media (min-width:600px) { .set-grid { grid-template-columns:repeat(3,1fr); } }
@@ -501,15 +527,31 @@
   <!-- ═══════════ STORE SCREEN ═══════════ -->
   <div id="screen-store" class="screen">
     <div class="page-header">
-      <div class="page-title">Storefront</div>
+      <div class="page-title">Store</div>
       <div style="font-size:13px;color:var(--green);font-weight:600" id="store-total">$0.00</div>
     </div>
-    <div class="section-label">Active Listings</div>
-    <div class="listing-list" id="listing-list"></div>
-    <div class="empty" id="store-empty">
-      <div class="empty-icon">🏪</div>
-      <h3>No listings yet</h3>
-      <p>Open a card in your binder and tap "List for Sale"</p>
+    <div style="padding:0 1.1rem">
+      <div class="tab-row" style="padding:0 0 0.8rem">
+        <button class="tab-btn active" id="tab-store-listings" onclick="switchStoreTab('listings')">My Listings</button>
+        <button class="tab-btn" id="tab-store-bulk" onclick="switchStoreTab('bulk')">Bulk Buy</button>
+      </div>
+    </div>
+
+    <!-- Listings panel -->
+    <div id="store-listings-panel">
+      <div class="listing-list" id="listing-list"></div>
+      <div class="empty" id="store-empty">
+        <div class="empty-icon">🏪</div>
+        <h3>No listings yet</h3>
+        <p>Open a card in your binder and tap "List for Sale"</p>
+      </div>
+    </div>
+
+    <!-- Bulk Buy panel -->
+    <div id="store-bulk-panel" style="display:none;padding:0 1.1rem 2rem">
+      <div id="bb-lines"></div>
+      <div id="bb-total-bar" class="bb-total-bar" style="display:none"></div>
+      <button class="btn btn-outline btn-sm" style="color:var(--muted);margin-top:4px" onclick="bbReset()">↺ Reset all</button>
     </div>
   </div>
 
@@ -818,7 +860,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v16
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v17
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1507,38 +1549,51 @@ function removeListing(uid) {
   toast('Listing removed');
 }
 
+let storeTab = 'listings';
+
+function switchStoreTab(tab) {
+  storeTab = tab;
+  document.getElementById('tab-store-listings').classList.toggle('active', tab === 'listings');
+  document.getElementById('tab-store-bulk').classList.toggle('active', tab === 'bulk');
+  document.getElementById('store-listings-panel').style.display = tab === 'listings' ? '' : 'none';
+  document.getElementById('store-bulk-panel').style.display    = tab === 'bulk'     ? '' : 'none';
+  if (tab === 'bulk') renderBulkBuy();
+}
+
 function renderStore() {
-  const list = document.getElementById('listing-list');
+  // Always keep listings up to date
+  const list  = document.getElementById('listing-list');
   const empty = document.getElementById('store-empty');
   const total = document.getElementById('store-total');
   if (!listings.length) {
     list.innerHTML = '';
     empty.style.display = '';
     total.textContent = '$0.00';
-    return;
+  } else {
+    empty.style.display = 'none';
+    let sum = 0;
+    list.innerHTML = listings.map(l => {
+      const card = inventory.find(c => (c.uid || c.id+'__normal') === l.uid);
+      if (!card) return '';
+      sum += l.price * l.qty;
+      const fl = finishLabel(card.finish);
+      return `<div class="listing-item">
+        <img src="${card.img}" alt="${card.name}">
+        <div class="listing-info">
+          <div class="listing-name">${card.name}</div>
+          <div class="listing-detail">${fl.icon} ${fl.label} · ${card.condition}</div>
+          <div class="listing-detail" style="margin-top:2px">${card.set}${l.notes ? ' · ' + l.notes : ''}</div>
+          <div class="listing-detail" style="margin-top:2px">Qty: ${l.qty}</div>
+        </div>
+        <div class="listing-actions">
+          <div class="listing-price">$${l.price.toFixed(2)}</div>
+          <button class="btn btn-outline btn-sm" onclick="removeListing('${l.uid}')">Remove</button>
+        </div>
+      </div>`;
+    }).join('');
+    total.textContent = '$' + sum.toFixed(2);
   }
-  empty.style.display = 'none';
-  let sum = 0;
-  list.innerHTML = listings.map(l => {
-    const card = inventory.find(c => (c.uid || c.id+'__normal') === l.uid);
-    if (!card) return '';
-    sum += l.price * l.qty;
-    const fl = finishLabel(card.finish);
-    return `<div class="listing-item">
-      <img src="${card.img}" alt="${card.name}">
-      <div class="listing-info">
-        <div class="listing-name">${card.name}</div>
-        <div class="listing-detail">${fl.icon} ${fl.label} · ${card.condition}</div>
-        <div class="listing-detail" style="margin-top:2px">${card.set}${l.notes ? ' · ' + l.notes : ''}</div>
-        <div class="listing-detail" style="margin-top:2px">Qty: ${l.qty}</div>
-      </div>
-      <div class="listing-actions">
-        <div class="listing-price">$${l.price.toFixed(2)}</div>
-        <button class="btn btn-outline btn-sm" onclick="removeListing('${l.uid}')">Remove</button>
-      </div>
-    </div>`;
-  }).join('');
-  total.textContent = '$' + sum.toFixed(2);
+  if (storeTab === 'bulk') renderBulkBuy();
 }
 
 // ═══ WISHLIST ═══
@@ -3252,6 +3307,119 @@ applyTheme(activeTheme);
 // ═══ INIT ═══
 renderInventory();
 renderWishlist();
+
+// ═══ BULK BUY CALCULATOR ═══
+const BB_DEFAULTS = [
+  { id:'common',  label:'Commons / Uncommons',         icon:'⬜', priceS:0.05, priceU:0.03 },
+  { id:'revholo', label:'Reverse Holos',               icon:'🔷', priceS:0.20, priceU:0.12 },
+  { id:'holo',    label:'Holo Rares',                  icon:'✨', priceS:0.50, priceU:0.30 },
+  { id:'ultra',   label:'Ultra Rares / ex / V / VSTAR',icon:'🌟', priceS:1.50, priceU:1.00 },
+  { id:'energy',  label:'Basic Energy',                icon:'⚡', priceS:0.03, priceU:0.02 },
+];
+let bbLines = null;  // initialised lazily
+
+function bbActivePrice(l) {
+  return l.customPrice != null ? l.customPrice : (l.sorted ? l.priceS : l.priceU);
+}
+
+function bbReset() {
+  bbLines = BB_DEFAULTS.map(d => ({ ...d, sorted: false, qty: 0, customPrice: null }));
+  renderBulkBuy();
+}
+
+function renderBulkBuy() {
+  if (!bbLines) bbReset();
+  const linesEl = document.getElementById('bb-lines');
+  if (!linesEl) return;
+
+  linesEl.innerHTML = bbLines.map(l => {
+    const price = bbActivePrice(l);
+    const sub   = l.qty * price;
+    return `
+    <div class="bb-line">
+      <div class="bb-line-hdr">
+        <div class="bb-line-title"><span>${l.icon}</span><span>${l.label}</span></div>
+        <button class="bb-remove" onclick="bbRemoveLine('${l.id}')">✕</button>
+      </div>
+      <div class="bb-sort" style="margin-bottom:0.7rem">
+        <button class="bb-sort-btn u ${!l.sorted ? 'active' : ''}" onclick="bbToggleSort('${l.id}',false)">Unsorted</button>
+        <button class="bb-sort-btn s ${l.sorted  ? 'active' : ''}" onclick="bbToggleSort('${l.id}',true)">Sorted</button>
+      </div>
+      <div class="bb-inputs">
+        <input class="bb-num" type="number" min="0" placeholder="0"
+          value="${l.qty || ''}"
+          oninput="bbSetQty('${l.id}',this.value)">
+        <span class="bb-sep">×</span>
+        <span class="bb-sep" style="font-size:11px">$</span>
+        <input class="bb-price" type="number" min="0" step="0.01" placeholder="0.00"
+          value="${price.toFixed(2)}"
+          oninput="bbSetPrice('${l.id}',this.value)">
+        <span class="bb-sub" data-bb-sub="${l.id}">${l.qty > 0 ? '= $'+sub.toFixed(2) : '—'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  bbRenderTotalBar();
+}
+
+function bbRenderTotalBar() {
+  const bar = document.getElementById('bb-total-bar');
+  if (!bar) return;
+  const active = (bbLines || []).filter(l => l.qty > 0);
+  if (!active.length) { bar.style.display = 'none'; return; }
+
+  const totalCards = active.reduce((s, l) => s + l.qty, 0);
+  const grandTotal = active.reduce((s, l) => s + l.qty * bbActivePrice(l), 0);
+
+  bar.style.display = '';
+  bar.innerHTML =
+    `<div class="bb-total-row count"><span>Total cards</span><span>${totalCards.toLocaleString()}</span></div>` +
+    active.map(l => {
+      const sub = l.qty * bbActivePrice(l);
+      return `<div class="bb-total-row">
+        <span>${l.icon} ${l.label} <span style="font-size:10px;opacity:0.55">(${l.sorted?'sorted':'unsorted'})</span></span>
+        <span>$${sub.toFixed(2)}</span>
+      </div>`;
+    }).join('') +
+    `<div class="bb-total-row grand"><span>Grand Total</span><span>$${grandTotal.toFixed(2)}</span></div>`;
+}
+
+// ── Inline updates (don't re-render inputs, preserves focus) ──
+function bbSetQty(id, val) {
+  const l = (bbLines||[]).find(x => x.id === id);
+  if (!l) return;
+  l.qty = Math.max(0, parseInt(val) || 0);
+  const sub = l.qty * bbActivePrice(l);
+  const el  = document.querySelector(`[data-bb-sub="${id}"]`);
+  if (el) el.textContent = l.qty > 0 ? '= $'+sub.toFixed(2) : '—';
+  bbRenderTotalBar();
+}
+
+function bbSetPrice(id, val) {
+  const l = (bbLines||[]).find(x => x.id === id);
+  if (!l) return;
+  const p = parseFloat(val);
+  l.customPrice = (isNaN(p) || p < 0) ? null : p;
+  const sub = l.qty * bbActivePrice(l);
+  const el  = document.querySelector(`[data-bb-sub="${id}"]`);
+  if (el) el.textContent = l.qty > 0 ? '= $'+sub.toFixed(2) : '—';
+  bbRenderTotalBar();
+}
+
+// ── Full re-renders (only on structural changes) ──
+function bbToggleSort(id, sorted) {
+  const l = (bbLines||[]).find(x => x.id === id);
+  if (!l) return;
+  l.sorted = sorted;
+  l.customPrice = null;   // revert to default price for this mode
+  renderBulkBuy();
+}
+
+function bbRemoveLine(id) {
+  if (!bbLines) return;
+  bbLines = bbLines.filter(x => x.id !== id);
+  renderBulkBuy();
+}
 
 // ═══ CITY LEAGUE RESULTS (April 2026) ═══
 const CITY_LEAGUE_RESULTS = [

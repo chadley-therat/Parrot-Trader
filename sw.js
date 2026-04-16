@@ -1,4 +1,4 @@
-const CACHE = 'tcgvault-v16';
+const CACHE = 'tcgvault-v17';
 const SHELL = ['./index.html', './manifest.json', './icon.svg'];
 
 // Install — cache the app shell
