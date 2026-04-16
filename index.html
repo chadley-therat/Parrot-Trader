@@ -156,6 +156,7 @@
 
   /* ── Modal / Sheet ── */
   .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; }
+  #detail-sheet  { z-index: 201; } /* Always above other sheets (e.g. set-cards-sheet) */
   .sheet-overlay.open { display: flex; align-items: flex-end; }
   .sheet { background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding: 0 1.2rem calc(1.5rem + env(safe-area-inset-bottom)); animation: slideUp 0.28s ease; }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -851,7 +852,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v18
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v19
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -2938,7 +2939,37 @@ function bulkDelete() {
 }
 
 // ═══ PRICE CACHE ═══
-const PRICE_CACHE_TTL = 24 * 60 * 60 * 1000;
+const PRICE_CACHE_TTL    = 24 * 60 * 60 * 1000;       // 24 h
+const SETS_LIST_TTL      =  7 * 24 * 60 * 60 * 1000;  // 7 days  – set list rarely changes
+const SET_CARDS_TTL      = 24 * 60 * 60 * 1000;        // 24 h    – card data per set
+
+// ── Sets-list cache ──
+function getSetsListCache() {
+  try {
+    const raw = localStorage.getItem('tcg_sets_list');
+    if (!raw) return null;
+    const { data, cachedAt } = JSON.parse(raw);
+    if (Date.now() - cachedAt > SETS_LIST_TTL) return null;
+    return data;
+  } catch { return null; }
+}
+function saveSetsListCache(data) {
+  try { localStorage.setItem('tcg_sets_list', JSON.stringify({ data, cachedAt: Date.now() })); } catch {}
+}
+
+// ── Per-set cards cache ──
+function getSetCardsCache(setId) {
+  try {
+    const raw = localStorage.getItem('tcg_set_cards_' + setId);
+    if (!raw) return null;
+    const { data, cachedAt } = JSON.parse(raw);
+    if (Date.now() - cachedAt > SET_CARDS_TTL) return null;
+    return data;
+  } catch { return null; }
+}
+function saveSetCardsCache(setId, data) {
+  try { localStorage.setItem('tcg_set_cards_' + setId, JSON.stringify({ data, cachedAt: Date.now() })); } catch {}
+}
 function getCachedPrice(cardId) {
   const c = priceCache[cardId];
   if (!c || Date.now() - c.cachedAt > PRICE_CACHE_TTL) return null;
@@ -3598,12 +3629,23 @@ let setsLoaded = false;
 async function loadSets() {
   const status = document.getElementById('sets-status');
   const grid   = document.getElementById('sets-grid');
+
+  // ── Serve from cache instantly if fresh ──
+  const cached = getSetsListCache();
+  if (cached) {
+    setsData   = cached;
+    setsLoaded = true;
+    if (status) status.textContent = `${setsData.length} sets`;
+    renderSetsGrid();
+    return;
+  }
+
   if (status) status.innerHTML = '<span class="loading-dots">Loading</span>';
   try {
     const res  = await fetch(`${POKEMON_API}/sets?orderBy=-releaseDate&pageSize=250`);
     const data = await res.json();
-    // Filter out online-only / junk series
     setsData = (data.data || []).filter(s => !/^(Online|POP Series)$/i.test(s.series));
+    saveSetsListCache(setsData);
     setsLoaded = true;
     if (status) status.textContent = `${setsData.length} sets`;
     renderSetsGrid();
@@ -3652,14 +3694,24 @@ async function openSetCards(set) {
       </div>
     </div>`;
   listEl.innerHTML = '';
-  statusEl.innerHTML = '<span class="loading-dots">Loading cards</span>';
   document.getElementById('set-cards-sheet').classList.add('open');
 
+  // ── Serve from cache instantly if fresh ──
+  const cached = getSetCardsCache(set.id);
+  if (cached) {
+    setCardsAll = cached;
+    statusEl.textContent = `${setCardsAll.length} cards (cached)`;
+    renderSetCardsList(setCardsAll);
+    return;
+  }
+
+  statusEl.innerHTML = '<span class="loading-dots">Loading cards</span>';
   try {
     const res  = await fetch(`${POKEMON_API}/cards?q=set.id:${set.id}&pageSize=250&orderBy=number&select=id,name,images,set,types,rarity,cardmarket,legalities,supertype,number,tcgplayer`);
     const data = await res.json();
     setCardsAll = (data.data || []);
     setCardsAll.forEach(cacheCardPrices);
+    saveSetCardsCache(set.id, setCardsAll);
     statusEl.textContent = `${setCardsAll.length} cards`;
     renderSetCardsList(setCardsAll);
   } catch(e) {
