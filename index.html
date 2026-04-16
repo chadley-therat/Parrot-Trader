@@ -852,7 +852,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v19
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v20
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1055,6 +1055,10 @@ function buildResultItem(c) {
   const types = (c.types || []).join(', ') || 'Unknown';
   const nm  = c.name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   const st  = (c.set?.name || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const pr  = getPullRate(c.rarity);
+  const pullBadge = pr
+    ? `<div style="font-size:10px;color:${PULL_TIER_COLOR[pr.tier]||'var(--muted)'};font-weight:600;margin-top:2px;white-space:nowrap">${pr.display}</div>`
+    : '';
   return `<div class="result-item" onclick="openCardDetail(${JSON.stringify(c).replace(/"/g,'&quot;')})">
     <img src="${imgSm}" alt="${c.name}" loading="lazy"
       data-lg="${imgLg}" data-name="${nm}" data-set="${st}"
@@ -1066,7 +1070,10 @@ function buildResultItem(c) {
       <div class="result-set">${c.set?.name || ''} · ${types}</div>
       <div style="margin-top:3px;display:flex;gap:4px">${legalityBadges(c.legalities)}</div>
     </div>
-    <div class="result-price">${priceStr}</div>
+    <div style="text-align:right;flex-shrink:0">
+      <div class="result-price">${priceStr}</div>
+      ${pullBadge}
+    </div>
   </div>`;
 }
 
@@ -1150,6 +1157,55 @@ function finishLabel(id) {
   return FINISHES.find(f => f.id === id) || { label: id || 'Normal', icon: '⬜' };
 }
 
+// ── Pull rate lookup (approximate booster pack odds per rarity) ──
+// Sources: official Pokémon TCG pack ratios + Limitless TCG / collector community averages.
+// Rates are per standard 10-card booster; SV era figures used for modern sets.
+const PULL_RATES = {
+  // ── Common/Uncommon — guaranteed slots, not meaningful "pulls" ──
+  'Common':                    null,
+  'Uncommon':                  null,
+  'Promo':                     null,
+  // ── Classic era ──
+  'Rare':                      { display: '~1 in 3',   packs: 3,   tier: 'rare',    tip: 'One rare per pack on average' },
+  'Rare Holo':                 { display: '~1 in 3',   packs: 3,   tier: 'rare',    tip: 'Guaranteed holo slot per pack' },
+  'Rare Holo EX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'EX ultra rare' },
+  'Rare Holo GX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'GX ultra rare' },
+  'Rare Holo V':               { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'V ultra rare' },
+  'Rare Holo VMAX':            { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'VMAX ultra rare' },
+  'Rare Holo VSTAR':           { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'VSTAR ultra rare' },
+  'Rare Ultra':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Full art / ultra rare' },
+  'Amazing Rare':              { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Amazing Rare' },
+  'LEGEND':                    { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'LEGEND card (half)' },
+  'Rare Shiny':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Shiny Pokémon' },
+  'Rare Shiny GX':             { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Shiny GX secret rare' },
+  'Rare Rainbow':              { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Rainbow rare / secret' },
+  'Rare Secret':               { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Secret rare' },
+  // ── Scarlet & Violet era ──
+  'Double Rare':               { display: '~1 in 8.5', packs: 8.5, tier: 'double',  tip: 'ex / Stage 2 Rare — ~1 per box' },
+  'Illustration Rare':         { display: '~1 in 16',  packs: 16,  tier: 'illus',   tip: 'Illustration Rare — ~3–4 per box' },
+  'Ultra Rare':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Full Art ex or Supporter — ~3 per box' },
+  'Special Illustration Rare': { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'Special Illustration Rare — ~1 per 2 boxes' },
+  'Hyper Rare':                { display: '~1 in 144', packs: 144, tier: 'hyper',   tip: 'Gold / Hyper Rare — ~1 per 4 boxes' },
+  'ACE SPEC Rare':             { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'ACE SPEC — ~1 per 2 boxes' },
+  'Shiny Rare':                { display: '~1 in 8.5', packs: 8.5, tier: 'double',  tip: 'Shiny Rare — ~1 per box' },
+  'Shiny Ultra Rare':          { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'Shiny Ultra Rare — ~1 per 2 boxes' },
+};
+
+const PULL_TIER_COLOR = {
+  rare:   'var(--text)',
+  double: 'var(--blue)',
+  illus:  'var(--blue)',
+  ultra:  'var(--accent)',
+  sir:    '#c084fc',   // purple
+  secret: 'var(--accent)',
+  hyper:  '#f59e0b',   // gold
+};
+
+function getPullRate(rarity) {
+  if (!rarity || !(rarity in PULL_RATES)) return null;
+  return PULL_RATES[rarity];
+}
+
 function openCardDetail(card) {
   activeCard = card;
   const existingAll = inventory.filter(i => i.id === card.id);
@@ -1170,6 +1226,7 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Set</span><span>${card.set?.name || '—'}</span></div>
         <div class="meta-row"><span>Type</span><span>${types}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${rarity}</span></div>
+        ${(() => { const pr = getPullRate(rarity); if (!pr) return ''; const c = PULL_TIER_COLOR[pr.tier] || 'var(--text)'; return `<div class="meta-row"><span>Pull Rate</span><span style="color:${c};font-weight:600" title="${pr.tip}">${pr.display} packs</span></div>`; })()}
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
