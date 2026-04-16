@@ -852,7 +852,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v20
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v21
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1157,38 +1157,37 @@ function finishLabel(id) {
   return FINISHES.find(f => f.id === id) || { label: id || 'Normal', icon: '⬜' };
 }
 
-// ── Pull rate lookup (approximate booster pack odds per rarity) ──
-// Sources: official Pokémon TCG pack ratios + Limitless TCG / collector community averages.
-// Rates are per standard 10-card booster; SV era figures used for modern sets.
+// ── Pull rate lookup ──
+// Per-pack odds for a standard 10-card SV booster.
+// Classic era (EX/GX/V/VMAX/VSTAR) figures from community-verified box break averages.
 const PULL_RATES = {
-  // ── Common/Uncommon — guaranteed slots, not meaningful "pulls" ──
   'Common':                    null,
   'Uncommon':                  null,
   'Promo':                     null,
-  // ── Classic era ──
-  'Rare':                      { display: '~1 in 3',   packs: 3,   tier: 'rare',    tip: 'One rare per pack on average' },
-  'Rare Holo':                 { display: '~1 in 3',   packs: 3,   tier: 'rare',    tip: 'Guaranteed holo slot per pack' },
-  'Rare Holo EX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'EX ultra rare' },
-  'Rare Holo GX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'GX ultra rare' },
-  'Rare Holo V':               { display: '~1 in 9',   packs: 9,   tier: 'ultra',   tip: 'V ultra rare' },
-  'Rare Holo VMAX':            { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'VMAX ultra rare' },
-  'Rare Holo VSTAR':           { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'VSTAR ultra rare' },
-  'Rare Ultra':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Full art / ultra rare' },
-  'Amazing Rare':              { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Amazing Rare' },
-  'LEGEND':                    { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'LEGEND card (half)' },
-  'Rare Shiny':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Shiny Pokémon' },
-  'Rare Shiny GX':             { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Shiny GX secret rare' },
-  'Rare Rainbow':              { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Rainbow rare / secret' },
-  'Rare Secret':               { display: '~1 in 72',  packs: 72,  tier: 'secret',  tip: 'Secret rare' },
+  // ── Classic / SWSH era ──
+  'Rare':                      { display: '~1 in 3',   tier: 'rare',   tip: '~1 guaranteed rare per pack' },
+  'Rare Holo':                 { display: '~1 in 3',   tier: 'rare',   tip: 'Holo slot — 1 per pack' },
+  'Rare Holo EX':              { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
+  'Rare Holo GX':              { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
+  'Rare Holo V':               { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
+  'Rare Holo VMAX':            { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
+  'Rare Holo VSTAR':           { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
+  'Rare Ultra':                { display: '~1 in 18',  tier: 'ultra',  tip: 'Full art / ultra rare — ~2 per box' },
+  'Amazing Rare':              { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
+  'LEGEND':                    { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box (counts as 1 card)' },
+  'Rare Shiny':                { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
+  'Rare Shiny GX':             { display: '~1 in 60',  tier: 'secret', tip: 'Shiny Vault secret — ~1 per 2 boxes' },
+  'Rare Rainbow':              { display: '~1 in 60',  tier: 'secret', tip: 'Rainbow secret — ~1 per 2 boxes' },
+  'Rare Secret':               { display: '~1 in 60',  tier: 'secret', tip: 'Secret rare — ~1 per 2 boxes' },
   // ── Scarlet & Violet era ──
-  'Double Rare':               { display: '~1 in 8.5', packs: 8.5, tier: 'double',  tip: 'ex / Stage 2 Rare — ~1 per box' },
-  'Illustration Rare':         { display: '~1 in 16',  packs: 16,  tier: 'illus',   tip: 'Illustration Rare — ~3–4 per box' },
-  'Ultra Rare':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',   tip: 'Full Art ex or Supporter — ~3 per box' },
-  'Special Illustration Rare': { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'Special Illustration Rare — ~1 per 2 boxes' },
-  'Hyper Rare':                { display: '~1 in 144', packs: 144, tier: 'hyper',   tip: 'Gold / Hyper Rare — ~1 per 4 boxes' },
-  'ACE SPEC Rare':             { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'ACE SPEC — ~1 per 2 boxes' },
-  'Shiny Rare':                { display: '~1 in 8.5', packs: 8.5, tier: 'double',  tip: 'Shiny Rare — ~1 per box' },
-  'Shiny Ultra Rare':          { display: '~1 in 80',  packs: 80,  tier: 'sir',     tip: 'Shiny Ultra Rare — ~1 per 2 boxes' },
+  'Double Rare':               { display: '~1 in 8',   tier: 'double', tip: 'ex Rare — ~4–5 per box' },
+  'Illustration Rare':         { display: '~1 in 16',  tier: 'illus',  tip: '~2–3 per box' },
+  'Ultra Rare':                { display: '~1 in 18',  tier: 'ultra',  tip: 'Full Art ex / Supporter — ~2 per box' },
+  'Special Illustration Rare': { display: '~1 in 64',  tier: 'sir',    tip: '~1 per 2 boxes' },
+  'Hyper Rare':                { display: '~1 in 128', tier: 'hyper',  tip: 'Gold card — ~1 per 3–4 boxes' },
+  'ACE SPEC Rare':             { display: '~1 in 66',  tier: 'sir',    tip: '~1 per 2 boxes' },
+  'Shiny Rare':                { display: '~1 in 8',   tier: 'double', tip: 'Shiny Rare — ~4–5 per box' },
+  'Shiny Ultra Rare':          { display: '~1 in 64',  tier: 'sir',    tip: '~1 per 2 boxes' },
 };
 
 const PULL_TIER_COLOR = {
@@ -1196,14 +1195,28 @@ const PULL_TIER_COLOR = {
   double: 'var(--blue)',
   illus:  'var(--blue)',
   ultra:  'var(--accent)',
-  sir:    '#c084fc',   // purple
+  sir:    '#c084fc',
   secret: 'var(--accent)',
-  hyper:  '#f59e0b',   // gold
+  hyper:  '#f59e0b',
 };
 
 function getPullRate(rarity) {
   if (!rarity || !(rarity in PULL_RATES)) return null;
   return PULL_RATES[rarity];
+}
+
+// Renders a pull-rate meta-row for openCardDetail (avoids IIFE in template)
+function pullRateRow(rarity) {
+  const pr = getPullRate(rarity);
+  if (!pr) return '';
+  const color = PULL_TIER_COLOR[pr.tier] || 'var(--text)';
+  return `<div class="meta-row">
+    <span>Pull Rate</span>
+    <div style="text-align:right;line-height:1.3">
+      <div style="color:${color};font-weight:600">${pr.display} packs</div>
+      <div style="font-size:10px;color:var(--muted)">${pr.tip}</div>
+    </div>
+  </div>`;
 }
 
 function openCardDetail(card) {
@@ -1226,7 +1239,7 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Set</span><span>${card.set?.name || '—'}</span></div>
         <div class="meta-row"><span>Type</span><span>${types}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${rarity}</span></div>
-        ${(() => { const pr = getPullRate(rarity); if (!pr) return ''; const c = PULL_TIER_COLOR[pr.tier] || 'var(--text)'; return `<div class="meta-row"><span>Pull Rate</span><span style="color:${c};font-weight:600" title="${pr.tip}">${pr.display} packs</span></div>`; })()}
+        ${pullRateRow(rarity)}
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
@@ -3538,141 +3551,228 @@ function bbRemoveLine(id) {
 // ═══ CITY LEAGUE RESULTS (April 2026) ═══
 const CITY_LEAGUE_RESULTS = [
   {
-    id:'cl-01', date:'2026-04-13', event:'Tokyo Spring City League', country:'🇯🇵', placement:1,
-    deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
-    decklist:{
-      pokemon:[
-        {name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},
-        {name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},
-        {name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}
-      ],
-      trainer:[
-        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
-        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
-        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},
-        {name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}
-      ],
-      energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]
-    }
+    id:'cl-01', date:'2026-04-13', event:'Tokyo Spring City League', country:'🇯🇵',
+    placements:[
+      { place:1, deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},{name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},{name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]}},
+      { place:2, deck:'Gardevoir ex', archetype:'Psychic Accel', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},{name:'Scream Tail',qty:3},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:2},{name:'Collapsed Stadium',qty:1}],
+          energy:[{name:'Psychic Energy',qty:9},{name:'Reversal Energy',qty:2}]}},
+      {place:3,  deck:'Charizard ex / Pidgeot ex',   archetype:'Fire Beatdown',     energy:['Fire']},
+      {place:4,  deck:'Raging Bolt ex',              archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:5,  deck:'Dragapult ex / Dusknoir',     archetype:'Spread Control',     energy:['Psychic']},
+      {place:6,  deck:"N's Zoroark ex",              archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:7,  deck:'Gardevoir ex',                archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:8,  deck:'Gholdengo ex',                archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:9,  deck:'Iron Thorns ex',              archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:10, deck:'Froslass / Munkidori',        archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:11, deck:'Charizard ex / Pidgeot ex',   archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:12, deck:'Raging Bolt ex',              archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:13, deck:'Klawf',                       archetype:'Control',            energy:['Fighting']},
+      {place:14, deck:'Miraidon ex',                 archetype:'Lightning Aggro',    energy:['Lightning']},
+      {place:15, deck:"Marnie's Grimmsnarl ex",      archetype:'Dark Accel',         energy:['Darkness']},
+    ]
   },
   {
-    id:'cl-02', date:'2026-04-12', event:'São Paulo City League', country:'🇧🇷', placement:1,
-    deck:'Raging Bolt ex', archetype:'Lightning Aggro', energy:['Lightning','Fighting'],
-    decklist:{
-      pokemon:[
-        {name:'Raging Bolt ex',qty:3},{name:'Teal Mask Ogerpon ex',qty:2},{name:'Munkidori',qty:2},
-        {name:'Bloodmoon Ursaluna ex',qty:1},{name:'Radiant Charizard',qty:1}
-      ],
-      trainer:[
-        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
-        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
-        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
-        {name:'Energy Switch',qty:3},{name:'Defiance Band',qty:3}
-      ],
-      energy:[{name:'Lightning Energy',qty:10},{name:'Fighting Energy',qty:4}]
-    }
+    id:'cl-02', date:'2026-04-12', event:'São Paulo City League', country:'🇧🇷',
+    placements:[
+      { place:1, deck:'Raging Bolt ex', archetype:'Lightning Aggro', energy:['Lightning','Fighting'],
+        decklist:{
+          pokemon:[{name:'Raging Bolt ex',qty:3},{name:'Teal Mask Ogerpon ex',qty:2},{name:'Munkidori',qty:2},{name:'Bloodmoon Ursaluna ex',qty:1},{name:'Radiant Charizard',qty:1}],
+          trainer:[{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},{name:'Energy Switch',qty:3},{name:'Defiance Band',qty:3},{name:'Pokégear 3.0',qty:3}],
+          energy:[{name:'Lightning Energy',qty:10},{name:'Fighting Energy',qty:4}]}},
+      { place:2, deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},{name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},{name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]}},
+      {place:3,  deck:'Gardevoir ex',               archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:4,  deck:'Gholdengo ex',               archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:5,  deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:6,  deck:'Dragapult ex / Dusknoir',    archetype:'Spread Control',     energy:['Psychic']},
+      {place:7,  deck:'Raging Bolt ex',             archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:8,  deck:"Marnie's Grimmsnarl ex",     archetype:'Dark Accel',         energy:['Darkness']},
+      {place:9,  deck:"N's Zoroark ex",             archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:10, deck:'Froslass / Munkidori',       archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:11, deck:'Gardevoir ex',               archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:12, deck:'Roaring Moon ex',            archetype:'Dark Aggro',         energy:['Darkness']},
+      {place:13, deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:14, deck:'Lugia VSTAR',                archetype:'Colorless Accel',    energy:['Colorless']},
+      {place:15, deck:'Terapagos ex',               archetype:'Stall Control',      energy:['Colorless']},
+    ]
   },
   {
-    id:'cl-03', date:'2026-04-12', event:'Seoul City League', country:'🇰🇷', placement:1,
-    deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown', energy:['Fire'],
-    decklist:{
-      pokemon:[
-        {name:'Charizard ex',qty:3},{name:'Charmeleon',qty:2},{name:'Charmander',qty:4},
-        {name:'Pidgeot ex',qty:2},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3},{name:'Rotom V',qty:1}
-      ],
-      trainer:[
-        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
-        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
-        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:1},
-        {name:'Prime Catcher',qty:1},{name:'Nest Ball',qty:2}
-      ],
-      energy:[{name:'Fire Energy',qty:11}]
-    }
+    id:'cl-03', date:'2026-04-12', event:'Seoul City League', country:'🇰🇷',
+    placements:[
+      { place:1, deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown', energy:['Fire'],
+        decklist:{
+          pokemon:[{name:'Charizard ex',qty:3},{name:'Charmeleon',qty:2},{name:'Charmander',qty:4},{name:'Pidgeot ex',qty:2},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3},{name:'Rotom V',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Nest Ball',qty:2}],
+          energy:[{name:'Fire Energy',qty:11}]}},
+      { place:2, deck:'Raging Bolt ex', archetype:'Lightning Aggro', energy:['Lightning','Fighting'],
+        decklist:{
+          pokemon:[{name:'Raging Bolt ex',qty:4},{name:'Teal Mask Ogerpon ex',qty:2},{name:'Munkidori',qty:2},{name:'Bloodmoon Ursaluna ex',qty:1}],
+          trainer:[{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},{name:'Energy Switch',qty:4},{name:'Defiance Band',qty:3},{name:'Pokégear 3.0',qty:3}],
+          energy:[{name:'Lightning Energy',qty:10},{name:'Fighting Energy',qty:3}]}},
+      {place:3,  deck:'Dragapult ex / Dusknoir',    archetype:'Spread Control',     energy:['Psychic']},
+      {place:4,  deck:'Gardevoir ex',               archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:5,  deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:6,  deck:'Gholdengo ex',               archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:7,  deck:"N's Zoroark ex",             archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:8,  deck:'Dragapult ex / Dusknoir',    archetype:'Spread Control',     energy:['Psychic']},
+      {place:9,  deck:'Miraidon ex',                archetype:'Lightning Aggro',    energy:['Lightning']},
+      {place:10, deck:'Gardevoir ex',               archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:11, deck:"Marnie's Grimmsnarl ex",     archetype:'Dark Accel',         energy:['Darkness']},
+      {place:12, deck:'Iron Thorns ex',             archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:13, deck:'Froslass / Munkidori',       archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:14, deck:'Regidrago VSTAR',            archetype:'Dragon Aggro',       energy:['Dragon']},
+      {place:15, deck:'Raging Bolt ex',             archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+    ]
   },
   {
-    id:'cl-04', date:'2026-04-06', event:'Mexico City League', country:'🇲🇽', placement:1,
-    deck:"Marnie's Grimmsnarl ex", archetype:'Dark Accel', energy:['Darkness'],
-    decklist:{
-      pokemon:[
-        {name:"Marnie's Grimmsnarl ex",qty:3},{name:"Marnie's Morgrem",qty:2},{name:"Marnie's Impidimp",qty:4},
-        {name:'Pecharunt ex',qty:2},{name:'Munkidori',qty:2}
-      ],
-      trainer:[
-        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
-        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
-        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
-        {name:'Colress Experiment',qty:3}
-      ],
-      energy:[{name:'Darkness Energy',qty:11},{name:'Reversal Energy',qty:2}]
-    }
+    id:'cl-04', date:'2026-04-06', event:'Mexico City League', country:'🇲🇽',
+    placements:[
+      { place:1, deck:"Marnie's Grimmsnarl ex", archetype:'Dark Accel', energy:['Darkness'],
+        decklist:{
+          pokemon:[{name:"Marnie's Grimmsnarl ex",qty:3},{name:"Marnie's Morgrem",qty:2},{name:"Marnie's Impidimp",qty:4},{name:'Pecharunt ex',qty:2},{name:'Munkidori',qty:2}],
+          trainer:[{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},{name:'Colress Experiment',qty:3}],
+          energy:[{name:'Darkness Energy',qty:11},{name:'Reversal Energy',qty:2}]}},
+      { place:2, deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},{name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},{name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]}},
+      {place:3,  deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:4,  deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:5,  deck:"N's Zoroark ex",            archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:6,  deck:'Raging Bolt ex',            archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:7,  deck:"Marnie's Grimmsnarl ex",    archetype:'Dark Accel',         energy:['Darkness']},
+      {place:8,  deck:'Froslass / Munkidori',      archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:9,  deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:10, deck:'Gholdengo ex',              archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:11, deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:12, deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:13, deck:'Lugia VSTAR',               archetype:'Colorless Accel',    energy:['Colorless']},
+      {place:14, deck:'Klawf',                     archetype:'Control',            energy:['Fighting']},
+      {place:15, deck:'Roaring Moon ex',           archetype:'Dark Aggro',         energy:['Darkness']},
+    ]
   },
   {
-    id:'cl-05', date:'2026-04-06', event:'Sydney City League', country:'🇦🇺', placement:1,
-    deck:'Gardevoir ex', archetype:'Psychic Accel', energy:['Psychic'],
-    decklist:{
-      pokemon:[
-        {name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},
-        {name:'Scream Tail',qty:2},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}
-      ],
-      trainer:[
-        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},
-        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
-        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},
-        {name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:2}
-      ],
-      energy:[{name:'Psychic Energy',qty:11}]
-    }
+    id:'cl-05', date:'2026-04-06', event:'Sydney City League', country:'🇦🇺',
+    placements:[
+      { place:1, deck:'Gardevoir ex', archetype:'Psychic Accel', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},{name:'Scream Tail',qty:2},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:2}],
+          energy:[{name:'Psychic Energy',qty:11}]}},
+      { place:2, deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},{name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},{name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]}},
+      {place:3,  deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:4,  deck:'Gholdengo ex',               archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:5,  deck:'Gardevoir ex',               archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:6,  deck:'Raging Bolt ex',             archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:7,  deck:'Dragapult ex / Dusknoir',    archetype:'Spread Control',     energy:['Psychic']},
+      {place:8,  deck:"N's Zoroark ex",             archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:9,  deck:'Iron Thorns ex',             archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:10, deck:'Froslass / Munkidori',       archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:11, deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:12, deck:"Marnie's Grimmsnarl ex",     archetype:'Dark Accel',         energy:['Darkness']},
+      {place:13, deck:'Klawf',                      archetype:'Control',            energy:['Fighting']},
+      {place:14, deck:'Miraidon ex',                archetype:'Lightning Aggro',    energy:['Lightning']},
+      {place:15, deck:'Terapagos ex',               archetype:'Stall Control',      energy:['Colorless']},
+    ]
   },
   {
-    id:'cl-06', date:'2026-04-05', event:'Berlin City League', country:'🇩🇪', placement:1,
-    deck:"N's Zoroark ex", archetype:'Dark Disruption', energy:['Darkness'],
-    decklist:{
-      pokemon:[
-        {name:"N's Zoroark ex",qty:3},{name:"N's Zorua",qty:4},{name:'Pecharunt ex',qty:2},
-        {name:'Munkidori',qty:2},{name:"N's Snorlax",qty:1}
-      ],
-      trainer:[
-        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
-        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
-        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:"N's PC",qty:4},
-        {name:'Prime Catcher',qty:1}
-      ],
-      energy:[{name:'Darkness Energy',qty:10},{name:'Reversal Energy',qty:3}]
-    }
+    id:'cl-06', date:'2026-04-05', event:'Berlin City League', country:'🇩🇪',
+    placements:[
+      { place:1, deck:"N's Zoroark ex", archetype:'Dark Disruption', energy:['Darkness'],
+        decklist:{
+          pokemon:[{name:"N's Zoroark ex",qty:3},{name:"N's Zorua",qty:4},{name:'Pecharunt ex',qty:2},{name:'Munkidori',qty:2},{name:"N's Snorlax",qty:1}],
+          trainer:[{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:"N's PC",qty:4},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Darkness Energy',qty:10},{name:'Reversal Energy',qty:3}]}},
+      { place:2, deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown', energy:['Fire'],
+        decklist:{
+          pokemon:[{name:'Charizard ex',qty:3},{name:'Charmeleon',qty:2},{name:'Charmander',qty:4},{name:'Pidgeot ex',qty:2},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3},{name:'Rotom V',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Nest Ball',qty:2}],
+          energy:[{name:'Fire Energy',qty:11}]}},
+      {place:3,  deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:4,  deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:5,  deck:'Raging Bolt ex',            archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:6,  deck:"Marnie's Grimmsnarl ex",    archetype:'Dark Accel',         energy:['Darkness']},
+      {place:7,  deck:"N's Zoroark ex",            archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:8,  deck:'Gholdengo ex',              archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:9,  deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:10, deck:'Froslass / Munkidori',      archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:11, deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:12, deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:13, deck:'Roaring Moon ex',           archetype:'Dark Aggro',         energy:['Darkness']},
+      {place:14, deck:'Iron Thorns ex',            archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:15, deck:'Lugia VSTAR',               archetype:'Colorless Accel',    energy:['Colorless']},
+    ]
   },
   {
-    id:'cl-07', date:'2026-04-05', event:'Chicago City League', country:'🇺🇸', placement:1,
-    deck:'Gholdengo ex', archetype:'Item Lock Control', energy:['Metal','Psychic'],
-    decklist:{
-      pokemon:[
-        {name:'Gholdengo ex',qty:3},{name:'Gimmighoul',qty:4},{name:'Fezandipiti ex',qty:2},
-        {name:'Roaring Moon ex',qty:2},{name:'Munkidori',qty:1}
-      ],
-      trainer:[
-        {name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},
-        {name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},
-        {name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},
-        {name:'Colress Experiment',qty:3},{name:'Calamitous Wasteland',qty:2}
-      ],
-      energy:[{name:'Metal Energy',qty:8},{name:'Psychic Energy',qty:4}]
-    }
+    id:'cl-07', date:'2026-04-05', event:'Chicago City League', country:'🇺🇸',
+    placements:[
+      { place:1, deck:'Gholdengo ex', archetype:'Item Lock Control', energy:['Metal','Psychic'],
+        decklist:{
+          pokemon:[{name:'Gholdengo ex',qty:3},{name:'Gimmighoul',qty:4},{name:'Fezandipiti ex',qty:2},{name:'Roaring Moon ex',qty:2},{name:'Munkidori',qty:1}],
+          trainer:[{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},{name:'Colress Experiment',qty:3},{name:'Calamitous Wasteland',qty:2}],
+          energy:[{name:'Metal Energy',qty:8},{name:'Psychic Energy',qty:4}]}},
+      { place:2, deck:'Dragapult ex / Dusknoir', archetype:'Spread Control', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Dragapult ex',qty:3},{name:'Drakloak',qty:2},{name:'Dreepy',qty:4},{name:'Dusknoir',qty:2},{name:'Dusclops',qty:1},{name:'Duskull',qty:4},{name:'Pidgeot ex',qty:1},{name:'Pidgeotto',qty:1},{name:'Pidgey',qty:3}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'TM: Devolution',qty:2},{name:'Prime Catcher',qty:1}],
+          energy:[{name:'Psychic Energy',qty:7},{name:'Reversal Energy',qty:1}]}},
+      {place:3,  deck:'Raging Bolt ex',            archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:4,  deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:5,  deck:'Charizard ex / Pidgeot ex', archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:6,  deck:"N's Zoroark ex",            archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:7,  deck:'Gholdengo ex',              archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:8,  deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:9,  deck:'Froslass / Munkidori',      archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:10, deck:'Iron Thorns ex',            archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:11, deck:"Marnie's Grimmsnarl ex",    archetype:'Dark Accel',         energy:['Darkness']},
+      {place:12, deck:'Raging Bolt ex',            archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:13, deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:14, deck:'Terapagos ex',              archetype:'Stall Control',      energy:['Colorless']},
+      {place:15, deck:'Klawf',                     archetype:'Control',            energy:['Fighting']},
+    ]
   },
   {
-    id:'cl-08', date:'2026-03-30', event:'Toronto City League', country:'🇨🇦', placement:1,
-    deck:'Froslass / Munkidori', archetype:'Poison Status', energy:['Water','Psychic'],
-    decklist:{
-      pokemon:[
-        {name:'Froslass',qty:3},{name:'Snorunt',qty:4},{name:'Munkidori',qty:3},
-        {name:'Pecharunt ex',qty:2},{name:'Greninja ex',qty:1}
-      ],
-      trainer:[
-        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},
-        {name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},
-        {name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},
-        {name:'Prime Catcher',qty:1},{name:'Toxic Chain',qty:2}
-      ],
-      energy:[{name:'Water Energy',qty:7},{name:'Psychic Energy',qty:4}]
-    }
+    id:'cl-08', date:'2026-03-30', event:'Toronto City League', country:'🇨🇦',
+    placements:[
+      { place:1, deck:'Froslass / Munkidori', archetype:'Poison Status', energy:['Water','Psychic'],
+        decklist:{
+          pokemon:[{name:'Froslass',qty:3},{name:'Snorunt',qty:4},{name:'Munkidori',qty:3},{name:'Pecharunt ex',qty:2},{name:'Greninja ex',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Nest Ball',qty:3},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Counter Catcher',qty:2},{name:'Prime Catcher',qty:1},{name:'Toxic Chain',qty:2}],
+          energy:[{name:'Water Energy',qty:7},{name:'Psychic Energy',qty:4}]}},
+      { place:2, deck:'Gardevoir ex', archetype:'Psychic Accel', energy:['Psychic'],
+        decklist:{
+          pokemon:[{name:'Gardevoir ex',qty:3},{name:'Kirlia',qty:3},{name:'Ralts',qty:4},{name:'Scream Tail',qty:3},{name:'Munkidori',qty:2},{name:'Drifloon',qty:1}],
+          trainer:[{name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:4},{name:'Rare Candy',qty:4},{name:'Iono',qty:4},{name:"Professor's Research",qty:3},{name:"Boss's Orders",qty:2},{name:'Arven',qty:2},{name:'Night Stretcher',qty:2},{name:'Nest Ball',qty:3},{name:'Counter Catcher',qty:1},{name:'Prime Catcher',qty:1},{name:'Hyper Aroma',qty:2},{name:'Collapsed Stadium',qty:1}],
+          energy:[{name:'Psychic Energy',qty:9},{name:'Reversal Energy',qty:2}]}},
+      {place:3,  deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:4,  deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:5,  deck:'Raging Bolt ex',            archetype:'Lightning Aggro',    energy:['Lightning','Fighting']},
+      {place:6,  deck:"N's Zoroark ex",            archetype:'Dark Disruption',    energy:['Darkness']},
+      {place:7,  deck:'Froslass / Munkidori',      archetype:'Poison Status',      energy:['Water','Psychic']},
+      {place:8,  deck:'Gholdengo ex',              archetype:'Item Lock Control',  energy:['Metal','Psychic']},
+      {place:9,  deck:'Gardevoir ex',              archetype:'Psychic Accel',      energy:['Psychic']},
+      {place:10, deck:"Marnie's Grimmsnarl ex",    archetype:'Dark Accel',         energy:['Darkness']},
+      {place:11, deck:'Dragapult ex / Dusknoir',   archetype:'Spread Control',     energy:['Psychic']},
+      {place:12, deck:'Iron Thorns ex',            archetype:'Paralysis Lock',     energy:['Lightning']},
+      {place:13, deck:'Charizard ex / Pidgeot ex',  archetype:'Fire Beatdown',      energy:['Fire']},
+      {place:14, deck:'Miraidon ex',               archetype:'Lightning Aggro',    energy:['Lightning']},
+      {place:15, deck:'Klawf',                     archetype:'Control',            energy:['Fighting']},
+    ]
   }
 ];
 
@@ -3789,40 +3889,82 @@ function renderSetCardsList(cards) {
 }
 
 // ── City League rendering ──
+function clPlaceBadge(n) {
+  if (n === 1) return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#f59e0b;color:#0d0d0f;flex-shrink:0">1st</span>`;
+  if (n === 2) return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#94a3b8;color:#0d0d0f;flex-shrink:0">2nd</span>`;
+  if (n === 3) return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#b45309;color:#fff;flex-shrink:0">3rd</span>`;
+  if (n === 4) return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#b45309;color:#fff;flex-shrink:0">4th</span>`;
+  return `<span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:var(--surface3);color:var(--muted);flex-shrink:0">${n}th</span>`;
+}
+
 function renderCityLeague() {
   const el = document.getElementById('city-league-list');
   if (!el) return;
   el.innerHTML = CITY_LEAGUE_RESULTS.map(r => {
-    const dlId = 'cl-dl-' + r.id;
-    const totalPokemon = r.decklist.pokemon.reduce((s,c)=>s+c.qty,0);
-    const totalTrainer = r.decklist.trainer.reduce((s,c)=>s+c.qty,0);
-    const totalEnergy  = r.decklist.energy.reduce((s,c)=>s+c.qty,0);
-    const d = new Date(r.date);
-    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const winner  = r.placements[0];
+    const d       = new Date(r.date);
+    const dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    const tcId    = 'tc-' + r.id;
+
+    const placementsHtml = r.placements.map(p => {
+      const chips = p.energy.map(e => `<span class="cl-chip" style="font-size:10px;padding:1px 6px">${e}</span>`).join('');
+      if (p.decklist) {
+        const dlId = `dl-${r.id}-${p.place}`;
+        const totP = p.decklist.pokemon.reduce((s,c)=>s+c.qty,0);
+        const totT = p.decklist.trainer.reduce((s,c)=>s+c.qty,0);
+        const totE = p.decklist.energy.reduce((s,c)=>s+c.qty,0);
+        return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            ${clPlaceBadge(p.place)}
+            <span style="font-size:13px;font-weight:600;flex:1">${p.deck}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:6px;padding-left:2px">
+            <span style="font-size:11px;color:var(--muted)">${p.archetype}</span>
+            ${chips}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="dl-toggle" style="padding:3px 10px;font-size:11px;margin:0" onclick="toggleCLDl('${dlId}')">
+              <span id="${dlId}-arrow" style="display:inline-block;transition:transform 0.2s">▶</span>
+              Decklist (${totP}P/${totT}T/${totE}E)
+            </button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;padding:3px 10px" onclick="saveToMyDecks('city','${r.id}:${p.place}')">💾 Save</button>
+          </div>
+          <div class="dl-body" id="${dlId}" style="margin-top:6px">
+            ${buildDlSection('Pokémon', p.decklist.pokemon)}
+            ${buildDlSection('Trainer', p.decklist.trainer)}
+            ${buildDlSection('Energy',  p.decklist.energy)}
+          </div>
+        </div>`;
+      }
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        ${clPlaceBadge(p.place)}
+        <span style="font-size:13px;font-weight:500;flex:1">${p.deck}</span>
+        <span style="font-size:11px;color:var(--muted);flex-shrink:0">${p.archetype}</span>
+        <div style="display:flex;gap:3px;flex-wrap:wrap">${chips}</div>
+      </div>`;
+    }).join('');
+
     return `<div class="cl-card">
       <div class="cl-header">
         <div>
-          <div class="cl-deck-name">${r.country} ${r.deck}</div>
-          <div class="cl-event">${r.event} · ${dateStr}</div>
+          <div class="cl-deck-name">${r.country} ${r.event}</div>
+          <div class="cl-event">${dateStr}</div>
         </div>
-        <div class="cl-badge">1st Place</div>
+        <div class="cl-badge">Top ${r.placements.length}</div>
       </div>
-      <div class="cl-chips">
-        <span class="cl-chip">${r.archetype}</span>
-        ${r.energy.map(e=>`<span class="cl-chip">${e}</span>`).join('')}
-        <span class="cl-chip">${totalPokemon}P / ${totalTrainer}T / ${totalEnergy}E</span>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+          <span style="font-size:10px;font-weight:700;background:#f59e0b;color:#0d0d0f;padding:1px 6px;border-radius:3px">CHAMPION</span>
+          <span style="font-size:14px;font-weight:700">${winner.deck}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">${winner.archetype} · ${winner.energy.join('/')}</div>
       </div>
-      <button class="dl-toggle" onclick="toggleCLDl('${dlId}')">
-        <span style="transform:rotate(0deg);transition:transform 0.2s;display:inline-block" id="${dlId}-arrow">▶</span>
-        Full Decklist
+      <button class="dl-toggle" onclick="toggleCLDl('${tcId}')">
+        <span id="${tcId}-arrow" style="display:inline-block;transition:transform 0.2s">▶</span>
+        Top ${r.placements.length} Results
       </button>
-      <div class="dl-body" id="${dlId}">
-        ${buildDlSection('Pokémon', r.decklist.pokemon)}
-        ${buildDlSection('Trainer', r.decklist.trainer)}
-        ${buildDlSection('Energy',  r.decklist.energy)}
-      </div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        <button class="btn btn-outline btn-block btn-sm" onclick="saveToMyDecks('city','${r.id}')">💾 Save to My Decks</button>
+      <div class="dl-body" id="${tcId}" style="padding:0 0 4px">
+        ${placementsHtml}
       </div>
     </div>`;
   }).join('');
@@ -3844,10 +3986,14 @@ function saveToMyDecks(source, key) {
     srcName     = deck.name;
     srcDecklist = deck.decklist;
   } else if (source === 'city') {
-    const r = CITY_LEAGUE_RESULTS.find(d => d.id === key);
-    if (!r) return;
-    srcName     = `${r.deck} (City League)`;
-    srcDecklist = r.decklist;
+    const [evId, placeStr] = key.split(':');
+    const ev = CITY_LEAGUE_RESULTS.find(r => r.id === evId);
+    if (!ev) return;
+    const p = ev.placements.find(pl => pl.place === parseInt(placeStr));
+    if (!p || !p.decklist) return;
+    const placeLabel = p.place === 1 ? '1st' : p.place === 2 ? '2nd' : p.place === 3 ? '3rd' : `${p.place}th`;
+    srcName     = `${p.deck} — ${ev.event} (${placeLabel})`;
+    srcDecklist = p.decklist;
   } else return;
 
   // Build cards array matching customDecks format
