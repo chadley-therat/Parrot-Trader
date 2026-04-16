@@ -818,7 +818,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v15
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v16
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1582,26 +1582,44 @@ function renderWishlist() {
   if (!grid) return;
   const q = document.getElementById('wishlist-search')?.value.toLowerCase() || '';
   const filtered = q ? wishlist.filter(w => w.name.toLowerCase().includes(q) || w.set.toLowerCase().includes(q)) : wishlist;
-  grid.innerHTML = filtered.map(w => `
+  grid.innerHTML = filtered.map(w => {
+    const lg   = (w.imgLg || w.img).replace(/"/g,'&quot;');
+    const nm   = w.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    const st   = (w.set||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    return `
     <div class="wish-card" onclick="openWishCard('${w.id}')">
       <div style="position:relative">
-        <img src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/></svg>'" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;border-radius:8px">
+        <img src="${w.img}" alt="${w.name}" loading="lazy"
+          data-lg="${lg}" data-name="${nm}" data-set="${st}"
+          ontouchstart="startZoomPress(this,event)" ontouchend="clearZoomPress()" ontouchmove="clearZoomPress()"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect width=%22100%22 height=%22140%22 fill=%22%231e1e24%22/></svg>'"
+          style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;border-radius:8px">
         ${(w.qty||1) > 1 ? `<div style="position:absolute;bottom:4px;right:4px;background:var(--accent);color:#0d0d0f;border-radius:4px;padding:0 5px;font-size:10px;font-weight:700">×${w.qty}</div>` : ''}
       </div>
       <div class="wish-card-info">
         <div class="wish-card-name">${w.name}</div>
         <div class="wish-card-price">${w.marketPrice ? '$'+w.marketPrice.toFixed(2) : '—'}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function openWishCard(id) {
+async function openWishCard(id) {
   const w = wishlist.find(x => x.id === id);
   if (!w) return;
+
+  const img      = w.imgLg || w.img;
+  const zoomName = w.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  const zoomSet  = (w.set||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  const inBinder = inventory.filter(c => c.id === w.id);
+
+  // ── Phase 1: render instantly from stored data ──
   document.getElementById('detail-content').innerHTML = `
     <div class="sheet-title">${w.name}</div>
     <div class="card-detail">
-      <img src="${w.imgLg || w.img}" alt="${w.name}" style="width:110px;border-radius:8px">
+      <div class="zoom-img-wrap" onclick="openCardZoom('${img}','${zoomName}','${zoomSet}')">
+        <img src="${img}" alt="${w.name}" style="width:110px;border-radius:8px;display:block">
+      </div>
       <div class="card-meta">
         <div class="meta-row"><span>Set</span><span>${w.set || '—'}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${w.rarity || '—'}</span></div>
@@ -1609,7 +1627,14 @@ function openWishCard(id) {
         <div class="meta-row" style="border:none"><span>Format</span><span>${legalityBadges(w.legalities)}</span></div>
       </div>
     </div>
-    <div class="form-group">
+    ${inBinder.length ? `
+      <div style="background:rgba(82,201,125,0.08);border:1px solid rgba(82,201,125,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green)">
+        ✓ In binder: ${inBinder.map(e => `${finishLabel(e.finish).icon} ${finishLabel(e.finish).label} ×${e.qty}`).join(' · ')}
+      </div>` : ''}
+    <div id="wish-detail-body" style="min-height:40px">
+      <div style="text-align:center;padding:0.8rem 0;color:var(--muted);font-size:13px"><span class="loading-dots">Loading details</span></div>
+    </div>
+    <div class="form-group" style="margin-top:0.2rem">
       <label class="form-label">Copies Needed</label>
       <div class="qty-control">
         <button onclick="adjWishQty('${w.id}',-1)">−</button>
@@ -1618,11 +1643,34 @@ function openWishCard(id) {
       </div>
     </div>
     <div class="flex gap-8" style="margin-bottom:10px">
-      <button class="btn btn-primary btn-block" onclick="moveWishToVault('${w.id}')">Move to Binder</button>
+      <button class="btn btn-primary btn-block" onclick="moveWishToVault('${w.id}')">➕ Move to Binder</button>
     </div>
     <button class="btn btn-danger btn-block btn-sm" onclick="removeFromWishlist('${w.id}')">Remove from Wishlist</button>
   `;
   document.getElementById('detail-sheet').classList.add('open');
+
+  // ── Phase 2: fetch full card in the background ──
+  try {
+    const res  = await fetch(`${POKEMON_API}/cards/${id}`);
+    const data = await res.json();
+    const card = data.data;
+    if (!card) return;
+
+    // Refresh stored price
+    const freshPrice = card.cardmarket?.prices?.averageSellPrice;
+    if (freshPrice) { w.marketPrice = freshPrice; save(); }
+
+    const body = document.getElementById('wish-detail-body');
+    if (!body) return;   // sheet was closed
+
+    const tcgPrice = card.tcgplayer?.prices?.holofoil?.market || card.tcgplayer?.prices?.normal?.market || 0;
+    body.innerHTML =
+      renderPriceBlock(freshPrice, card.cardmarket?.prices?.trendPrice, tcgPrice, card.id, card.name, card.set?.name) +
+      renderCardText(card);
+  } catch(_) {
+    const body = document.getElementById('wish-detail-body');
+    if (body) body.innerHTML = '';
+  }
 }
 
 function moveWishToVault(id) {
