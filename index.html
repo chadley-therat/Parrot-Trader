@@ -852,7 +852,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v21
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v22
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1047,7 +1047,8 @@ async function fetchApiCards(nameQuery) {
   return cards;
 }
 
-function buildResultItem(c) {
+// setCards (optional): full set card list — enables per-card pull rate display.
+function buildResultItem(c, setCards) {
   const price = c.cardmarket?.prices?.averageSellPrice;
   const priceStr = price ? `$${price.toFixed(2)}` : '—';
   const imgSm = c.images?.small || '';
@@ -1056,9 +1057,21 @@ function buildResultItem(c) {
   const nm  = c.name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   const st  = (c.set?.name || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   const pr  = getPullRate(c.rarity);
-  const pullBadge = pr
-    ? `<div style="font-size:10px;color:${PULL_TIER_COLOR[pr.tier]||'var(--muted)'};font-weight:600;margin-top:2px;white-space:nowrap">${pr.display}</div>`
-    : '';
+
+  let pullBadge = '';
+  if (pr) {
+    const color = PULL_TIER_COLOR[pr.tier] || 'var(--muted)';
+    const pc = calcPerCardRate(c.rarity, setCards);
+    if (pc) {
+      // Per-card rate (set data available)
+      pullBadge = `<div style="font-size:10px;color:${color};font-weight:600;margin-top:2px;white-space:nowrap">~1 in ${pc.perCardPacks.toLocaleString()}</div>
+                   <div style="font-size:9px;color:var(--muted);white-space:nowrap">per card · ${pr.display} slot</div>`;
+    } else {
+      // Slot rate only (no set data, or only 1 card of this rarity)
+      pullBadge = `<div style="font-size:10px;color:${color};font-weight:600;margin-top:2px;white-space:nowrap">${pr.display}</div>`;
+    }
+  }
+
   return `<div class="result-item" onclick="openCardDetail(${JSON.stringify(c).replace(/"/g,'&quot;')})">
     <img src="${imgSm}" alt="${c.name}" loading="lazy"
       data-lg="${imgLg}" data-name="${nm}" data-set="${st}"
@@ -1165,29 +1178,29 @@ const PULL_RATES = {
   'Uncommon':                  null,
   'Promo':                     null,
   // ── Classic / SWSH era ──
-  'Rare':                      { display: '~1 in 3',   tier: 'rare',   tip: '~1 guaranteed rare per pack' },
-  'Rare Holo':                 { display: '~1 in 3',   tier: 'rare',   tip: 'Holo slot — 1 per pack' },
-  'Rare Holo EX':              { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
-  'Rare Holo GX':              { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
-  'Rare Holo V':               { display: '~1 in 9',   tier: 'ultra',  tip: '~4 per box' },
-  'Rare Holo VMAX':            { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
-  'Rare Holo VSTAR':           { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
-  'Rare Ultra':                { display: '~1 in 18',  tier: 'ultra',  tip: 'Full art / ultra rare — ~2 per box' },
-  'Amazing Rare':              { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
-  'LEGEND':                    { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box (counts as 1 card)' },
-  'Rare Shiny':                { display: '~1 in 18',  tier: 'ultra',  tip: '~2 per box' },
-  'Rare Shiny GX':             { display: '~1 in 60',  tier: 'secret', tip: 'Shiny Vault secret — ~1 per 2 boxes' },
-  'Rare Rainbow':              { display: '~1 in 60',  tier: 'secret', tip: 'Rainbow secret — ~1 per 2 boxes' },
-  'Rare Secret':               { display: '~1 in 60',  tier: 'secret', tip: 'Secret rare — ~1 per 2 boxes' },
+  'Rare':                      { display: '~1 in 3',   packs: 3,   tier: 'rare',   tip: '~1 per pack (shared slot)' },
+  'Rare Holo':                 { display: '~1 in 3',   packs: 3,   tier: 'rare',   tip: 'Holo slot — 1 per pack (shared)' },
+  'Rare Holo EX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',  tip: '~4 per box (shared slot)' },
+  'Rare Holo GX':              { display: '~1 in 9',   packs: 9,   tier: 'ultra',  tip: '~4 per box (shared slot)' },
+  'Rare Holo V':               { display: '~1 in 9',   packs: 9,   tier: 'ultra',  tip: '~4 per box (shared slot)' },
+  'Rare Holo VMAX':            { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: '~2 per box (shared slot)' },
+  'Rare Holo VSTAR':           { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: '~2 per box (shared slot)' },
+  'Rare Ultra':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: 'Full art — ~2 per box (shared slot)' },
+  'Amazing Rare':              { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: '~2 per box (shared slot)' },
+  'LEGEND':                    { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: '~2 per box (shared slot)' },
+  'Rare Shiny':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: '~2 per box (shared slot)' },
+  'Rare Shiny GX':             { display: '~1 in 60',  packs: 60,  tier: 'secret', tip: 'Shiny Vault — ~1 per 2 boxes (shared slot)' },
+  'Rare Rainbow':              { display: '~1 in 60',  packs: 60,  tier: 'secret', tip: 'Rainbow secret (shared slot)' },
+  'Rare Secret':               { display: '~1 in 60',  packs: 60,  tier: 'secret', tip: 'Secret rare (shared slot)' },
   // ── Scarlet & Violet era ──
-  'Double Rare':               { display: '~1 in 8',   tier: 'double', tip: 'ex Rare — ~4–5 per box' },
-  'Illustration Rare':         { display: '~1 in 16',  tier: 'illus',  tip: '~2–3 per box' },
-  'Ultra Rare':                { display: '~1 in 18',  tier: 'ultra',  tip: 'Full Art ex / Supporter — ~2 per box' },
-  'Special Illustration Rare': { display: '~1 in 64',  tier: 'sir',    tip: '~1 per 2 boxes' },
-  'Hyper Rare':                { display: '~1 in 128', tier: 'hyper',  tip: 'Gold card — ~1 per 3–4 boxes' },
-  'ACE SPEC Rare':             { display: '~1 in 66',  tier: 'sir',    tip: '~1 per 2 boxes' },
-  'Shiny Rare':                { display: '~1 in 8',   tier: 'double', tip: 'Shiny Rare — ~4–5 per box' },
-  'Shiny Ultra Rare':          { display: '~1 in 64',  tier: 'sir',    tip: '~1 per 2 boxes' },
+  'Double Rare':               { display: '~1 in 8',   packs: 8,   tier: 'double', tip: 'ex Rare slot — ~4–5 per box total' },
+  'Illustration Rare':         { display: '~1 in 16',  packs: 16,  tier: 'illus',  tip: 'IR slot — ~2–3 per box total' },
+  'Ultra Rare':                { display: '~1 in 18',  packs: 18,  tier: 'ultra',  tip: 'Full Art slot — ~2 per box total' },
+  'Special Illustration Rare': { display: '~1 in 64',  packs: 64,  tier: 'sir',    tip: 'SIR slot — ~1 per 2 boxes total' },
+  'Hyper Rare':                { display: '~1 in 128', packs: 128, tier: 'hyper',  tip: 'Gold slot — ~1 per 3–4 boxes total' },
+  'ACE SPEC Rare':             { display: '~1 in 66',  packs: 66,  tier: 'sir',    tip: 'ACE SPEC slot — ~1 per 2 boxes total' },
+  'Shiny Rare':                { display: '~1 in 8',   packs: 8,   tier: 'double', tip: 'Shiny slot — ~4–5 per box total' },
+  'Shiny Ultra Rare':          { display: '~1 in 64',  packs: 64,  tier: 'sir',    tip: 'Shiny UR slot — ~1 per 2 boxes total' },
 };
 
 const PULL_TIER_COLOR = {
@@ -1205,16 +1218,35 @@ function getPullRate(rarity) {
   return PULL_RATES[rarity];
 }
 
-// Renders a pull-rate meta-row for openCardDetail (avoids IIFE in template)
-function pullRateRow(rarity) {
+// Per-card rate = slot_packs × number of cards sharing that slot in the set.
+// setCards = full array of cards for the set (from setCardsAll or similar).
+function calcPerCardRate(rarity, setCards) {
+  const pr = getPullRate(rarity);
+  if (!pr || !pr.packs || !setCards || !setCards.length) return null;
+  const count = setCards.filter(c => c.rarity === rarity).length;
+  if (count < 2) return null; // only 1 card of that rarity — slot rate IS per-card rate
+  const perCardPacks = Math.round(pr.packs * count);
+  return { perCardPacks, count };
+}
+
+// Renders the pull-rate meta-row for openCardDetail.
+// setCards (optional): full set card list — enables per-card calculation.
+function pullRateRow(rarity, setCards) {
   const pr = getPullRate(rarity);
   if (!pr) return '';
   const color = PULL_TIER_COLOR[pr.tier] || 'var(--text)';
+  const pc = calcPerCardRate(rarity, setCards);
+  const perCardLine = pc
+    ? `<div style="font-size:10px;color:${color};font-weight:600">~1 in ${pc.perCardPacks.toLocaleString()} per card</div>
+       <div style="font-size:10px;color:var(--muted)">${pc.count} cards share slot · ${pr.display} slot rate</div>`
+    : `<div style="font-size:10px;color:var(--muted)">${pr.tip}</div>`;
   return `<div class="meta-row">
     <span>Pull Rate</span>
-    <div style="text-align:right;line-height:1.3">
-      <div style="color:${color};font-weight:600">${pr.display} packs</div>
-      <div style="font-size:10px;color:var(--muted)">${pr.tip}</div>
+    <div style="text-align:right;line-height:1.45">
+      ${pc
+        ? `<div style="color:${color};font-weight:600">~1 in ${pc.perCardPacks.toLocaleString()} packs</div>`
+        : `<div style="color:${color};font-weight:600">${pr.display} packs</div>`}
+      ${perCardLine}
     </div>
   </div>`;
 }
@@ -1226,6 +1258,10 @@ function openCardDetail(card) {
   const img = card.images?.large || card.images?.small || '';
   const types = (card.types || []).join(', ') || 'Unknown';
   const rarity = card.rarity || '—';
+
+  // Use loaded set cards for per-card pull rate if they're from the same set
+  const sameSetCards = (setCardsAll.length && setCardsAll[0]?.set?.id === card.set?.id)
+    ? setCardsAll : null;
 
   const zoomName = card.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const zoomSet  = (card.set?.name||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
@@ -1239,7 +1275,7 @@ function openCardDetail(card) {
         <div class="meta-row"><span>Set</span><span>${card.set?.name || '—'}</span></div>
         <div class="meta-row"><span>Type</span><span>${types}</span></div>
         <div class="meta-row"><span>Rarity</span><span>${rarity}</span></div>
-        ${pullRateRow(rarity)}
+        ${pullRateRow(rarity, sameSetCards)}
         <div class="meta-row"><span>Market</span><span style="color:var(--accent)">${price ? '$'+price.toFixed(2) : '—'}</span></div>
       </div>
     </div>
@@ -3885,7 +3921,8 @@ function filterSetCards() {
 function renderSetCardsList(cards) {
   const listEl = document.getElementById('set-cards-list');
   if (!cards.length) { listEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">No cards found</div>'; return; }
-  listEl.innerHTML = cards.map(c => buildResultItem(c)).join('');
+  // Pass the full set so per-card pull rates can be calculated
+  listEl.innerHTML = cards.map(c => buildResultItem(c, setCardsAll)).join('');
 }
 
 // ── City League rendering ──
