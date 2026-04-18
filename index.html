@@ -84,7 +84,7 @@
   .theme-swatch-label { font-size:11px; font-weight:600; text-align:center; padding:5px 4px; background:var(--surface); color:var(--text); }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; overflow-x: hidden; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; overflow-x: hidden; overscroll-behavior-y: none; }
   h1, h2, .brand { font-family: 'Bebas Neue', cursive; letter-spacing: 0.04em; }
   input, select, textarea, button { font-family: inherit; }
 
@@ -852,7 +852,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v22
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v23
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -1004,9 +1004,14 @@ function save() {
 function closeAllSheets() {
   document.querySelectorAll('.sheet-overlay').forEach(s => s.classList.remove('open'));
 }
+// Tapping the dim backdrop closes only THAT overlay, not everything.
+// This means tapping away from card-detail while set-cards-sheet is open
+// returns to the set browser rather than dismissing everything.
 document.querySelectorAll('.sheet-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) closeAllSheets(); });
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
 });
+
+let activeSetName = ''; // set when a set card browser is opened; cleared on close
 function openAddSheet() {
   closeAllSheets();
   document.getElementById('add-sheet').classList.add('open');
@@ -1263,9 +1268,19 @@ function openCardDetail(card) {
   const sameSetCards = (setCardsAll.length && setCardsAll[0]?.set?.id === card.set?.id)
     ? setCardsAll : null;
 
+  const fromSet = document.getElementById('set-cards-sheet')?.classList.contains('open') && activeSetName;
+  const backBtn = fromSet
+    ? `<button onclick="document.getElementById('detail-sheet').classList.remove('open')"
+         style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--muted);font-size:13px;padding:0 0 10px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+         ${activeSetName}
+       </button>`
+    : '';
+
   const zoomName = card.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const zoomSet  = (card.set?.name||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   document.getElementById('detail-content').innerHTML = `
+    ${backBtn}
     <div class="sheet-title">${card.name}</div>
     <div class="card-detail">
       <div class="zoom-img-wrap" onclick="openCardZoom('${img}','${zoomName}','${zoomSet}')">
@@ -3887,6 +3902,7 @@ async function openSetCards(set) {
       </div>
     </div>`;
   listEl.innerHTML = '';
+  activeSetName = set.name;
   document.getElementById('set-cards-sheet').classList.add('open');
 
   // ── Serve from cache instantly if fresh ──
