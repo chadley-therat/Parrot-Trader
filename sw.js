@@ -1,4 +1,4 @@
-const CACHE = 'tcgvault-v23';
+const CACHE = 'tcgvault-v24';
 const SHELL = ['./index.html', './manifest.json', './icon.svg'];
 
 // Install — cache the app shell
@@ -17,6 +17,11 @@ self.addEventListener('activate', e => {
     )
   );
   self.clients.claim();
+});
+
+// Message — allow page to force activation
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // Fetch — cache-first for same-origin, network-only for APIs

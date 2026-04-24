@@ -636,8 +636,11 @@
   <!-- ═══════════ STATS SCREEN ═══════════ -->
   <div id="screen-stats" class="screen">
     <div class="page-header">
-      <div class="page-title">Stats</div>
-      <button class="btn btn-outline btn-sm" onclick="openThemeSheet()">🎨 Theme</button>
+      <div class="page-title">Profile</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-outline btn-sm" id="update-btn" onclick="checkForUpdate()">↑ Update</button>
+        <button class="btn btn-outline btn-sm" onclick="openThemeSheet()">🎨 Theme</button>
+      </div>
     </div>
     <div class="stats-grid">
       <div class="stat-tile">
@@ -711,7 +714,7 @@
   </button>
   <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span class="nav-label">Stats</span>
+    <span class="nav-label">Profile</span>
   </button>
   <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
@@ -852,7 +855,7 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v23
+const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v24
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');
@@ -4297,10 +4300,76 @@ async function handlePhotoScan(e) {
   }
 }
 
-// ═══ SERVICE WORKER ═══
+// ═══ SERVICE WORKER + UPDATE ═══
+let swReg = null;
+
+function setUpdateBtn(state) {
+  const btn = document.getElementById('update-btn');
+  if (!btn) return;
+  btn.disabled = false;
+  btn.style.color = '';
+  btn.style.borderColor = '';
+  if (state === 'checking') {
+    btn.textContent = '…';
+    btn.disabled = true;
+  } else if (state === 'uptodate') {
+    btn.textContent = '✓ Up to date';
+    btn.disabled = true;
+    setTimeout(() => setUpdateBtn('idle'), 3000);
+  } else if (state === 'updating') {
+    btn.textContent = '↻ Updating…';
+    btn.disabled = true;
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+  } else if (state === 'error') {
+    btn.textContent = '⚠ Check failed';
+    setTimeout(() => setUpdateBtn('idle'), 3000);
+  } else {
+    // idle
+    btn.textContent = '↑ Update';
+    btn.onclick = checkForUpdate;
+  }
+}
+
+async function checkForUpdate() {
+  if (!swReg) { toast('Offline — cannot check for updates'); return; }
+  setUpdateBtn('checking');
+
+  let foundUpdate = false;
+
+  // updatefound fires if the SW file changed
+  const onFound = () => {
+    foundUpdate = true;
+    setUpdateBtn('updating');
+    // SW has skipWaiting() so it will activate and trigger controllerchange → reload
+  };
+  swReg.addEventListener('updatefound', onFound, { once: true });
+
+  try {
+    await swReg.update();
+  } catch {
+    swReg.removeEventListener('updatefound', onFound);
+    setUpdateBtn('error');
+    return;
+  }
+
+  // Give the browser up to 2 s to fire updatefound before declaring "up to date"
+  setTimeout(() => {
+    if (!foundUpdate) setUpdateBtn('uptodate');
+  }, 2000);
+}
+
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  window.addEventListener('load', async () => {
+    try {
+      swReg = await navigator.serviceWorker.register('./sw.js');
+      // When a new SW takes control (after skipWaiting), reload to get fresh assets
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    } catch {
+      // SW unavailable — non-fatal
+    }
   });
 }
 </script>
