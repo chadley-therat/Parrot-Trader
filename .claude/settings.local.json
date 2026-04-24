@@ -13,7 +13,9 @@
       "Bash(not exist:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(\"/c/Users/chadl/AppData/Local/Microsoft/WindowsApps/python.exe\" --version)",
-      "Bash(\"/c/Users/chadl/AppData/Local/Microsoft/WindowsApps/python.exe\" -m http.server --help)"
+      "Bash(\"/c/Users/chadl/AppData/Local/Microsoft/WindowsApps/python.exe\" -m http.server --help)",
+      "Bash(gh pr *)",
+      "Bash(where gh *)"
     ]
   }
 }
