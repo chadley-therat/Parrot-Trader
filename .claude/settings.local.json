@@ -15,7 +15,8 @@
       "Bash(\"/c/Users/chadl/AppData/Local/Microsoft/WindowsApps/python.exe\" --version)",
       "Bash(\"/c/Users/chadl/AppData/Local/Microsoft/WindowsApps/python.exe\" -m http.server --help)",
       "Bash(gh pr *)",
-      "Bash(where gh *)"
+      "Bash(where gh *)",
+      "Bash(git credential *)"
     ]
   }
 }
