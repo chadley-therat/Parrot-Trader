@@ -860,7 +860,13 @@
 </div>
 
 <script>
-const POKEMON_API = 'https://api.pokemontcg.io/v2'; // v25
+// Auto-route to local Pi server when on LAN, otherwise use the live API
+const POKEMON_API = (function() {
+  const h = location.hostname;
+  const isLocal = h === 'localhost' || h === '127.0.0.1' ||
+    /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(h);
+  return isLocal ? `${location.origin}/v2` : 'https://api.pokemontcg.io/v2';
+})();
 let inventory = JSON.parse(localStorage.getItem('tcg_inventory') || '[]');
 let listings = JSON.parse(localStorage.getItem('tcg_listings') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('tcg_wishlist') || '[]');

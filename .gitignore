@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Local card data — download on-device via scripts/download_data.py
+data/cards.db
+data/images/
+
+# Env / secrets
+.env
+*.env
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
