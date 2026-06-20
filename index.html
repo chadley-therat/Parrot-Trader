@@ -1514,7 +1514,7 @@ function renderInventoryGrid(cards) {
   }).join('');
 }
 
-function openVaultCard(uid) {
+async function openVaultCard(uid) {
   const card = inventory.find(c => (c.uid || c.id+'__normal') === uid);
   if (!card) return;
   const cardUid = card.uid || card.id + '__normal';
@@ -1523,6 +1523,13 @@ function openVaultCard(uid) {
   const vzName = card.name.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const vzSet  = card.set.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const vzImg  = card.imgLg || card.img;
+
+  // Show whatever price we have stored immediately, then refresh in background
+  const hasCached = !!getCachedPrice(card.id);
+  const initialPriceHtml = (card.marketPrice || hasCached)
+    ? renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice, card.id, card.name, card.set)
+    : `<div style="text-align:center;padding:0.8rem 0;color:var(--muted);font-size:13px"><span class="loading-dots">Loading prices</span></div>`;
+
   document.getElementById('detail-content').innerHTML = `
     <div class="sheet-title">${card.name}</div>
     <div class="card-detail">
@@ -1535,10 +1542,13 @@ function openVaultCard(uid) {
         <div class="meta-row"><span>Finish</span><span>${fl.icon} ${fl.label}</span></div>
         <div class="meta-row"><span>Condition</span><span>${card.condition}</span></div>
         <div class="meta-row"><span>Quantity</span><span>${card.qty}</span></div>
-        <div class="meta-row"><span>Market Price</span><span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span></div>
+        <div class="meta-row" id="vault-price-meta-row">
+          <span>Market Price</span>
+          <span style="color:var(--accent)">${card.marketPrice ? '$'+card.marketPrice.toFixed(2) : '—'}</span>
+        </div>
       </div>
     </div>
-    ${renderPriceBlock(card.marketPrice, card.trendPrice, card.tcgPlayerPrice, card.id, card.name, card.set)}
+    <div id="vault-price-body">${initialPriceHtml}</div>
     ${renderCardText(card)}
     <div class="form-group">
       <label class="form-label">Quantity</label>
@@ -1560,6 +1570,39 @@ function openVaultCard(uid) {
     <button class="btn btn-danger btn-block btn-sm" onclick="removeFromVault('${cardUid}')">Remove from Binder</button>
   `;
   document.getElementById('detail-sheet').classList.add('open');
+
+  // Phase 2: fetch fresh price data in background
+  try {
+    const res  = await fetch(`${POKEMON_API}/cards/${card.id}`);
+    const data = await res.json();
+    const fresh = data.data;
+    if (!fresh) return;
+
+    const freshPrice = fresh.cardmarket?.prices?.averageSellPrice || 0;
+    const freshTrend = fresh.cardmarket?.prices?.trendPrice || 0;
+    const freshTcg   = fresh.tcgplayer?.prices?.holofoil?.market
+                    || fresh.tcgplayer?.prices?.normal?.market || 0;
+
+    // Persist updated prices into inventory + cache
+    if (freshPrice) {
+      card.marketPrice    = freshPrice;
+      card.trendPrice     = freshTrend;
+      card.tcgPlayerPrice = freshTcg;
+      save();
+    }
+    cacheCardPrices(fresh);
+
+    const body    = document.getElementById('vault-price-body');
+    const metaRow = document.getElementById('vault-price-meta-row');
+    if (!body) return;   // sheet was closed
+
+    body.innerHTML = renderPriceBlock(freshPrice, freshTrend, freshTcg, card.id, card.name, card.set);
+    if (metaRow && freshPrice) {
+      metaRow.querySelector('span:last-child').textContent = '$' + freshPrice.toFixed(2);
+    }
+  } catch(_) {
+    // Keep whatever was already rendered (cached / stored price)
+  }
 }
 
 function adjVaultQty(uid, delta) {
