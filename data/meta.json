@@ -1,0 +1,347 @@
+{
+  "updated": "Jun 2026",
+  "format": "SVI-ASC",
+  "meta_decks": [
+    {
+      "id": "dragapult",
+      "name": "Dragapult ex",
+      "tier": "S", "share": "18.8%",
+      "archetype": "Spread / Control",
+      "energy": ["Psychic"],
+      "keyCards": ["Dragapult ex", "Dreepy", "Drakloak", "Dusknoir", "Duskull", "Dusclops", "Pidgeot ex", "Pidgey", "Pidgeotto"],
+      "strategy": "Use Phantom Dive to spread 50 damage across the bench while Dusknoir relocates damage counters for knock-outs. The premier spread control deck in format.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/284",
+      "decklist": {
+        "pokemon": [
+          {"name":"Dragapult ex","qty":3},{"name":"Drakloak","qty":2},{"name":"Dreepy","qty":4},
+          {"name":"Dusknoir","qty":2},{"name":"Dusclops","qty":2},{"name":"Duskull","qty":4},
+          {"name":"Pidgeot ex","qty":1},{"name":"Pidgeotto","qty":1},{"name":"Pidgey","qty":3}
+        ],
+        "trainer": [
+          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},
+          {"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},
+          {"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},
+          {"name":"TM: Devolution","qty":2},{"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1}
+        ],
+        "energy": [{"name":"Psychic Energy","qty":7},{"name":"Reversal Energy","qty":1}]
+      }
+    },
+    {
+      "id": "grimmsnarl",
+      "name": "Marnie's Grimmsnarl ex",
+      "tier": "S", "share": "13.4%",
+      "archetype": "Dark Accel / Beatdown",
+      "energy": ["Darkness"],
+      "keyCards": ["Marnie's Grimmsnarl ex", "Marnie's Impidimp", "Marnie's Morgrem", "Pecharunt ex"],
+      "strategy": "Punk Up ability accelerates Darkness energy onto Grimmsnarl ex to power Shadow Bullet — 180 damage plus 30 snipe. Pecharunt ex adds poison disruption.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/329",
+      "decklist": {
+        "pokemon": [
+          {"name":"Marnie's Grimmsnarl ex","qty":3},{"name":"Marnie's Morgrem","qty":2},{"name":"Marnie's Impidimp","qty":4},
+          {"name":"Pecharunt ex","qty":2},{"name":"Munkidori","qty":2}
+        ],
+        "trainer": [
+          {"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},
+          {"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},
+          {"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},
+          {"name":"Colress Experiment","qty":3},{"name":"Pecharunt Promo","qty":1}
+        ],
+        "energy": [{"name":"Darkness Energy","qty":11},{"name":"Reversal Energy","qty":2}]
+      }
+    },
+    {
+      "id": "gardevoir",
+      "name": "Gardevoir ex",
+      "tier": "S", "share": "11.1%",
+      "archetype": "Psychic Accel",
+      "energy": ["Psychic"],
+      "keyCards": ["Gardevoir ex", "Ralts", "Kirlia", "Scream Tail", "Munkidori"],
+      "strategy": "Psychic Embrace accelerates Psychic energy from the discard to power up big attackers. One of the most consistent energy acceleration engines ever printed.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/255",
+      "decklist": {
+        "pokemon": [
+          {"name":"Gardevoir ex","qty":3},{"name":"Kirlia","qty":3},{"name":"Ralts","qty":4},
+          {"name":"Scream Tail","qty":2},{"name":"Munkidori","qty":2},{"name":"Drifloon","qty":1}
+        ],
+        "trainer": [
+          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},
+          {"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},
+          {"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},
+          {"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1},{"name":"Hyper Aroma","qty":3}
+        ],
+        "energy": [{"name":"Psychic Energy","qty":11}]
+      }
+    },
+    {
+      "id": "zoroark",
+      "name": "N's Zoroark ex",
+      "tier": "A", "share": "10.2%",
+      "archetype": "Dark / Disruption",
+      "energy": ["Darkness"],
+      "keyCards": ["N's Zoroark ex", "N's Zorua", "Pecharunt ex", "Munkidori"],
+      "strategy": "N's Zoroark copies the attacks of Darkness types on your bench. Combined with Pecharunt ex and Munkidori for disruption, this deck can adapt to any situation.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/320",
+      "decklist": {
+        "pokemon": [
+          {"name":"N's Zoroark ex","qty":3},{"name":"N's Zorua","qty":4},{"name":"Pecharunt ex","qty":2},
+          {"name":"Munkidori","qty":2},{"name":"N's Snorlax","qty":1}
+        ],
+        "trainer": [
+          {"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},
+          {"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},
+          {"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},
+          {"name":"N's PC","qty":4}
+        ],
+        "energy": [{"name":"Darkness Energy","qty":10},{"name":"Reversal Energy","qty":3}]
+      }
+    },
+    {
+      "id": "gholdengo",
+      "name": "Gholdengo ex",
+      "tier": "A", "share": "8.9%",
+      "archetype": "Item Lock / Control",
+      "energy": ["Metal", "Psychic"],
+      "keyCards": ["Gholdengo ex", "Roaring Moon ex", "Fezandipiti ex"],
+      "strategy": "Make It Rain blocks opponents from playing Item cards while building a board. Fezandipiti ex adds disruption and Roaring Moon provides a heavy hitting pivot.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/267",
+      "decklist": {
+        "pokemon": [
+          {"name":"Gholdengo ex","qty":3},{"name":"Gimmighoul","qty":4},{"name":"Fezandipiti ex","qty":2},
+          {"name":"Roaring Moon ex","qty":2},{"name":"Munkidori","qty":1}
+        ],
+        "trainer": [
+          {"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},
+          {"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},
+          {"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},
+          {"name":"Colress Experiment","qty":3},{"name":"Calamitous Wasteland","qty":2}
+        ],
+        "energy": [{"name":"Metal Energy","qty":8},{"name":"Psychic Energy","qty":4}]
+      }
+    },
+    {
+      "id": "megaabsol",
+      "name": "Mega Absol Box",
+      "tier": "A", "share": "5.6%",
+      "archetype": "Dark / Disruption Beatdown",
+      "energy": ["Darkness"],
+      "keyCards": ["Mega Absol ex", "Absol", "Mega Kangaskhan ex", "Kangaskhan"],
+      "strategy": "Chaos Claws discards opponent hand cards while dealing damage. Pair with Mega Kangaskhan ex for a powerful two-attacker Dark box strategy.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/344",
+      "decklist": {
+        "pokemon": [
+          {"name":"Mega Absol ex","qty":3},{"name":"Absol","qty":2},{"name":"Mega Kangaskhan ex","qty":2},
+          {"name":"Kangaskhan","qty":2},{"name":"Pecharunt ex","qty":1}
+        ],
+        "trainer": [
+          {"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},
+          {"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},
+          {"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},
+          {"name":"Mega Turbo","qty":3},{"name":"Spirit Token","qty":2}
+        ],
+        "energy": [{"name":"Darkness Energy","qty":11},{"name":"Basic Darkness Energy","qty":4}]
+      }
+    },
+    {
+      "id": "charizard",
+      "name": "Charizard ex",
+      "tier": "A", "share": "5.3%",
+      "archetype": "Fire Beatdown",
+      "energy": ["Fire"],
+      "keyCards": ["Charizard ex", "Charmeleon", "Charmander", "Pidgeot ex", "Noctowl"],
+      "strategy": "Infernal Reign fetches Fire energy from the deck to power Burning Darkness — scales with prizes taken. Pidgeot ex or Noctowl provides draw/search consistency.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/264",
+      "decklist": {
+        "pokemon": [
+          {"name":"Charizard ex","qty":3},{"name":"Charmeleon","qty":2},{"name":"Charmander","qty":4},
+          {"name":"Pidgeot ex","qty":2},{"name":"Pidgeotto","qty":1},{"name":"Pidgey","qty":3},{"name":"Rotom V","qty":1}
+        ],
+        "trainer": [
+          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Rare Candy","qty":4},
+          {"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},
+          {"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":1},
+          {"name":"Prime Catcher","qty":1},{"name":"Nest Ball","qty":2}
+        ],
+        "energy": [{"name":"Fire Energy","qty":11}]
+      }
+    },
+    {
+      "id": "froslass",
+      "name": "Froslass Munkidori",
+      "tier": "A", "share": "5.0%",
+      "archetype": "Poison / Status",
+      "energy": ["Water", "Psychic"],
+      "keyCards": ["Froslass", "Snorunt", "Munkidori", "Pecharunt ex"],
+      "strategy": "Froslass's ability poisons and confuses on evolution. Stack with Munkidori's damage moving and Pecharunt ex for a relentless status loop your opponent struggles to escape.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/288",
+      "decklist": {
+        "pokemon": [
+          {"name":"Froslass","qty":3},{"name":"Snorunt","qty":4},{"name":"Munkidori","qty":3},
+          {"name":"Pecharunt ex","qty":2},{"name":"Greninja ex","qty":1}
+        ],
+        "trainer": [
+          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},
+          {"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},
+          {"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},
+          {"name":"Prime Catcher","qty":1},{"name":"Toxic Chain","qty":2}
+        ],
+        "energy": [{"name":"Water Energy","qty":7},{"name":"Psychic Energy","qty":4}]
+      }
+    },
+    {
+      "id": "ragingbolt",
+      "name": "Raging Bolt ex",
+      "tier": "B", "share": "4.3%",
+      "archetype": "Lightning Aggro",
+      "energy": ["Lightning", "Fighting"],
+      "keyCards": ["Raging Bolt ex", "Teal Mask Ogerpon ex", "Munkidori"],
+      "strategy": "Raging Bolt accelerates itself with Bellowing Thunder, attaching 3 energy from hand. Ogerpon ex and Munkidori provide support and pivot options.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/280",
+      "decklist": {
+        "pokemon": [
+          {"name":"Raging Bolt ex","qty":3},{"name":"Teal Mask Ogerpon ex","qty":2},{"name":"Munkidori","qty":2},
+          {"name":"Bloodmoon Ursaluna ex","qty":1},{"name":"Radiant Charizard","qty":1}
+        ],
+        "trainer": [
+          {"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},
+          {"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},
+          {"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},
+          {"name":"Energy Switch","qty":3},{"name":"Defiance Band","qty":2}
+        ],
+        "energy": [{"name":"Lightning Energy","qty":10},{"name":"Fighting Energy","qty":4}]
+      }
+    },
+    {
+      "id": "crustle",
+      "name": "Crustle Mysterious Rock Inn",
+      "tier": "B", "share": "3.8%",
+      "archetype": "Stall / Mill",
+      "energy": ["Fighting"],
+      "keyCards": ["Crustle", "Dwebble", "Mysterious Rock Inn"],
+      "strategy": "Shell Trap sets up massive damage counters on anything that attacks Crustle. Mysterious Rock Inn stadium locks down opponent energy recovery for a grinding win.",
+      "limitlessUrl": "https://limitlesstcg.com/decks/341",
+      "decklist": {
+        "pokemon": [
+          {"name":"Crustle","qty":4},{"name":"Dwebble","qty":4},{"name":"Manaphy","qty":2},
+          {"name":"Snorlax","qty":2},{"name":"Mew ex","qty":1}
+        ],
+        "trainer": [
+          {"name":"Mysterious Rock Inn","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},
+          {"name":"Nest Ball","qty":4},{"name":"Ultra Ball","qty":3},{"name":"Boss's Orders","qty":2},
+          {"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},
+          {"name":"Prime Catcher","qty":1},{"name":"Defiance Band","qty":3}
+        ],
+        "energy": [{"name":"Fighting Energy","qty":8}]
+      }
+    }
+  ],
+  "city_league_results": [
+    {
+      "id": "cl-12", "date": "2026-06-15", "event": "Shanghai City League", "country": "🇨🇳",
+      "placements": [
+        { "place":1, "deck":"Gardevoir ex", "archetype":"Psychic Accel", "energy":["Psychic"],
+          "decklist":{"pokemon":[{"name":"Gardevoir ex","qty":3},{"name":"Kirlia","qty":3},{"name":"Ralts","qty":4},{"name":"Scream Tail","qty":3},{"name":"Munkidori","qty":2},{"name":"Drifloon","qty":1}],"trainer":[{"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Nest Ball","qty":3},{"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1},{"name":"Hyper Aroma","qty":2}],"energy":[{"name":"Psychic Energy","qty":9},{"name":"Reversal Energy","qty":2}]}},
+        { "place":2, "deck":"Marnie's Grimmsnarl ex", "archetype":"Dark Accel", "energy":["Darkness"],
+          "decklist":{"pokemon":[{"name":"Marnie's Grimmsnarl ex","qty":3},{"name":"Marnie's Morgrem","qty":2},{"name":"Marnie's Impidimp","qty":4},{"name":"Pecharunt ex","qty":2},{"name":"Munkidori","qty":2}],"trainer":[{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},{"name":"Colress Experiment","qty":3}],"energy":[{"name":"Darkness Energy","qty":11},{"name":"Reversal Energy","qty":2}]}},
+        {"place":3,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":5,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":6,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":7,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":8,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
+        {"place":9,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":12, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":13, "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":14, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
+        {"place":15, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]}
+      ]
+    },
+    {
+      "id": "cl-11", "date": "2026-06-08", "event": "Denver City League", "country": "🇺🇸",
+      "placements": [
+        { "place":1, "deck":"Dragapult ex / Dusknoir", "archetype":"Spread Control", "energy":["Psychic"],
+          "decklist":{"pokemon":[{"name":"Dragapult ex","qty":3},{"name":"Drakloak","qty":2},{"name":"Dreepy","qty":4},{"name":"Dusknoir","qty":2},{"name":"Dusclops","qty":2},{"name":"Duskull","qty":4},{"name":"Pidgeot ex","qty":1},{"name":"Pidgeotto","qty":1},{"name":"Pidgey","qty":3}],"trainer":[{"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},{"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"TM: Devolution","qty":2},{"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1}],"energy":[{"name":"Psychic Energy","qty":7},{"name":"Reversal Energy","qty":1}]}},
+        { "place":2, "deck":"Gardevoir ex", "archetype":"Psychic Accel", "energy":["Psychic"],
+          "decklist":{"pokemon":[{"name":"Gardevoir ex","qty":3},{"name":"Kirlia","qty":3},{"name":"Ralts","qty":4},{"name":"Scream Tail","qty":2},{"name":"Munkidori","qty":2},{"name":"Drifloon","qty":1}],"trainer":[{"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},{"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1},{"name":"Hyper Aroma","qty":3}],"energy":[{"name":"Psychic Energy","qty":11}]}},
+        {"place":3,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":5,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":6,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":7,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
+        {"place":8,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":9,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":12, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":13, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":14, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]},
+        {"place":15, "deck":"Miraidon ex",               "archetype":"Lightning Aggro",          "energy":["Lightning"]}
+      ]
+    },
+    {
+      "id": "cl-10", "date": "2026-05-25", "event": "Osaka City League", "country": "🇯🇵",
+      "placements": [
+        { "place":1, "deck":"N's Zoroark ex", "archetype":"Dark Disruption", "energy":["Darkness"],
+          "decklist":{"pokemon":[{"name":"N's Zoroark ex","qty":3},{"name":"N's Zorua","qty":4},{"name":"Pecharunt ex","qty":2},{"name":"Munkidori","qty":2},{"name":"N's Snorlax","qty":1}],"trainer":[{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},{"name":"N's PC","qty":4}],"energy":[{"name":"Darkness Energy","qty":10},{"name":"Reversal Energy","qty":3}]}},
+        { "place":2, "deck":"Marnie's Grimmsnarl ex", "archetype":"Dark Accel", "energy":["Darkness"],
+          "decklist":{"pokemon":[{"name":"Marnie's Grimmsnarl ex","qty":3},{"name":"Marnie's Morgrem","qty":2},{"name":"Marnie's Impidimp","qty":4},{"name":"Pecharunt ex","qty":2},{"name":"Munkidori","qty":2}],"trainer":[{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},{"name":"Colress Experiment","qty":3}],"energy":[{"name":"Darkness Energy","qty":11},{"name":"Reversal Energy","qty":2}]}},
+        {"place":3,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":4,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":5,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":6,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":7,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":8,  "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":9,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":10, "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":11, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":12, "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
+        {"place":13, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":14, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
+        {"place":15, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]}
+      ]
+    },
+    {
+      "id": "cl-09", "date": "2026-05-11", "event": "London Spring Regionals", "country": "🇬🇧",
+      "placements": [
+        { "place":1, "deck":"Marnie's Grimmsnarl ex", "archetype":"Dark Accel", "energy":["Darkness"],
+          "decklist":{"pokemon":[{"name":"Marnie's Grimmsnarl ex","qty":3},{"name":"Marnie's Morgrem","qty":2},{"name":"Marnie's Impidimp","qty":4},{"name":"Pecharunt ex","qty":2},{"name":"Munkidori","qty":2}],"trainer":[{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Counter Catcher","qty":2},{"name":"Prime Catcher","qty":1},{"name":"Colress Experiment","qty":3},{"name":"Pecharunt Promo","qty":1}],"energy":[{"name":"Darkness Energy","qty":11},{"name":"Reversal Energy","qty":2}]}},
+        { "place":2, "deck":"Dragapult ex / Dusknoir", "archetype":"Spread Control", "energy":["Psychic"],
+          "decklist":{"pokemon":[{"name":"Dragapult ex","qty":3},{"name":"Drakloak","qty":2},{"name":"Dreepy","qty":4},{"name":"Dusknoir","qty":2},{"name":"Dusclops","qty":2},{"name":"Duskull","qty":4},{"name":"Pidgeot ex","qty":1},{"name":"Pidgeotto","qty":1},{"name":"Pidgey","qty":3}],"trainer":[{"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":4},{"name":"Nest Ball","qty":3},{"name":"Rare Candy","qty":4},{"name":"Iono","qty":4},{"name":"Professor's Research","qty":3},{"name":"Boss's Orders","qty":2},{"name":"Arven","qty":2},{"name":"Night Stretcher","qty":2},{"name":"TM: Devolution","qty":2},{"name":"Counter Catcher","qty":1},{"name":"Prime Catcher","qty":1}],"energy":[{"name":"Psychic Energy","qty":7},{"name":"Reversal Energy","qty":1}]}},
+        {"place":3,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":4,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":5,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":6,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
+        {"place":7,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":8,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":9,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":11, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":12, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":13, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]},
+        {"place":14, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":15, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]}
+      ]
+    },
+    {
+      "id": "cl-08", "date": "2026-03-30", "event": "Toronto City League", "country": "🇨🇦",
+      "placements": [
+        {"place":1,  "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":2,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":3,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":4,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":5,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":6,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":7,  "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":8,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":9,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":10, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":11, "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",          "energy":["Psychic"]},
+        {"place":12, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
+        {"place":13, "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":14, "deck":"Miraidon ex",               "archetype":"Lightning Aggro",          "energy":["Lightning"]},
+        {"place":15, "deck":"Klawf",                     "archetype":"Control",                  "energy":["Fighting"]}
+      ]
+    }
+  ]
+}
