@@ -2354,10 +2354,24 @@ let META_DECKS = [
     name: 'Dragapult ex',
     tier: 'S', share: '18.8%',
     archetype: 'Spread / Control',
-    energy: ['Psychic'],
-    keyCards: ['Dragapult ex', 'Dreepy', 'Drakloak', 'Dusknoir', 'Duskull', 'Dusclops', 'Pidgeot ex', 'Pidgey', 'Pidgeotto'],
+    energy: ['Psychic', 'Fire', 'Darkness'],
+    keyCards: ['Dragapult ex', 'Dreepy', 'Drakloak', 'Dusknoir', 'Duskull', 'Dusclops', 'Fezandipiti ex', 'Meowth ex', 'Munkidori'],
     strategy: 'Use Phantom Dive to spread 50 damage across the bench while Dusknoir relocates damage counters for knock-outs. The premier spread control deck in format.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/284'
+    limitlessUrl: 'https://limitlesstcg.com/decks/284',
+    decklist: {
+      pokemon: [
+        {name:'Dreepy',qty:4},{name:'Drakloak',qty:4},{name:'Dragapult ex',qty:2},
+        {name:'Duskull',qty:2},{name:'Dusclops',qty:2},{name:'Dusknoir',qty:1},
+        {name:'Budew',qty:1},{name:'Fezandipiti ex',qty:1},{name:'Meowth ex',qty:1},{name:'Munkidori',qty:1}
+      ],
+      trainer: [
+        {name:"Lillie's Determination",qty:4},{name:'Crispin',qty:3},{name:"Boss's Orders",qty:2},{name:'Dawn',qty:1},
+        {name:'Ultra Ball',qty:4},{name:'Poké Pad',qty:4},{name:'Buddy-Buddy Poffin',qty:4},{name:'Crushing Hammer',qty:4},
+        {name:'Night Stretcher',qty:2},{name:'Unfair Stamp',qty:1},{name:'Special Red Card',qty:1},
+        {name:'Handheld Fan',qty:1},{name:"Team Rocket's Watchtower",qty:1},{name:'Jamming Tower',qty:1}
+      ],
+      energy: [{name:'Psychic Energy',qty:3},{name:'Fire Energy',qty:3},{name:'Darkness Energy',qty:2}]
+    }
   },
   {
     id: 'grimmsnarl',
@@ -2365,19 +2379,49 @@ let META_DECKS = [
     tier: 'S', share: '13.4%',
     archetype: 'Dark Accel / Beatdown',
     energy: ['Darkness'],
-    keyCards: ["Marnie's Grimmsnarl ex", "Marnie's Impidimp", "Marnie's Morgrem", 'Pecharunt ex'],
-    strategy: "Punk Up ability accelerates Darkness energy onto Grimmsnarl ex to power Shadow Bullet — 180 damage plus 30 snipe. Pecharunt ex adds poison disruption.",
-    limitlessUrl: 'https://limitlesstcg.com/decks/329'
+    keyCards: ["Marnie's Grimmsnarl ex", "Marnie's Impidimp", "Marnie's Morgrem", 'Froslass', 'Snorunt', 'Munkidori', 'Yveltal'],
+    strategy: "Punk Up ability accelerates Darkness energy onto Grimmsnarl ex to power Shadow Bullet — 180 damage plus 30 snipe. Froslass adds status pressure on the opponent's bench.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/329',
+    decklist: {
+      pokemon: [
+        {name:'Munkidori',qty:4},{name:"Marnie's Impidimp",qty:3},{name:"Marnie's Morgrem",qty:2},
+        {name:"Marnie's Grimmsnarl ex",qty:3},{name:'Snorunt',qty:2},{name:'Froslass',qty:2},
+        {name:'Budew',qty:1},{name:'Tatsugiri',qty:1},{name:'Yveltal',qty:1}
+      ],
+      trainer: [
+        {name:"Lillie's Determination",qty:4},{name:"Team Rocket's Petrel",qty:4},{name:"Boss's Orders",qty:3},{name:"Iris's Fighting Spirit",qty:1},
+        {name:'Poké Pad',qty:4},{name:'Buddy-Buddy Poffin',qty:3},{name:'Night Stretcher',qty:3},{name:'Rare Candy',qty:2},
+        {name:'Energy Switch',qty:1},{name:'Special Red Card',qty:1},{name:'Secret Box',qty:1},
+        {name:'Air Balloon',qty:1},{name:'Spikemuth Gym',qty:4}
+      ],
+      energy: [{name:'Darkness Energy',qty:9}]
+    }
   },
   {
     id: 'gardevoir',
     name: 'Gardevoir ex',
     tier: 'S', share: '11.1%',
     archetype: 'Psychic Accel',
-    energy: ['Psychic'],
-    keyCards: ['Gardevoir ex', 'Ralts', 'Kirlia', 'Scream Tail', 'Munkidori'],
+    energy: ['Psychic', 'Darkness'],
+    keyCards: ['Gardevoir ex', 'Ralts', 'Kirlia', 'Munkidori', "Lillie's Clefairy ex", 'Fezandipiti ex', 'Mew ex'],
     strategy: 'Psychic Embrace accelerates Psychic energy from the discard to power up big attackers. One of the most consistent energy acceleration engines ever printed.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/255'
+    limitlessUrl: 'https://limitlesstcg.com/decks/255',
+    decklist: {
+      pokemon: [
+        {name:'Ralts',qty:3},{name:'Kirlia',qty:2},{name:'Gardevoir ex',qty:2},{name:'Munkidori',qty:3},
+        {name:'Fezandipiti ex',qty:1},{name:'Frillish',qty:1},{name:"Lillie's Clefairy ex",qty:1},
+        {name:'Mew ex',qty:1},{name:'Scream Tail',qty:1},{name:'Drifloon',qty:1}
+      ],
+      trainer: [
+        {name:'Iono',qty:4},{name:"Lillie's Determination",qty:3},{name:"Professor's Research",qty:1},
+        {name:"Professor Turo's Scenario",qty:1},{name:'Arven',qty:1},
+        {name:'Ultra Ball',qty:4},{name:'Earthen Vessel',qty:3},{name:'Nest Ball',qty:2},{name:'Night Stretcher',qty:2},
+        {name:'Rare Candy',qty:2},{name:'Secret Box',qty:1},{name:'Super Rod',qty:1},{name:'Counter Catcher',qty:1},
+        {name:'Technical Machine: Evolution',qty:2},{name:'Bravery Charm',qty:2},{name:'Luxurious Cape',qty:1},
+        {name:'Artazon',qty:1},{name:'Mystery Garden',qty:1}
+      ],
+      energy: [{name:'Psychic Energy',qty:8},{name:'Darkness Energy',qty:3}]
+    }
   },
   {
     id: 'zoroark',
@@ -2385,69 +2429,186 @@ let META_DECKS = [
     tier: 'A', share: '10.2%',
     archetype: 'Dark / Disruption',
     energy: ['Darkness'],
-    keyCards: ["N's Zoroark ex", "N's Zorua", 'Pecharunt ex', 'Munkidori'],
-    strategy: "N's Zoroark copies the attacks of Darkness types on your bench. Combined with Pecharunt ex and Munkidori for disruption, this deck can adapt to any situation.",
-    limitlessUrl: 'https://limitlesstcg.com/decks/320'
+    keyCards: ["N's Zoroark ex", "N's Zorua", "N's Zekrom", 'Munkidori', 'Pecharunt ex', 'Fezandipiti ex', 'Meowth ex'],
+    strategy: "N's Zoroark copies the attacks of Darkness types on your bench. N's Zekrom and other attackers give it flexibility to adapt to any situation.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/320',
+    decklist: {
+      pokemon: [
+        {name:"N's Zorua",qty:4},{name:"N's Zoroark ex",qty:4},{name:"N's Zekrom",qty:2},
+        {name:"N's Darumaka",qty:1},{name:"N's Darmanitan",qty:1},{name:'Tatsugiri',qty:1},
+        {name:'Budew',qty:1},{name:'Yveltal',qty:1},{name:'Munkidori',qty:1},
+        {name:'Pecharunt ex',qty:1},{name:'Fezandipiti ex',qty:1},{name:'Meowth ex',qty:1}
+      ],
+      trainer: [
+        {name:"Lillie's Determination",qty:4},{name:"Boss's Orders",qty:3},{name:'Cyrano',qty:2},
+        {name:"Black Belt's Training",qty:1},{name:'Ruffian',qty:1},
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Transformation Tome',qty:4},{name:'Ultra Ball',qty:3},
+        {name:"N's PP Up",qty:3},{name:'Night Stretcher',qty:2},{name:'Poké Pad',qty:1},
+        {name:'Special Red Card',qty:1},{name:'Secret Box',qty:1},{name:'Binding Mochi',qty:2},{name:"N's Castle",qty:2}
+      ],
+      energy: [{name:'Darkness Energy',qty:7}]
+    }
   },
   {
     id: 'gholdengo',
     name: 'Gholdengo ex',
     tier: 'A', share: '8.9%',
     archetype: 'Item Lock / Control',
-    energy: ['Metal', 'Psychic'],
-    keyCards: ['Gholdengo ex', 'Roaring Moon ex', 'Fezandipiti ex'],
-    strategy: 'Make It Rain blocks opponents from playing Item cards while building a board. Fezandipiti ex adds disruption and Roaring Moon provides a heavy hitting pivot.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/267'
+    energy: ['Fighting', 'Metal'],
+    keyCards: ['Gholdengo ex', 'Gimmighoul', 'Lunatone', 'Solrock', 'Mega Lopunny ex', 'Genesect ex', 'Fezandipiti ex'],
+    strategy: "Make It Rain blocks opponents from playing Item cards while building a board. Lunatone and Solrock provide energy acceleration and Genesect ex adds a power attacker.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/267',
+    decklist: {
+      pokemon: [
+        {name:'Gimmighoul',qty:4},{name:'Gholdengo ex',qty:4},{name:'Lunatone',qty:2},{name:'Solrock',qty:2},
+        {name:'Buneary',qty:1},{name:'Mega Lopunny ex',qty:1},{name:'Fezandipiti ex',qty:1},{name:'Genesect ex',qty:1}
+      ],
+      trainer: [
+        {name:'Arven',qty:4},{name:"Boss's Orders",qty:3},{name:"Professor Turo's Scenario",qty:2},{name:"Lana's Aid",qty:1},
+        {name:'Superior Energy Retrieval',qty:4},{name:'Nest Ball',qty:3},{name:'Fighting Gong',qty:3},
+        {name:'Earthen Vessel',qty:3},{name:'Super Rod',qty:1},{name:'Prime Catcher',qty:1},
+        {name:'Picnic Basket',qty:1},{name:'Buddy-Buddy Poffin',qty:1},{name:'Air Balloon',qty:2},
+        {name:'Vitality Band',qty:1},{name:'Technical Machine: Evolution',qty:1},
+        {name:'Artazon',qty:1},{name:"Team Rocket's Watchtower",qty:1}
+      ],
+      energy: [{name:'Fighting Energy',qty:8},{name:'Metal Energy',qty:3}]
+    }
   },
   {
     id: 'megaabsol',
     name: 'Mega Absol Box',
     tier: 'A', share: '5.6%',
     archetype: 'Dark / Disruption Beatdown',
-    energy: ['Darkness'],
-    keyCards: ['Mega Absol ex', 'Absol', 'Mega Kangaskhan ex', 'Kangaskhan'],
-    strategy: 'Chaos Claws discards opponent hand cards while dealing damage. Pair with Mega Kangaskhan ex for a powerful two-attacker Dark box strategy.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/344'
+    energy: ['Darkness', 'Fire'],
+    keyCards: ['Mega Absol ex', 'Mega Kangaskhan ex', 'Mega Audino ex', 'Munkidori', 'Yveltal', 'Fezandipiti ex'],
+    strategy: "Mega Absol ex discards opponent's hand while dealing damage. Mega Kangaskhan ex and Mega Audino ex provide additional attackers in a versatile Dark box strategy.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/344',
+    decklist: {
+      pokemon: [
+        {name:'Munkidori',qty:3},{name:'Mega Absol ex',qty:2},{name:'Mega Kangaskhan ex',qty:2},
+        {name:'Mega Audino ex',qty:2},{name:'Yveltal',qty:2},{name:'Bloodmoon Ursaluna ex',qty:1},
+        {name:'Latias ex',qty:1},{name:'Pecharunt ex',qty:1},{name:'Fezandipiti ex',qty:1},
+        {name:'Moltres',qty:1},{name:'Psyduck',qty:1}
+      ],
+      trainer: [
+        {name:"Boss's Orders",qty:4},{name:"Team Rocket's Petrel",qty:4},{name:"Lillie's Determination",qty:2},
+        {name:"Lisia's Appeal",qty:2},{name:"Brock's Scouting",qty:1},
+        {name:"Team Rocket's Transceiver",qty:4},{name:'Transformation Tome',qty:4},{name:'Night Stretcher',qty:3},
+        {name:'Special Red Card',qty:2},{name:'Energy Switch',qty:1},{name:'Precious Trolley',qty:1},
+        {name:'Ultra Ball',qty:1},{name:'Energy Search',qty:1},
+        {name:'Prism Tower',qty:2},{name:"Team Rocket's Watchtower",qty:1}
+      ],
+      energy: [{name:'Darkness Energy',qty:8},{name:'Fire Energy',qty:2}]
+    }
   },
   {
     id: 'charizard',
     name: 'Charizard ex',
     tier: 'A', share: '5.3%',
     archetype: 'Fire Beatdown',
-    energy: ['Fire'],
-    keyCards: ['Charizard ex', 'Charmeleon', 'Charmander', 'Pidgeot ex', 'Noctowl'],
-    strategy: 'Infernal Reign fetches Fire energy from the deck to power Burning Darkness — scales with prizes taken. Pidgeot ex or Noctowl provides draw/search consistency.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/264'
+    energy: ['Fire', 'Water'],
+    keyCards: ['Charizard ex', 'Charmander', 'Noctowl', 'Hoothoot', 'Wellspring Mask Ogerpon ex', 'Fezandipiti ex'],
+    strategy: 'Infernal Reign fetches Fire energy to power Burning Darkness — scales with prizes taken. Noctowl provides draw consistency and Wellspring Mask Ogerpon ex offers a Water pivot.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/264',
+    decklist: {
+      pokemon: [
+        {name:'Charmander',qty:3},{name:'Charmeleon',qty:1},{name:'Charizard ex',qty:2},
+        {name:'Hoothoot',qty:3},{name:'Noctowl',qty:3},{name:'Duskull',qty:2},{name:'Dusclops',qty:1},{name:'Dusknoir',qty:1},
+        {name:'Fan Rotom',qty:2},{name:'Wellspring Mask Ogerpon ex',qty:2},
+        {name:'Pidgey',qty:1},{name:'Pidgeot ex',qty:1},{name:'Ditto',qty:1},
+        {name:'Latias ex',qty:1},{name:'Fezandipiti ex',qty:1},{name:'Chien-Pao',qty:1}
+      ],
+      trainer: [
+        {name:'Dawn',qty:4},{name:"Boss's Orders",qty:2},{name:'Iono',qty:1},{name:'Briar',qty:1},{name:'Crispin',qty:1},
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Nest Ball',qty:3},{name:'Rare Candy',qty:3},
+        {name:'Ultra Ball',qty:1},{name:'Counter Catcher',qty:1},{name:'Super Rod',qty:1},
+        {name:'Night Stretcher',qty:1},{name:'Poké Pad',qty:1},{name:'Sparkling Crystal',qty:1},
+        {name:'Area Zero Underdepths',qty:2}
+      ],
+      energy: [{name:'Fire Energy',qty:5},{name:'Jet Energy',qty:1},{name:'Water Energy',qty:1}]
+    }
   },
   {
     id: 'froslass',
     name: 'Froslass Munkidori',
     tier: 'A', share: '5.0%',
     archetype: 'Poison / Status',
-    energy: ['Water', 'Psychic'],
-    keyCards: ['Froslass', 'Snorunt', 'Munkidori', 'Pecharunt ex'],
-    strategy: "Froslass's ability poisons and confuses on evolution. Stack with Munkidori's damage moving and Pecharunt ex for a relentless status loop your opponent struggles to escape.",
-    limitlessUrl: 'https://limitlesstcg.com/decks/288'
+    energy: ['Water', 'Darkness', 'Psychic'],
+    keyCards: ['Froslass', 'Snorunt', 'Mega Froslass ex', 'Munkidori', 'Bronzong', 'Mega Starmie ex'],
+    strategy: "Froslass's ability poisons and confuses on evolution. Mega Froslass ex and Bronzong add bulk while Munkidori moves damage counters for a relentless status loop.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/288',
+    decklist: {
+      pokemon: [
+        {name:'Snorunt',qty:3},{name:'Froslass',qty:2},{name:'Mega Froslass ex',qty:1},
+        {name:'Munkidori',qty:3},{name:'Bronzor',qty:2},{name:'Bronzong',qty:2},
+        {name:'Staryu',qty:1},{name:'Mega Starmie ex',qty:1},
+        {name:'Meowth ex',qty:1},{name:'Yveltal',qty:1},{name:'Budew',qty:1}
+      ],
+      trainer: [
+        {name:"Lillie's Determination",qty:4},{name:'Crispin',qty:2},{name:"Iris's Fighting Spirit",qty:2},
+        {name:'Salvatore',qty:2},{name:"Boss's Orders",qty:2},{name:'Hilda',qty:1},{name:'Lucian',qty:1},{name:"Lana's Aid",qty:1},
+        {name:'Buddy-Buddy Poffin',qty:4},{name:'Ultra Ball',qty:3},{name:'Poké Pad',qty:2},
+        {name:'Switch',qty:2},{name:'Night Stretcher',qty:2},{name:'Pokégear 3.0',qty:1},
+        {name:'Air Balloon',qty:1},{name:'Risky Ruins',qty:2}
+      ],
+      energy: [{name:'Water Energy',qty:3},{name:'Darkness Energy',qty:3},{name:'Psychic Energy',qty:3},{name:'Legacy Energy',qty:1}]
+    }
   },
   {
     id: 'ragingbolt',
     name: 'Raging Bolt ex',
     tier: 'B', share: '4.3%',
-    archetype: 'Lightning Aggro',
-    energy: ['Lightning', 'Fighting'],
-    keyCards: ['Raging Bolt ex', 'Teal Mask Ogerpon ex', 'Munkidori'],
-    strategy: 'Raging Bolt accelerates itself with Bellowing Thunder, attaching 3 energy from hand. Ogerpon ex and Munkidori provide support and pivot options.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/280'
+    archetype: 'Multi-Energy Aggro',
+    energy: ['Grass', 'Lightning', 'Fighting'],
+    keyCards: ['Raging Bolt ex', 'Teal Mask Ogerpon ex', 'Mega Kangaskhan ex', 'Meowth ex', 'Latias ex', 'Iron Leaves ex'],
+    strategy: 'Raging Bolt powers up with Bellowing Thunder while Teal Mask Ogerpon ex and Mega Kangaskhan ex provide additional pressure. Area Zero Underdepths accelerates energy from the discard.',
+    limitlessUrl: 'https://limitlesstcg.com/decks/280',
+    decklist: {
+      pokemon: [
+        {name:'Mega Kangaskhan ex',qty:3},{name:'Meowth ex',qty:3},{name:'Teal Mask Ogerpon ex',qty:3},
+        {name:'Raging Bolt ex',qty:2},{name:'Latias ex',qty:2},{name:"Lillie's Clefairy ex",qty:1},
+        {name:'Wellspring Mask Ogerpon ex',qty:1},{name:'Iron Leaves ex',qty:1},
+        {name:'Fezandipiti ex',qty:1},{name:'Passimian',qty:1},{name:'Chien-Pao',qty:1}
+      ],
+      trainer: [
+        {name:'Crispin',qty:4},{name:"Boss's Orders",qty:2},{name:'Cyrano',qty:2},
+        {name:"Ciphermaniac's Codebreaking",qty:1},{name:"Lillie's Determination",qty:1},
+        {name:'Ultra Ball',qty:4},{name:'Energy Switch',qty:4},{name:'Night Stretcher',qty:2},
+        {name:'Glass Trumpet',qty:2},{name:'Unfair Stamp',qty:1},{name:'Area Zero Underdepths',qty:4}
+      ],
+      energy: [
+        {name:'Grass Energy',qty:7},{name:'Lightning Energy',qty:2},
+        {name:'Fighting Energy',qty:2},{name:'Psychic Energy',qty:2},{name:'Water Energy',qty:1}
+      ]
+    }
   },
   {
     id: 'crustle',
-    name: 'Crustle Mysterious Rock Inn',
+    name: 'Crustle',
     tier: 'B', share: '3.8%',
     archetype: 'Stall / Mill',
-    energy: ['Fighting'],
-    keyCards: ['Crustle', 'Dwebble', 'Mysterious Rock Inn'],
-    strategy: 'Shell Trap sets up massive damage counters on anything that attacks Crustle. Mysterious Rock Inn stadium locks down opponent energy recovery for a grinding win.',
-    limitlessUrl: 'https://limitlesstcg.com/decks/341'
+    energy: ['Grass'],
+    keyCards: ['Crustle', 'Dwebble', 'Mega Kangaskhan ex', 'Jumbo Ice Cream', 'Spiky Energy'],
+    strategy: "Shell Trap stacks massive damage on anything that attacks Crustle. Mega Kangaskhan ex provides a powerful secondary attacker. Spiky and special energies fuel the strategy.",
+    limitlessUrl: 'https://limitlesstcg.com/decks/341',
+    decklist: {
+      pokemon: [
+        {name:'Mega Kangaskhan ex',qty:4},{name:'Dwebble',qty:3},{name:'Crustle',qty:3}
+      ],
+      trainer: [
+        {name:"Lillie's Determination",qty:4},{name:"Boss's Orders",qty:4},{name:"Team Rocket's Petrel",qty:4},
+        {name:'Hilda',qty:2},{name:'Eri',qty:2},{name:"Xerosic's Machinations",qty:1},
+        {name:'Pokémon Center Lady',qty:1},{name:"Bianca's Devotion",qty:1},{name:"Lisia's Appeal",qty:1},
+        {name:'Jumbo Ice Cream',qty:4},{name:'Pokégear 3.0',qty:3},{name:'Buddy-Buddy Poffin',qty:2},
+        {name:'Ultra Ball',qty:1},{name:'Switch',qty:1},{name:'Hand Trimmer',qty:1},
+        {name:"Hero's Cape",qty:1},{name:'Handheld Fan',qty:1},{name:"Team Rocket's Factory",qty:1},
+        {name:'Community Center',qty:1},{name:'Festival Grounds',qty:1}
+      ],
+      energy: [
+        {name:'Spiky Energy',qty:4},{name:'Growing Grass Energy',qty:4},
+        {name:'Mist Energy',qty:4},{name:'Grass Energy',qty:1}
+      ]
+    }
   }
 ];
 
