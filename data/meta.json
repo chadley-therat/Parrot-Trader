@@ -105,43 +105,22 @@
   ],
   "city_league_results": [
     {
-      "id": "cl-12", "date": "2026-06-15", "event": "Shanghai City League", "country": "🇨🇳",
+      "id": "cl-09", "date": "2026-05-11", "event": "London Spring Regionals", "country": "🇬🇧",
       "placements": [
-        {"place":1,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":2,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":3,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":1,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":2,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
+        {"place":3,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":4,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
         {"place":5,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
-        {"place":6,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
+        {"place":6,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
         {"place":7,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
-        {"place":8,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
-        {"place":9,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
-        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":12, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
-        {"place":13, "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":14, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
-        {"place":15, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]}
-      ]
-    },
-    {
-      "id": "cl-11", "date": "2026-06-08", "event": "Denver City League", "country": "🇺🇸",
-      "placements": [
-        {"place":1,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":2,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":3,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
-        {"place":5,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
-        {"place":6,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
-        {"place":7,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
         {"place":8,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":9,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":9,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
         {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
-        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":12, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":13, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
-        {"place":14, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]},
-        {"place":15, "deck":"Miraidon ex",               "archetype":"Lightning Aggro",          "energy":["Lightning"]}
+        {"place":11, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":12, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":13, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]},
+        {"place":14, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]}
       ]
     },
     {
@@ -160,48 +139,45 @@
         {"place":11, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
         {"place":12, "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
         {"place":13, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":14, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
-        {"place":15, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]}
+        {"place":14, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]}
       ]
     },
     {
-      "id": "cl-09", "date": "2026-05-11", "event": "London Spring Regionals", "country": "🇬🇧",
+      "id": "cl-11", "date": "2026-06-08", "event": "Denver City League", "country": "🇺🇸",
       "placements": [
-        {"place":1,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":2,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":3,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
-        {"place":4,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":5,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
-        {"place":6,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
-        {"place":7,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
-        {"place":8,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":9,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
-        {"place":11, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
-        {"place":12, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
-        {"place":13, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]},
-        {"place":14, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":15, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]}
-      ]
-    },
-    {
-      "id": "cl-08", "date": "2026-03-30", "event": "Toronto City League", "country": "🇨🇦",
-      "placements": [
-        {"place":1,  "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":1,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
         {"place":2,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":3,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":5,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":6,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":7,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
+        {"place":8,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
+        {"place":9,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":12, "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":13, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":14, "deck":"Crustle",                   "archetype":"Stall / Mill",             "energy":["Fighting"]}
+      ]
+    },
+    {
+      "id": "cl-12", "date": "2026-06-15", "event": "Shanghai City League", "country": "🇨🇳",
+      "placements": [
+        {"place":1,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
+        {"place":2,  "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
         {"place":3,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":4,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
-        {"place":5,  "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
-        {"place":6,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
-        {"place":7,  "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
-        {"place":8,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":4,  "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]},
+        {"place":5,  "deck":"Gholdengo ex",              "archetype":"Item Lock Control",        "energy":["Metal","Psychic"]},
+        {"place":6,  "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
+        {"place":7,  "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
+        {"place":8,  "deck":"Mega Absol Box",            "archetype":"Dark Disruption Beatdown", "energy":["Darkness"]},
         {"place":9,  "deck":"Gardevoir ex",              "archetype":"Psychic Accel",            "energy":["Psychic"]},
-        {"place":10, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
-        {"place":11, "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
-        {"place":12, "deck":"Iron Thorns ex",            "archetype":"Paralysis Lock",           "energy":["Lightning"]},
-        {"place":13, "deck":"Charizard ex / Pidgeot ex", "archetype":"Fire Beatdown",            "energy":["Fire"]},
-        {"place":14, "deck":"Miraidon ex",               "archetype":"Lightning Aggro",          "energy":["Lightning"]},
-        {"place":15, "deck":"Klawf",                     "archetype":"Control",                  "energy":["Fighting"]}
+        {"place":10, "deck":"Froslass / Munkidori",      "archetype":"Poison Status",            "energy":["Water","Psychic"]},
+        {"place":11, "deck":"Marnie's Grimmsnarl ex",    "archetype":"Dark Accel",               "energy":["Darkness"]},
+        {"place":12, "deck":"Raging Bolt ex",            "archetype":"Lightning Aggro",          "energy":["Lightning","Fighting"]},
+        {"place":13, "deck":"Dragapult ex / Dusknoir",   "archetype":"Spread Control",           "energy":["Psychic"]},
+        {"place":14, "deck":"N's Zoroark ex",            "archetype":"Dark Disruption",          "energy":["Darkness"]}
       ]
     }
   ]
