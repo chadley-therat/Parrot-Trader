@@ -4464,6 +4464,17 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });
+      // Auto-check for updates on every load — handles PWA installs that never see the Update button
+      swReg.addEventListener('updatefound', () => {
+        const newSW = swReg.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', () => {
+          // New SW is ready and waiting — skipWaiting is called in sw.js install,
+          // so this will activate immediately and controllerchange will trigger reload
+        });
+      });
+      // Silently poll for a new SW; if found, it auto-activates via skipWaiting → reload
+      try { await swReg.update(); } catch {}
     } catch {
       // SW unavailable — non-fatal
     }
