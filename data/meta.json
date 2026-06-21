@@ -47,30 +47,6 @@
       }
     },
     {
-      "id": "gardevoir", "name": "Gardevoir ex",
-      "tier": "S", "share": "11.1%",
-      "archetype": "Psychic Accel", "energy": ["Psychic","Darkness"],
-      "keyCards": ["Gardevoir ex","Ralts","Kirlia","Munkidori","Lillie's Clefairy ex","Fezandipiti ex","Mew ex"],
-      "strategy": "Psychic Embrace accelerates Psychic energy from the discard to power up big attackers. One of the most consistent energy acceleration engines ever printed.",
-      "limitlessUrl": "https://limitlesstcg.com/decks/255",
-      "decklist": {
-        "pokemon": [
-          {"name":"Ralts","qty":3},{"name":"Kirlia","qty":2},{"name":"Gardevoir ex","qty":2},{"name":"Munkidori","qty":3},
-          {"name":"Fezandipiti ex","qty":1},{"name":"Frillish","qty":1},{"name":"Lillie's Clefairy ex","qty":1},
-          {"name":"Mew ex","qty":1},{"name":"Scream Tail","qty":1},{"name":"Drifloon","qty":1}
-        ],
-        "trainer": [
-          {"name":"Iono","qty":4},{"name":"Lillie's Determination","qty":3},{"name":"Professor's Research","qty":1},
-          {"name":"Professor Turo's Scenario","qty":1},{"name":"Arven","qty":1},
-          {"name":"Ultra Ball","qty":4},{"name":"Earthen Vessel","qty":3},{"name":"Nest Ball","qty":2},{"name":"Night Stretcher","qty":2},
-          {"name":"Rare Candy","qty":2},{"name":"Secret Box","qty":1},{"name":"Super Rod","qty":1},{"name":"Counter Catcher","qty":1},
-          {"name":"Technical Machine: Evolution","qty":2},{"name":"Bravery Charm","qty":2},{"name":"Luxurious Cape","qty":1},
-          {"name":"Artazon","qty":1},{"name":"Mystery Garden","qty":1}
-        ],
-        "energy": [{"name":"Psychic Energy","qty":8},{"name":"Darkness Energy","qty":3}]
-      }
-    },
-    {
       "id": "zoroark", "name": "N's Zoroark ex",
       "tier": "A", "share": "10.2%",
       "archetype": "Dark / Disruption", "energy": ["Darkness"],
@@ -92,29 +68,6 @@
           {"name":"Special Red Card","qty":1},{"name":"Secret Box","qty":1},{"name":"Binding Mochi","qty":2},{"name":"N's Castle","qty":2}
         ],
         "energy": [{"name":"Darkness Energy","qty":7}]
-      }
-    },
-    {
-      "id": "gholdengo", "name": "Gholdengo ex",
-      "tier": "A", "share": "8.9%",
-      "archetype": "Item Lock / Control", "energy": ["Fighting","Metal"],
-      "keyCards": ["Gholdengo ex","Gimmighoul","Lunatone","Solrock","Mega Lopunny ex","Genesect ex","Fezandipiti ex"],
-      "strategy": "Make It Rain blocks opponents from playing Item cards while building a board. Lunatone and Solrock provide energy acceleration and Genesect ex adds a power attacker.",
-      "limitlessUrl": "https://limitlesstcg.com/decks/267",
-      "decklist": {
-        "pokemon": [
-          {"name":"Gimmighoul","qty":4},{"name":"Gholdengo ex","qty":4},{"name":"Lunatone","qty":2},{"name":"Solrock","qty":2},
-          {"name":"Buneary","qty":1},{"name":"Mega Lopunny ex","qty":1},{"name":"Fezandipiti ex","qty":1},{"name":"Genesect ex","qty":1}
-        ],
-        "trainer": [
-          {"name":"Arven","qty":4},{"name":"Boss's Orders","qty":3},{"name":"Professor Turo's Scenario","qty":2},{"name":"Lana's Aid","qty":1},
-          {"name":"Superior Energy Retrieval","qty":4},{"name":"Nest Ball","qty":3},{"name":"Fighting Gong","qty":3},
-          {"name":"Earthen Vessel","qty":3},{"name":"Super Rod","qty":1},{"name":"Prime Catcher","qty":1},
-          {"name":"Picnic Basket","qty":1},{"name":"Buddy-Buddy Poffin","qty":1},{"name":"Air Balloon","qty":2},
-          {"name":"Vitality Band","qty":1},{"name":"Technical Machine: Evolution","qty":1},
-          {"name":"Artazon","qty":1},{"name":"Team Rocket's Watchtower","qty":1}
-        ],
-        "energy": [{"name":"Fighting Energy","qty":8},{"name":"Metal Energy","qty":3}]
       }
     },
     {
@@ -140,55 +93,6 @@
           {"name":"Prism Tower","qty":2},{"name":"Team Rocket's Watchtower","qty":1}
         ],
         "energy": [{"name":"Darkness Energy","qty":8},{"name":"Fire Energy","qty":2}]
-      }
-    },
-    {
-      "id": "charizard", "name": "Charizard ex",
-      "tier": "A", "share": "5.3%",
-      "archetype": "Fire Beatdown", "energy": ["Fire","Water"],
-      "keyCards": ["Charizard ex","Charmander","Noctowl","Hoothoot","Wellspring Mask Ogerpon ex","Fezandipiti ex"],
-      "strategy": "Infernal Reign fetches Fire energy to power Burning Darkness — scales with prizes taken. Noctowl provides draw consistency and Wellspring Mask Ogerpon ex offers a Water pivot.",
-      "limitlessUrl": "https://limitlesstcg.com/decks/264",
-      "decklist": {
-        "pokemon": [
-          {"name":"Charmander","qty":3},{"name":"Charmeleon","qty":1},{"name":"Charizard ex","qty":2},
-          {"name":"Hoothoot","qty":3},{"name":"Noctowl","qty":3},{"name":"Duskull","qty":2},{"name":"Dusclops","qty":1},{"name":"Dusknoir","qty":1},
-          {"name":"Fan Rotom","qty":2},{"name":"Wellspring Mask Ogerpon ex","qty":2},
-          {"name":"Pidgey","qty":1},{"name":"Pidgeot ex","qty":1},{"name":"Ditto","qty":1},
-          {"name":"Latias ex","qty":1},{"name":"Fezandipiti ex","qty":1},{"name":"Chien-Pao","qty":1}
-        ],
-        "trainer": [
-          {"name":"Dawn","qty":4},{"name":"Boss's Orders","qty":2},{"name":"Iono","qty":1},{"name":"Briar","qty":1},{"name":"Crispin","qty":1},
-          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Nest Ball","qty":3},{"name":"Rare Candy","qty":3},
-          {"name":"Ultra Ball","qty":1},{"name":"Counter Catcher","qty":1},{"name":"Super Rod","qty":1},
-          {"name":"Night Stretcher","qty":1},{"name":"Poké Pad","qty":1},{"name":"Sparkling Crystal","qty":1},
-          {"name":"Area Zero Underdepths","qty":2}
-        ],
-        "energy": [{"name":"Fire Energy","qty":5},{"name":"Jet Energy","qty":1},{"name":"Water Energy","qty":1}]
-      }
-    },
-    {
-      "id": "froslass", "name": "Froslass Munkidori",
-      "tier": "A", "share": "5.0%",
-      "archetype": "Poison / Status", "energy": ["Water","Darkness","Psychic"],
-      "keyCards": ["Froslass","Snorunt","Mega Froslass ex","Munkidori","Bronzong","Mega Starmie ex"],
-      "strategy": "Froslass's ability poisons and confuses on evolution. Mega Froslass ex and Bronzong add bulk while Munkidori moves damage counters for a relentless status loop.",
-      "limitlessUrl": "https://limitlesstcg.com/decks/288",
-      "decklist": {
-        "pokemon": [
-          {"name":"Snorunt","qty":3},{"name":"Froslass","qty":2},{"name":"Mega Froslass ex","qty":1},
-          {"name":"Munkidori","qty":3},{"name":"Bronzor","qty":2},{"name":"Bronzong","qty":2},
-          {"name":"Staryu","qty":1},{"name":"Mega Starmie ex","qty":1},
-          {"name":"Meowth ex","qty":1},{"name":"Yveltal","qty":1},{"name":"Budew","qty":1}
-        ],
-        "trainer": [
-          {"name":"Lillie's Determination","qty":4},{"name":"Crispin","qty":2},{"name":"Iris's Fighting Spirit","qty":2},
-          {"name":"Salvatore","qty":2},{"name":"Boss's Orders","qty":2},{"name":"Hilda","qty":1},{"name":"Lucian","qty":1},{"name":"Lana's Aid","qty":1},
-          {"name":"Buddy-Buddy Poffin","qty":4},{"name":"Ultra Ball","qty":3},{"name":"Poké Pad","qty":2},
-          {"name":"Switch","qty":2},{"name":"Night Stretcher","qty":2},{"name":"Pokégear 3.0","qty":1},
-          {"name":"Air Balloon","qty":1},{"name":"Risky Ruins","qty":2}
-        ],
-        "energy": [{"name":"Water Energy","qty":3},{"name":"Darkness Energy","qty":3},{"name":"Psychic Energy","qty":3},{"name":"Legacy Energy","qty":1}]
       }
     },
     {
