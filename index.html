@@ -526,16 +526,17 @@
     </div>
   </div>
 
-  <!-- ═══════════ STORE SCREEN ═══════════ -->
+  <!-- ═══════════ TRADE SCREEN ═══════════ -->
   <div id="screen-store" class="screen">
     <div class="page-header">
-      <div class="page-title">Store</div>
+      <div class="page-title">Trade</div>
       <div style="font-size:13px;color:var(--green);font-weight:600" id="store-total">$0.00</div>
     </div>
     <div style="padding:0 1.1rem">
       <div class="tab-row" style="padding:0 0 0.8rem">
         <button class="tab-btn active" id="tab-store-listings" onclick="switchStoreTab('listings')">My Listings</button>
         <button class="tab-btn" id="tab-store-bulk" onclick="switchStoreTab('bulk')">Bulk Buy</button>
+        <button class="tab-btn" id="tab-store-tradecalc" onclick="switchStoreTab('tradecalc')">Trade Calc</button>
       </div>
     </div>
 
@@ -554,6 +555,52 @@
       <div id="bb-lines"></div>
       <div id="bb-total-bar" class="bb-total-bar" style="display:none"></div>
       <button class="btn btn-outline btn-sm" style="color:var(--muted);margin-top:4px" onclick="bbReset()">↺ Reset all</button>
+    </div>
+
+    <!-- Trade Calculator panel -->
+    <div id="store-tradecalc-panel" style="display:none;padding:0 1.1rem 6rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <!-- You give -->
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">You Give</div>
+          <div id="tc-give-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px" onclick="tcPickCard('give')">+ Add Card</button>
+          <div style="margin-top:8px;padding:8px;background:var(--surface);border-radius:var(--radius-sm);text-align:center">
+            <div style="font-size:11px;color:var(--muted)">Your Total</div>
+            <div id="tc-give-total" style="font-size:1.3rem;font-weight:700;color:var(--text)">$0.00</div>
+          </div>
+        </div>
+        <!-- You get -->
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">You Get</div>
+          <div id="tc-get-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px" onclick="tcPickCard('get')">+ Add Card</button>
+          <div style="margin-top:8px;padding:8px;background:var(--surface);border-radius:var(--radius-sm);text-align:center">
+            <div style="font-size:11px;color:var(--muted)">Their Total</div>
+            <div id="tc-get-total" style="font-size:1.3rem;font-weight:700;color:var(--text)">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verdict bar -->
+      <div id="tc-verdict" style="padding:12px;background:var(--surface);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">TRADE BALANCE</div>
+        <div id="tc-verdict-text" style="font-size:1.1rem;font-weight:700">Add cards to both sides</div>
+        <div id="tc-verdict-diff" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="color:var(--muted);margin-top:10px;width:100%" onclick="tcReset()">↺ Reset trade</button>
+
+      <!-- Card picker sheet -->
+      <div id="tc-picker-sheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:var(--bg);border-radius:var(--radius) var(--radius) 0 0;margin-top:15vh;min-height:85vh;padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:1rem" id="tc-picker-title">Pick a card</div>
+            <button onclick="document.getElementById('tc-picker-sheet').style.display='none'" style="background:none;border:none;font-size:1.4rem;color:var(--muted);cursor:pointer">✕</button>
+          </div>
+          <input id="tc-picker-search" type="search" placeholder="Search inventory…" oninput="tcRenderPicker()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:10px;box-sizing:border-box">
+          <div id="tc-picker-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -728,7 +775,7 @@
   </button>
   <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
-    <span class="nav-label">Store</span>
+    <span class="nav-label">Trade</span>
   </button>
 </nav>
 
@@ -1743,9 +1790,115 @@ function switchStoreTab(tab) {
   storeTab = tab;
   document.getElementById('tab-store-listings').classList.toggle('active', tab === 'listings');
   document.getElementById('tab-store-bulk').classList.toggle('active', tab === 'bulk');
-  document.getElementById('store-listings-panel').style.display = tab === 'listings' ? '' : 'none';
-  document.getElementById('store-bulk-panel').style.display    = tab === 'bulk'     ? '' : 'none';
+  document.getElementById('tab-store-tradecalc').classList.toggle('active', tab === 'tradecalc');
+  document.getElementById('store-listings-panel').style.display   = tab === 'listings'  ? '' : 'none';
+  document.getElementById('store-bulk-panel').style.display       = tab === 'bulk'      ? '' : 'none';
+  document.getElementById('store-tradecalc-panel').style.display  = tab === 'tradecalc' ? '' : 'none';
   if (tab === 'bulk') renderBulkBuy();
+  if (tab === 'tradecalc') tcRender();
+}
+
+// ═══ TRADE CALCULATOR ═══
+let tcGive = [];  // [{uid, name, img, price, qty}]
+let tcGet  = [];
+let tcPickSide = 'give';
+
+function tcReset() {
+  tcGive = []; tcGet = [];
+  tcRender();
+}
+
+function tcGetPrice(card) {
+  const cached = getCachedPrice(card.id || card.uid?.split('__')[0]);
+  return (cached?.market) || card.marketPrice || 0;
+}
+
+function tcRender() {
+  const renderSide = (items, side) => {
+    const el = document.getElementById(`tc-${side}-list`);
+    if (!el) return;
+    if (!items.length) { el.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:8px 0">No cards added</div>'; return; }
+    el.innerHTML = items.map((item, i) => `
+      <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:var(--radius-sm);padding:5px 7px">
+        <img src="${item.img}" style="width:32px;border-radius:3px;flex-shrink:0">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
+          <div style="font-size:11px;color:var(--muted)">$${item.price.toFixed(2)} × <input type="number" min="1" max="99" value="${item.qty}" style="width:36px;border:1px solid var(--border);border-radius:3px;background:var(--bg);color:var(--text);font-size:11px;padding:1px 3px" onchange="tcSetQty('${side}',${i},+this.value)"></div>
+        </div>
+        <button onclick="tcRemove('${side}',${i})" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;flex-shrink:0">✕</button>
+      </div>`).join('');
+  };
+
+  renderSide(tcGive, 'give');
+  renderSide(tcGet,  'get');
+
+  const giveTotal = tcGive.reduce((s, c) => s + c.price * c.qty, 0);
+  const getTotal  = tcGet.reduce((s, c)  => s + c.price * c.qty, 0);
+  document.getElementById('tc-give-total').textContent = '$' + giveTotal.toFixed(2);
+  document.getElementById('tc-get-total').textContent  = '$' + getTotal.toFixed(2);
+
+  const vt = document.getElementById('tc-verdict-text');
+  const vd = document.getElementById('tc-verdict-diff');
+  if (!tcGive.length && !tcGet.length) {
+    vt.textContent = 'Add cards to both sides'; vt.style.color = 'var(--muted)'; vd.textContent = ''; return;
+  }
+  const diff = getTotal - giveTotal;
+  const absDiff = Math.abs(diff).toFixed(2);
+  if (Math.abs(diff) < 0.50) {
+    vt.textContent = 'Even trade'; vt.style.color = 'var(--green)';
+    vd.textContent = 'Within $0.50';
+  } else if (diff > 0) {
+    vt.textContent = `You gain $${absDiff}`; vt.style.color = 'var(--green)';
+    vd.textContent = `Their side is worth more`;
+  } else {
+    vt.textContent = `You lose $${absDiff}`; vt.style.color = 'var(--red, #e05252)';
+    vd.textContent = `Your side is worth more`;
+  }
+}
+
+function tcSetQty(side, idx, qty) {
+  const arr = side === 'give' ? tcGive : tcGet;
+  arr[idx].qty = Math.max(1, qty || 1);
+  tcRender();
+}
+
+function tcRemove(side, idx) {
+  if (side === 'give') tcGive.splice(idx, 1);
+  else tcGet.splice(idx, 1);
+  tcRender();
+}
+
+function tcPickCard(side) {
+  tcPickSide = side;
+  document.getElementById('tc-picker-title').textContent = side === 'give' ? 'Add card you give' : 'Add card you get';
+  document.getElementById('tc-picker-search').value = '';
+  document.getElementById('tc-picker-sheet').style.display = '';
+  tcRenderPicker();
+}
+
+function tcRenderPicker() {
+  const q = document.getElementById('tc-picker-search').value.toLowerCase();
+  const grid = document.getElementById('tc-picker-grid');
+  const cards = inventory.filter(c => !q || c.name.toLowerCase().includes(q) || (c.set||'').toLowerCase().includes(q));
+  if (!cards.length) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:20px">No cards found</div>'; return; }
+  grid.innerHTML = cards.slice(0, 60).map(c => {
+    const price = tcGetPrice(c);
+    return `<div onclick="tcAddCard('${(c.uid||c.id+'__normal').replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}','${(c.img||'').replace(/'/g,"\\'")}',${price})"
+      style="cursor:pointer;text-align:center;background:var(--surface);border-radius:var(--radius-sm);padding:6px">
+      <img src="${c.img}" style="width:100%;border-radius:4px;display:block;margin-bottom:4px">
+      <div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+      <div style="font-size:10px;color:var(--green)">$${price.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+function tcAddCard(uid, name, img, price) {
+  const arr = tcPickSide === 'give' ? tcGive : tcGet;
+  const existing = arr.find(c => c.uid === uid);
+  if (existing) { existing.qty++; }
+  else { arr.push({ uid, name, img, price, qty: 1 }); }
+  document.getElementById('tc-picker-sheet').style.display = 'none';
+  tcRender();
 }
 
 function renderStore() {
