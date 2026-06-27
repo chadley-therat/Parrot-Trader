@@ -1870,20 +1870,37 @@ function tcRemove(side, idx) {
 
 function tcPickCard(side) {
   tcPickSide = side;
-  document.getElementById('tc-picker-title').textContent = side === 'give' ? 'Add card you give' : 'Add card you get';
-  document.getElementById('tc-picker-search').value = '';
+  const isBinder = side === 'give';
+  document.getElementById('tc-picker-title').textContent = isBinder ? 'From your binder' : 'Search any card';
+  const input = document.getElementById('tc-picker-search');
+  input.placeholder = isBinder ? 'Filter binder…' : 'Search Pokémon cards…';
+  input.value = '';
   document.getElementById('tc-picker-sheet').style.display = '';
-  tcRenderPicker();
+  if (isBinder) tcRenderBinderPicker('');
+  else tcRenderSearchPicker('');
 }
 
 function tcRenderPicker() {
-  const q = document.getElementById('tc-picker-search').value.toLowerCase();
+  const q = document.getElementById('tc-picker-search').value;
+  if (tcPickSide === 'give') tcRenderBinderPicker(q.toLowerCase());
+  else tcRenderSearchPicker(q);
+}
+
+function tcRenderBinderPicker(q) {
   const grid = document.getElementById('tc-picker-grid');
   const cards = inventory.filter(c => !q || c.name.toLowerCase().includes(q) || (c.set||'').toLowerCase().includes(q));
-  if (!cards.length) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:20px">No cards found</div>'; return; }
+  if (!cards.length) {
+    grid.style.gridTemplateColumns = '1fr';
+    grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">No cards in binder</div>';
+    return;
+  }
+  grid.style.gridTemplateColumns = 'repeat(3,1fr)';
   grid.innerHTML = cards.slice(0, 60).map(c => {
     const price = tcGetPrice(c);
-    return `<div onclick="tcAddCard('${(c.uid||c.id+'__normal').replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}','${(c.img||'').replace(/'/g,"\\'")}',${price})"
+    const uid = (c.uid || c.id + '__normal').replace(/'/g, "\\'");
+    const name = c.name.replace(/'/g, "\\'");
+    const img  = (c.img || '').replace(/'/g, "\\'");
+    return `<div onclick="tcAddCard('${uid}','${name}','${img}',${price})"
       style="cursor:pointer;text-align:center;background:var(--surface);border-radius:var(--radius-sm);padding:6px">
       <img src="${c.img}" style="width:100%;border-radius:4px;display:block;margin-bottom:4px">
       <div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
@@ -1892,11 +1909,52 @@ function tcRenderPicker() {
   }).join('');
 }
 
+let tcSearchTimer = null;
+function tcRenderSearchPicker(q) {
+  clearTimeout(tcSearchTimer);
+  const grid = document.getElementById('tc-picker-grid');
+  if (!q || q.length < 2) {
+    grid.style.gridTemplateColumns = '1fr';
+    grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Type a card name to search</div>';
+    return;
+  }
+  grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Searching…</div>';
+  tcSearchTimer = setTimeout(async () => {
+    try {
+      const cards = await fetchApiCards(q);
+      if (!cards.length) {
+        grid.style.gridTemplateColumns = '1fr';
+        grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">No cards found</div>';
+        return;
+      }
+      grid.style.gridTemplateColumns = '1fr';
+      grid.innerHTML = cards.map(c => {
+        const price = c.cardmarket?.prices?.averageSellPrice || 0;
+        const img   = c.images?.small || '';
+        const uid   = c.id;
+        const name  = c.name.replace(/'/g, "\\'");
+        const imgE  = img.replace(/'/g, "\\'");
+        return `<div onclick="tcAddCard('${uid}','${name}','${imgE}',${price})"
+          style="cursor:pointer;display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--radius-sm);padding:8px">
+          <img src="${img}" style="width:44px;border-radius:4px;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+            <div style="font-size:11px;color:var(--muted)">${c.set?.name || ''}</div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--green);flex-shrink:0">$${price.toFixed(2)}</div>
+        </div>`;
+      }).join('');
+    } catch {
+      grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Search failed</div>';
+    }
+  }, 300);
+}
+
 function tcAddCard(uid, name, img, price) {
   const arr = tcPickSide === 'give' ? tcGive : tcGet;
   const existing = arr.find(c => c.uid === uid);
   if (existing) { existing.qty++; }
-  else { arr.push({ uid, name, img, price, qty: 1 }); }
+  else { arr.push({ uid, name, img, price: +price || 0, qty: 1 }); }
   document.getElementById('tc-picker-sheet').style.display = 'none';
   tcRender();
 }
