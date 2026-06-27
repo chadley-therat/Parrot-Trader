@@ -530,28 +530,16 @@
   <div id="screen-store" class="screen">
     <div class="page-header">
       <div class="page-title">Trade</div>
-      <div style="font-size:13px;color:var(--green);font-weight:600" id="store-total">$0.00</div>
     </div>
     <div style="padding:0 1.1rem">
       <div class="tab-row" style="padding:0 0 0.8rem">
-        <button class="tab-btn active" id="tab-store-listings" onclick="switchStoreTab('listings')">My Listings</button>
-        <button class="tab-btn" id="tab-store-bulk" onclick="switchStoreTab('bulk')">Bulk Buy</button>
+        <button class="tab-btn active" id="tab-store-bulk" onclick="switchStoreTab('bulk')">Bulk Buy</button>
         <button class="tab-btn" id="tab-store-tradecalc" onclick="switchStoreTab('tradecalc')">Trade Calc</button>
       </div>
     </div>
 
-    <!-- Listings panel -->
-    <div id="store-listings-panel">
-      <div class="listing-list" id="listing-list"></div>
-      <div class="empty" id="store-empty">
-        <div class="empty-icon">🏪</div>
-        <h3>No listings yet</h3>
-        <p>Open a card in your binder and tap "List for Sale"</p>
-      </div>
-    </div>
-
     <!-- Bulk Buy panel -->
-    <div id="store-bulk-panel" style="display:none;padding:0 1.1rem 2rem">
+    <div id="store-bulk-panel" style="padding:0 1.1rem 2rem">
       <div id="bb-lines"></div>
       <div id="bb-total-bar" class="bb-total-bar" style="display:none"></div>
       <button class="btn btn-outline btn-sm" style="color:var(--muted);margin-top:4px" onclick="bbReset()">↺ Reset all</button>
@@ -1784,16 +1772,14 @@ function removeListing(uid) {
   toast('Listing removed');
 }
 
-let storeTab = 'listings';
+let storeTab = 'bulk';
 
 function switchStoreTab(tab) {
   storeTab = tab;
-  document.getElementById('tab-store-listings').classList.toggle('active', tab === 'listings');
   document.getElementById('tab-store-bulk').classList.toggle('active', tab === 'bulk');
   document.getElementById('tab-store-tradecalc').classList.toggle('active', tab === 'tradecalc');
-  document.getElementById('store-listings-panel').style.display   = tab === 'listings'  ? '' : 'none';
-  document.getElementById('store-bulk-panel').style.display       = tab === 'bulk'      ? '' : 'none';
-  document.getElementById('store-tradecalc-panel').style.display  = tab === 'tradecalc' ? '' : 'none';
+  document.getElementById('store-bulk-panel').style.display      = tab === 'bulk'      ? '' : 'none';
+  document.getElementById('store-tradecalc-panel').style.display = tab === 'tradecalc' ? '' : 'none';
   if (tab === 'bulk') renderBulkBuy();
   if (tab === 'tradecalc') tcRender();
 }
@@ -1960,39 +1946,8 @@ function tcAddCard(uid, name, img, price) {
 }
 
 function renderStore() {
-  // Always keep listings up to date
-  const list  = document.getElementById('listing-list');
-  const empty = document.getElementById('store-empty');
-  const total = document.getElementById('store-total');
-  if (!listings.length) {
-    list.innerHTML = '';
-    empty.style.display = '';
-    total.textContent = '$0.00';
-  } else {
-    empty.style.display = 'none';
-    let sum = 0;
-    list.innerHTML = listings.map(l => {
-      const card = inventory.find(c => (c.uid || c.id+'__normal') === l.uid);
-      if (!card) return '';
-      sum += l.price * l.qty;
-      const fl = finishLabel(card.finish);
-      return `<div class="listing-item">
-        <img src="${card.img}" alt="${card.name}">
-        <div class="listing-info">
-          <div class="listing-name">${card.name}</div>
-          <div class="listing-detail">${fl.icon} ${fl.label} · ${card.condition}</div>
-          <div class="listing-detail" style="margin-top:2px">${card.set}${l.notes ? ' · ' + l.notes : ''}</div>
-          <div class="listing-detail" style="margin-top:2px">Qty: ${l.qty}</div>
-        </div>
-        <div class="listing-actions">
-          <div class="listing-price">$${l.price.toFixed(2)}</div>
-          <button class="btn btn-outline btn-sm" onclick="removeListing('${l.uid}')">Remove</button>
-        </div>
-      </div>`;
-    }).join('');
-    total.textContent = '$' + sum.toFixed(2);
-  }
   if (storeTab === 'bulk') renderBulkBuy();
+  if (storeTab === 'tradecalc') tcRender();
 }
 
 // ═══ WISHLIST ═══
