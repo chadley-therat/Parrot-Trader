@@ -6,7 +6,7 @@
 <title>Parrot Binder</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e8c84a">
-<meta name="description" content="Pokémon TCG collection tracker, deck builder and storefront manager">
+<meta name="description" content="Pokémon TCG deck inventory, collection tracker and trade calculator">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Parrot Binder">
@@ -465,7 +465,7 @@
 <div id="app">
 
   <!-- ═══════════ INVENTORY SCREEN ═══════════ -->
-  <div id="screen-inventory" class="screen active">
+  <div id="screen-inventory" class="screen">
     <div class="page-header">
       <div>
         <div class="page-title">My Binder</div>
@@ -593,17 +593,27 @@
   </div>
 
   <!-- ═══════════ DECKS SCREEN ═══════════ -->
-  <div id="screen-decks" class="screen">
+  <div id="screen-decks" class="screen active">
     <div class="page-header">
-      <div class="page-title">Deck Lab</div>
-      <button class="btn btn-outline btn-sm" id="decks-action-btn" onclick="handleDecksAction()">Suggest</button>
+      <div class="page-title">Decks</div>
+      <button class="btn btn-outline btn-sm" id="decks-action-btn" onclick="handleDecksAction()">+ New</button>
     </div>
     <div class="tab-row">
-      <button class="tab-btn active" id="tab-meta" onclick="switchDeckTab('meta')">Meta</button>
-      <button class="tab-btn" id="tab-mydecks" onclick="switchDeckTab('mydecks')">My Decks</button>
+      <button class="tab-btn active" id="tab-mydecks" onclick="switchDeckTab('mydecks')">My Decks</button>
+      <button class="tab-btn" id="tab-meta" onclick="switchDeckTab('meta')">Meta</button>
       <button class="tab-btn" id="tab-cityleague" onclick="switchDeckTab('cityleague')">City League</button>
     </div>
-    <div id="meta-deck-panel">
+    <div id="mydecks-panel">
+      <!-- Import bar -->
+      <div style="padding:0.6rem 1.1rem 0;display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" style="flex:1;gap:6px;display:flex;align-items:center;justify-content:center" onclick="openLimitlessImport()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+          Import from Limitless
+        </button>
+      </div>
+      <div class="deck-list" id="mydecks-list"></div>
+    </div>
+    <div id="meta-deck-panel" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0 1.1rem 0.5rem;gap:8px">
         <div style="font-size:11px;color:var(--muted)" id="meta-updated-label">SVI-ASC · Jun 2026</div>
         <button onclick="refreshMetaData()" id="meta-refresh-btn"
@@ -625,11 +635,27 @@
         </div>
       </div>
     </div>
-    <div id="mydecks-panel" style="display:none">
-      <div class="deck-list" id="mydecks-list"></div>
-    </div>
     <div id="cityleague-panel" style="display:none">
       <div style="padding:0 1.1rem 1rem" class="cl-list" id="city-league-list"></div>
+    </div>
+
+    <!-- Limitless Import Sheet -->
+    <div class="sheet-overlay" id="limitless-import-sheet">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <div style="font-weight:700;font-size:1.05rem">Import from Limitless</div>
+          <button onclick="document.getElementById('limitless-import-sheet').classList.remove('open')" style="background:none;border:none;font-size:1.4rem;color:var(--muted);cursor:pointer">✕</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:0.8rem">Copy a decklist from <strong style="color:var(--text)">limitlesstcg.com/tournaments</strong> — open a tournament, click a deck list, then copy all the text. Paste it below.</p>
+        <textarea id="limitless-paste-input" placeholder="Paste decklist here…&#10;&#10;e.g.&#10;Pokémon – 14&#10;4 Dragapult ex PAF 130&#10;2 Drakloak PAF 129&#10;…" style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px;box-sizing:border-box;resize:none;font-family:inherit" oninput="limitlessPastePreview()"></textarea>
+        <div id="limitless-parse-preview" style="font-size:12px;color:var(--muted);margin-top:6px;min-height:16px"></div>
+        <div style="margin-top:0.8rem">
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Deck name</label>
+          <input id="limitless-deck-name" type="text" placeholder="e.g. Dragapult ex" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:14px;box-sizing:border-box">
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:1rem" onclick="confirmLimitlessImport()">Import Deck</button>
+      </div>
     </div>
   </div>
 
@@ -744,13 +770,17 @@
 
 <!-- Bottom Nav -->
 <nav id="bottom-nav">
-  <button class="nav-btn active" id="nav-inventory" onclick="showScreen('inventory')">
+  <button class="nav-btn active" id="nav-decks" onclick="showScreen('decks')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="13" height="17" rx="2"/><rect x="7" y="2" width="13" height="17" rx="2" fill="none"/><path d="M8 10h6M8 14h4"/></svg>
+    <span class="nav-label">Decks</span>
+  </button>
+  <button class="nav-btn" id="nav-inventory" onclick="showScreen('inventory')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <span class="nav-label">Binder</span>
   </button>
-  <button class="nav-btn" id="nav-decks" onclick="showScreen('decks')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="13" height="17" rx="2"/><rect x="7" y="2" width="13" height="17" rx="2" fill="none"/><path d="M8 10h6M8 14h4"/></svg>
-    <span class="nav-label">Decks</span>
+  <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
+    <span class="nav-label">Trade</span>
   </button>
   <button class="nav-btn" id="nav-wishlist" onclick="showScreen('wishlist')" style="position:relative">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -760,10 +790,6 @@
   <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     <span class="nav-label">Profile</span>
-  </button>
-  <button class="nav-btn" id="nav-store" onclick="showScreen('store')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M8 21V10M16 21V10M3 10h18"/></svg>
-    <span class="nav-label">Trade</span>
   </button>
 </nav>
 
@@ -926,7 +952,7 @@ let sortMode = 'date-desc';
 let supertypeFilter = 'All';
 let selectMode = false;
 let selectedUids = new Set();
-let activeDeckTab = 'meta';
+let activeDeckTab = 'mydecks';
 let activeWishlistTab = 'list';
 let newDeckCards = [];
 let editingDeckId = null;
@@ -2871,7 +2897,6 @@ Respond with ONLY a JSON array (no markdown, no preamble) of exactly 3 deck sugg
 function renderDecks() {
   if (activeDeckTab === 'mydecks')    { renderMyDecks(); return; }
   if (activeDeckTab === 'cityleague') { renderCityLeague(); return; }
-  // Silently refresh meta data in background; re-render when it resolves
   fetchMetaData().then(ok => { if (ok && inventory.length >= 1) generateDecks(); });
   if (inventory.length >= 1) generateDecks();
 }
@@ -3323,23 +3348,109 @@ function handleWishlistAction() {
 // ═══ DECK TABS ═══
 function switchDeckTab(tab) {
   activeDeckTab = tab;
-  document.getElementById('meta-deck-panel').style.display    = tab === 'meta'        ? '' : 'none';
   document.getElementById('mydecks-panel').style.display      = tab === 'mydecks'     ? '' : 'none';
+  document.getElementById('meta-deck-panel').style.display    = tab === 'meta'        ? '' : 'none';
   document.getElementById('cityleague-panel').style.display   = tab === 'cityleague'  ? '' : 'none';
-  document.getElementById('tab-meta').classList.toggle('active',        tab === 'meta');
   document.getElementById('tab-mydecks').classList.toggle('active',     tab === 'mydecks');
+  document.getElementById('tab-meta').classList.toggle('active',        tab === 'meta');
   document.getElementById('tab-cityleague').classList.toggle('active',  tab === 'cityleague');
   const btn = document.getElementById('decks-action-btn');
   if (btn) {
-    btn.textContent = tab === 'meta' ? 'Suggest' : tab === 'mydecks' ? '+ New' : '';
+    btn.textContent = tab === 'meta' ? 'Suggest' : '+ New';
     btn.style.display = tab === 'cityleague' ? 'none' : '';
   }
   if (tab === 'mydecks')    renderMyDecks();
+  if (tab === 'meta')       { fetchMetaData().then(ok => { if (ok && inventory.length >= 1) generateDecks(); }); }
   if (tab === 'cityleague') renderCityLeague();
 }
 function handleDecksAction() {
   if (activeDeckTab === 'meta') generateDecks();
   else openNewDeckBuilder();
+}
+
+// ═══ LIMITLESS IMPORT ═══
+function openLimitlessImport() {
+  document.getElementById('limitless-paste-input').value = '';
+  document.getElementById('limitless-deck-name').value = '';
+  document.getElementById('limitless-parse-preview').textContent = '';
+  document.getElementById('limitless-import-sheet').classList.add('open');
+  // Try to read clipboard automatically
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(text => {
+      if (text && text.trim()) {
+        document.getElementById('limitless-paste-input').value = text;
+        limitlessPastePreview();
+      }
+    }).catch(() => {});
+  }
+}
+
+function parseLimitlessList(raw) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const result = { pokemon: [], trainer: [], energy: [] };
+  let section = null;
+  // Section header patterns: "Pokémon – 14", "Trainer – 32", "Energy – 14", "Total – 60"
+  const sectionRe = /^(pok[eé]mon|trainer|energy|total)\s*[–\-]\s*\d+/i;
+  // Card line: "4 Dragapult ex PAF 130" or "4 Dragapult ex PAF"
+  const cardRe = /^(\d+)\s+(.+?)(?:\s+[A-Z]{2,4}\s+\d+\w*)?(?:\s+[A-Z]{2,4})?$/;
+
+  for (const line of lines) {
+    if (sectionRe.test(line)) {
+      const l = line.toLowerCase();
+      if (l.startsWith('pok')) section = 'pokemon';
+      else if (l.startsWith('tra')) section = 'trainer';
+      else if (l.startsWith('ene')) section = 'energy';
+      else section = null;
+      continue;
+    }
+    if (!section) continue;
+    // Strip set code + collector number from end: "4 Dragapult ex PAF 130" → "4 Dragapult ex"
+    const stripped = line.replace(/\s+[A-Z]{2,5}\s+\d+\w*$/, '').replace(/\s+[A-Z]{2,5}$/, '');
+    const m = stripped.match(/^(\d+)\s+(.+)$/);
+    if (m) {
+      const qty = parseInt(m[1]);
+      const name = m[2].trim();
+      if (qty > 0 && name) result[section].push({ name, qty });
+    }
+  }
+  return result;
+}
+
+function limitlessPastePreview() {
+  const text = document.getElementById('limitless-paste-input').value;
+  const preview = document.getElementById('limitless-parse-preview');
+  if (!text.trim()) { preview.textContent = ''; return; }
+  const parsed = parseLimitlessList(text);
+  const p = parsed.pokemon.length, t = parsed.trainer.length, e = parsed.energy.length;
+  const total = parsed.pokemon.reduce((s,c)=>s+c.qty,0) + parsed.trainer.reduce((s,c)=>s+c.qty,0) + parsed.energy.reduce((s,c)=>s+c.qty,0);
+  if (!p && !t && !e) {
+    preview.style.color = 'var(--red)'; preview.textContent = 'Could not parse — paste the full decklist text'; return;
+  }
+  preview.style.color = 'var(--green)';
+  preview.textContent = `Parsed: ${p} Pokémon · ${t} Trainer · ${e} Energy · ${total} total cards`;
+  // Auto-suggest name from first Pokémon
+  const nameInput = document.getElementById('limitless-deck-name');
+  if (!nameInput.value && parsed.pokemon.length) nameInput.value = parsed.pokemon[0].name;
+}
+
+function confirmLimitlessImport() {
+  const text = document.getElementById('limitless-paste-input').value;
+  const name = document.getElementById('limitless-deck-name').value.trim() || 'Imported Deck';
+  if (!text.trim()) { toast('Paste a decklist first'); return; }
+  const decklist = parseLimitlessList(text);
+  const total = decklist.pokemon.reduce((s,c)=>s+c.qty,0) + decklist.trainer.reduce((s,c)=>s+c.qty,0) + decklist.energy.reduce((s,c)=>s+c.qty,0);
+  if (!total) { toast('Could not parse decklist — check the format'); return; }
+  const deck = {
+    id: 'custom_' + Date.now(),
+    name,
+    decklist,
+    createdAt: Date.now()
+  };
+  customDecks.unshift(deck);
+  save();
+  document.getElementById('limitless-import-sheet').classList.remove('open');
+  renderMyDecks();
+  toast(`✓ "${name}" imported — ${total} cards`);
 }
 
 // ═══ CUSTOM DECKS ═══
